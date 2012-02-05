@@ -1,0 +1,215 @@
+<h3>1. Certificate Request Generation using WebCert</h3>
+<hr>
+<p>
+Fill out the form in buildrequest.cgi and a certificate
+request along with the public/private key pair will be
+generated. You will see the subject information of the
+generated request and the corresponding private key.
+Copy and paste the private key into a local file, you
+will need it in order to use the certificate. Since the
+private key is private for a reason, no copy is left on
+the server so if you miss this part you won't be able to
+use the generated certificate.
+</p>
+<p>
+<h3>2. External Certificate Generation</h3>
+<hr>
+<p>
+If you already have a certificate request, say its already
+generated for you by a smart network or firewall device
+(i.e. Cisco, Netscreen), you already got a key pair
+that stays in the system. Here you simply cut and paste
+the certificate request into the certrequest.cgi form
+and generate the certificate. Once done, simply import
+the certificate into your device.
+</p>
+<p>
+A valid certificate request looks like this (example):
+</p>
+<pre>-----BEGIN CERTIFICATE REQUEST-----
+MIICGjCCAYMCAQAwgbQxCzAJBgNVBAgTAkNBMRMwEQYDVQQHEwpXaGVyZS1ldmVy
+MRMwEQYDVQQKEwpDdXN0b21lciBBMREwDwYDVQQLEwhOZXR3b3JrczEZMBcGA1UE
+AxMQMDA1MjA3MjAwMjAwMDI0NTEVMBMGA1UEAxMMMTExLTExMS0xMTExMRAwDgYD
+VQQDEwdyc2Eta2V5MQ8wDQYDVQQDEwZuczV4dC4xEzARBgNVBAMTCkZyYW5rcy01
+WFQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAPdC5s9c3ESCnrZ9YgSXYEW3
+sT9yJmpxGJDNgI6SUZbNG4Sek5rbePusCHPtLESe2K2oEF5A0tSaY3pj2QMREs5R
+lC4TSPJY5VvJA+sR1wppU5w0ocOCLzxKe0KYGklpyGEvTPmmE+GIYcwCSHYir4kZ
+/iUKhx+exarH+m+CvZlxAgMBAAGgJTAjBgkqhkiG9w0BCQ4xFjAUMBIGA1UdEQQL
+MAmCB25zNXh0LgAwDQYJKoZIhvcNAQEFBQADgYEALQy5g2ntoVxO8AgQHPIpe3DD
+gUrhvYTm35G5SjfM9SiO841Wcta8tRkeOWaWh46T6uQaj+r4N8VhybF9gFZdsZGq
+6S3uWY80eC0/MHo+yJcyyqjpl9s2yPLMlGR8MqM14mLO9vVqx+rdMRZFulNJ5YsD
+9bSue4v0pECcZZMv6r8=
+-----END CERTIFICATE REQUEST-----</pre>
+<p>
+You need to paste such a request, including the "Begin" and
+"End" lines, into the certrequest.cgi form and press [verify].
+</p>
+<h3>3. Certificate Request Verification</h3>
+<hr>
+<p>
+After a external certificate request has been pasted into WebCert,
+or WebCerts certificate building form has been used, a verification
+will show you the subject information that will be signed. Select
+the certificate type from the list and set a expiration date
+counted in days from now. (365 = 1yr, 730 = 2 yrs, 1460 = 4 yrs).
+</p>
+<p>
+In addition to the certificate type and expiration, the extended
+key usage option can be be added to certificates who *really*
+need it. Please enable this option only if you are sure this is
+needed. For example server certificates used with Microsoft Windows
+to enable the active directory LDAPS function need the addition of
+the "SSL/TLS Web Server Authentication" extended key usage setting.
+</p>
+<p>
+If a externally generated certificate request has been pasted into
+Webcert, additional attributes like the extended key usage are 
+discarded unless they are explicitly set in the verfication screen.
+</p>
+<p>
+Finally, use [Sign Request] to generate the certificate. If
+successful, you'll get a certificate displayed that looks like
+this:
+</p>
+<pre>-----BEGIN CERTIFICATE-----
+MIID7DCCA1WgAwIBAgIBDjANBgkqhkiG9w0BAQQFADCBmTELMAkGA1UEBhMCVVMx
+CzAJBgNVBAgTAkNBMRUwEwYDVQQHEwxSZWR3b29kIENpdHkxFTATBgNVBAoTDE9y
+YWNsZSBDb3JwLjEoMCYGA1UECxMfR2xvYmFsIElUIFNlY3VyaXR5IEFyY2hpdGVj
+dHVyZTElMCMGCSqGSIb3DQEJARYWZmlyZXdhbGxfdXNAb3JhY2xlLmNvbTAeFw0w
+MzA2MTgyMDM0MjBaFw0wNDA2MTcyMDM0MjBaMIG0MQswCQYDVQQIEwJDQTETMBEG
+A1UEBxMKV2hlcmUtZXZlcjETMBEGA1UEChMKQ3VzdG9tZXIgQTERMA8GA1UECxMI
+TmV0d29ya3MxGTAXBgNVBAMTEDAwNTIwNzIwMDIwMDAyNDUxFTATBgNVBAMTDDEx
+MS0xMTEtMTExMTEQMA4GA1UEAxMHcnNhLWtleTEPMA0GA1UEAxMGbnM1eHQuMRMw
+EQYDVQQDEwpGcmFua3MtNVhUMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3
+QubPXNxEgp62fWIEl2BFt7E/ciZqcRiQzYCOklGWzRuEnpOa23j7rAhz7SxEntit
+qBBeQNLUmmN6Y9kDERLOUZQuE0jyWOVbyQPrEdcKaVOcNKHDgi88SntCmBpJachh
+L0z5phPhiGHMAkh2Iq+JGf4lCocfnsWqx/pvgr2ZcQIDAQABo4IBJTCCASEwCQYD
+VR0TBAIwADAsBglghkgBhvhCAQ0EHxYdT3BlblNTTCBHZW5lcmF0ZWQgQ2VydGlm
+aWNhdGUwHQYDVR0OBBYEFH23Br/vBZex2NWJLoqLa+mRPVUiMIHGBgNVHSMEgb4w
+gbuAFJlwj84ZPgPIfPHbDN3AZFMHR1twoYGfpIGcMIGZMQswCQYDVQQGEwJVUzEL
+MAkGA1UECBMCQ0ExFTATBgNVBAcTDFJlZHdvb2QgQ2l0eTEVMBMGA1UEChMMT3Jh
+Y2xlIENvcnAuMSgwJgYDVQQLEx9HbG9iYWwgSVQgU2VjdXJpdHkgQXJjaGl0ZWN0
+dXJlMSUwIwYJKoZIhvcNAQkBFhZmaXJld2FsbF91c0BvcmFjbGUuY29tggEAMA0G
+CSqGSIb3DQEBBAUAA4GBAD2f9Lb+KJ3kqvKhyb7k+uLpvIvl13qxY+HyAF/DPqYx
+EXa3CYdy8IR8ulj703vLtPbZcKjXvtjyr/reGBgD8REKNK6bHcjBAjUa61vlg9dW
+pdsIsSEWBjqO93o2LAnJaZSXJ/axmLtErEh4tfUG0IlU2Ol38avGBtdZbGLYYYSc
+-----END CERTIFICATE-----</pre>
+<p>
+Now you can cut and paste it via an editor such as Windows Notepad
+into a text file and save it locally. Alternatively, you can use
+the [Export] functions to download the certificate as a file.
+</p>
+<p>
+A detailed how-to for generating a S/Mime certificate is here:
+http://www.frank4dd.com/howto/openssl/webcert-smime-howto.htm
+</p>
+<h3>4. Certificate Export</h3>
+<hr>
+<p>
+Certificates can be exported for easy download in either DER, PEM
+or PKCS12 format. They are written to the webcert export directory
+and a link is provided to save the file locally.
+To create a PKCS12 container for easy use with Windows S/MIME you
+will need the previously generated private key in PEM format for
+pasting it into the export form. The PKCS12 container will be
+secured with the supplied passphrase in the export form. This
+passphrase is needed when the .p12 file is imported by Windows.
+</p>
+<h3>5. Certificate Installation</h3>
+<hr>
+<p>
+Certificates can be installed/loaded from the cut&paste text files
+or from the downloaded certificate files which were exported.
+For some applications, the filename must have a certain extension
+such as <certfile>.pem for PEM files - try to rename it if that is
+the case. Sometimes it is also necessary to co-install the CA Root
+certificate to enable the verification of the generated certificate.
+</p>
+<h3>6. Certificate Management</h3>
+<hr>
+<p>
+All certificates are stored in a directory  on this server. They
+can be viewed with the "list certificates" item (certstore.cgi).
+It conveniently displays the subject along with the remaining
+time for the certificate to be valid.
+</p>
+<p>
+The "ViewPEM" button displays the certificate in PEM format,
+convenient for importing it into various certificate stores.
+The "ViewTXT" button shows the certificate data readable in
+ASCII text format.
+</p>
+<h3>7. Certificate Search</h3>
+<hr>
+<p>
+To find particular certificates, the certsearch CGI can filter
+the cert store per subject field, serial number, validation or
+expiration date. This helps to identify certificates that are
+about to expire, and renew them before they become invalid.
+</p>
+<h3>8. Most Common Errors:</h3>
+<hr>
+<p>
+Hit "Generate" with no certificate in the paste cert form will
+result in a "Error getting request from certrequest.cgi form".
+</p>
+<p>
+Not including the "Begin" or "End" lines, or having an additional
+empty line before or after the "Begin" or "End" lines when 
+pasting the request into the form will result in a "Error invalid
+request format, no BEGIN/END lines". 
+</p>
+<p>
+Accidentially hitting <return> somewhere in the paste window,
+generating a newline in the request data, will result in a
+"Error cant read request content with PEM function".
+</p>
+<p>
+In short, CAREFULLY pasting the request resolves most errors.
+</p>
+<p>
+Trying to generate a certificate from a request that has been
+already processed works just fine.
+</p>
+<h3>9. Browser Complaints</h3>
+<hr>
+<p>
+Browser constantly asks if this certificate can be trusted and
+complains about various things:
+</p>
+<p>
+Importing the Root CA "parent" certificate can help resolve
+this issue. Thats what the "Get Root CA cert" is for. Loading
+the Root CA into your browser enables the automatic
+verification of the certificate every time you connect. No
+questions asked.
+</p>
+<p>
+If there is still the window popping up asking if you want
+to accept this certificate, then its mostly a missmatch between
+the certificate common name (CN) and the device name/server
+name/device IP/server IP.  Either the certificate was requested
+wrongly, or the device changed its name/IP recently. Ask the
+device owner to generate a new certificate (request) with the
+valid device name/IP entry.
+</p>
+<p>
+Certificates are signed to be valid for a time range and
+"expire". The expiration defaults to 3 years. This should
+give plenty of time to regenerate a new certificate when
+the time comes. Certificates still can work when when expired,
+but the browser comes up with and error message. Re-
+certification of devices is a good way to enforce inventory
+updates.  Setting the expiration date to far into the future
+(>11663days = >32years) or trying negative values will result
+in a error.
+</p>
+<h3>10. Links</h3>
+<hr>
+<ul>
+<li>How to <a href="http://www.frank4dd.com/howto/openssl/webcert-smime-howto.htm">
+generate S/MIME e-mail encryption certificates with WebCert</a></li>
+</ul>
+<p>
+last update 11/10/2010			@2003-2010 Frank4DD
+</p>

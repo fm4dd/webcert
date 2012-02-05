@@ -1,0 +1,312 @@
+<html>
+<head>
+<title>WebCert - Installation</title>
+  <!--#include virtual="/site-headermeta-template.htm" -->
+<meta name="Title" content="WebCert - Installation" />
+<meta name="Description" content="Installation instructions for the WebCert Digital Certificate Managementi software." />
+<meta name="Keywords" content="SSL, HTTPS, TLS, certificate, x509" />
+<meta name="Classification" content="IT Security" />
+</head>
+
+<body>
+<div id="wrapper">
+  <div id="banner">
+    <h1>WebCert - Installation</h1>
+    <h2>Web-based Digital Certificate Management - Installation Instructions</h2>
+  </div>
+  <!--#include virtual="/site-navigation-template.htm" -->
+
+  <div id="content">
+    <div id=copyright>2005-06-28 by Frank4dd</div>
+    <h3>Software dependencies</h3>
+    <hr>
+    <p>
+Webcert is a web-based 'C' application using CGI technology. It relies on Thomas Boutell's <a href="http://www.boutell.com/cgic/">CGIC library</a> and <a href="http://www.openssl.org/">OpenSSL</a>, the leading OpenSource security layer software. To compile it from source, you'll need a working 'C' compiler environment such as gcc.
+    </p>
+    <h3>Preparations - creating a OpenSSL CA</h3>
+    <hr>
+    <p>
+You just downloaded the software package <a href="http://www.frank4dd.com/sw/webcert/webcert-v1.7.3.tar.gz">here</a>, saved it to /tmp and looked into the README. You want to install webcert into "/var/www/html" instead of my chosen "/srv/www/std-root/frank4dd.com/sw" path and you would like to change the the CA directory structure from my "/srv/app/webCA" to "/var/myCA". Here is what you should
+do in order to make it all work.
+    </p>
+    <p>
+First, before we start unpacking the  software package, we create the CA directory structure with OpenSSL. We need to locate the script CA.pl, which is normally located in <openssl-home>/misc. Depending on your distributions OpenSSL deployment, this could be similar to OpenSuse and SLES, where it is found in <i>/usr/share/ssl/misc/CA.pl</i>.  We need to edit this script and change the line to match our new CA directory: [line numbers are in brackets]
+    </p>
+<pre><code> susie112:~ # vi /usr/share/ssl/misc/CA.pl
+[47]	$CATOP="/var/myCA";</code></pre>
+    <p>
+Then we run it as root:
+    </p>
+<pre><code>susie112:~ # /usr/share/ssl/misc/CA.pl -newca
+   CA certificate filename (or enter to create)
+   
+   Making CA certificate ...
+   Generating a 1024 bit RSA private key
+   ......++++++
+   ...................++++++
+   writing new private key to '/var/myCA/private/cakey.pem'
+   Enter PEM pass phrase:		&lt;-- please remember this password!
+   Verifying - Enter PEM pass phrase:
+   -----
+   You are about to be asked to enter information that will be incorporated
+   into your certificate request.
+   What you are about to enter is what is called a Distinguished Name or a DN.
+   There are quite a few fields but you can leave some blank
+   For some fields there will be a default value,
+   If you enter '.', the field will be left blank.
+   -----
+   Country Name (2 letter code) [US]:
+   State or Province Name (full name) [CA]:
+   Locality Name (eg, city) [Rocklin]:
+   Organization Name (eg, company) [Frank4DD]:
+   Organizational Unit Name (eg, section) []:
+   Common Name (eg, YOUR name) []:WebCert CA
+   Email Address []:
+   susie112:/home/openssl/misc # </code></pre>
+    <p>
+Now lets check the created file structures:
+    </p>
+<pre><code>susie112:~ # ls -lR /var/myCA
+   /var/myCA:
+   total 4
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 .
+   drwxr-xr-x   16 root     root          408 2005-06-28 13:10 ..
+   -rw-r--r--    1 root     root         1034 2005-06-28 13:10 cacert.pem
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 certs
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 crl
+   -rw-r--r--    1 root     root            0 2005-06-28 13:10 index.txt
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:10 private
+   
+   /var/myCA/certs:
+   total 0
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 .
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 ..
+   
+   /var/myCA/crl:
+   total 0
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 .
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 ..
+   
+   /var/myCA/private:
+   total 4
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:10 .
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 ..
+   -rw-r--r--    1 root     root          951 2005-06-28 13:10 cakey.pem</code></pre>
+    <p>
+If not already created, we need to create theCA's  serial number file. We also need to make this file writeable to the webserver, and the same goes for the certs directory.
+    </p>
+<pre><code>susie112:/var/myCA # echo 01 &gt; serial
+   susie112:/var/myCA # chown wwwrun:www serial
+   susie112:/var/myCA # chmod 664 serial
+   susie112:/var/myCA # chown wwwrun:www certs
+   susie112:/var/myCA # chmod 775 certs
+   susie112:/var/myCA # ls -l
+   total 8
+   drwxr-xr-x    5 root     root          208 2005-06-28 13:25 .
+   drwxr-xr-x   16 root     root          408 2005-06-28 13:10 ..
+   -rw-r--r--    1 root     root         1034 2005-06-28 13:10 cacert.pem
+   drwxrwxr-x    2 wwwrun   www            48 2005-06-28 13:10 certs
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 crl
+   -rw-r--r--    1 root     root            0 2005-06-28 13:10 index.txt
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:10 private
+   -rw-rw-r--    1 wwwrun   www             3 2005-06-28 13:25 serial</code></pre>
+    <h3>Install The WebCert software package</h3>
+    <hr>
+    <p>
+Now we can un-tar the software package and change the software source package config files to match your setup [line numbers are in brackets]. Edit one line in webcert-[version]/Makefile:
+    </p>
+<pre><code>susie112:~ # vi Makefile
+[3]     BASEDIR=/var/www/html</code></pre>
+    <p>
+Edit one line in webcert-<version>/src/Makefile:
+    </p>
+<pre><code>susie112:~ # vi src/Makefile
+[6]    CGIDIR=/var/www/html/webcert/cgi-bin</code></pre>
+    <p>
+Edit the following lines in webcert-[version]/src/webcert.h:
+    </p>
+<pre><code>susie112:~ # vi src/webcert.h
+[11]	#define HOMELINK      /webcert/
+[13]	#define REQLINK       /webcert/cgi-bin/certrequest.cgi
+[15]	#define CACERT        /var/myCA/cacert.pem
+[17]	#define CAKEY         /var/myCA/private/cakey.pem
+[19]	#define PASS          (password entered during the run of CA.pl above)
+[21]	#define CACERTSTORE   /var/myCA/certs
+[23]	#define CERTEXPORTDIR /var/www/html/webcert/export
+[25]	#define CERTEXPORTURL /webcert/export
+[27]	#define SERIALFILE    /var/myCA/serial
+[29]	#define DAYS_VALID    1095 (set the default expiration, = 3 years) 
+...
+[34]	#define FORCE_SOURCE_IP_INCLUSION       TRUE</code></pre>
+    <p>
+Comment [34] out to remove the automatic inclusion of the client IP address
+in the certificate subject. This function is meant as a security measure
+on the public demo I am running to prevent abuse.
+    </p>
+    <p>
+Next, we create "/var/www/html/webcert" and the sub-directories "images", "cgi-bin", "etc", "results" and "style". 
+    </p>
+<pre><code>susie112:/home # mkdir -p /var/www/html/webcert
+susie112:~ # mkdir /var/www/html/webcert/images
+susie112:~ # mkdir /var/www/html/webcert/cgi-bin
+susie112:~ # mkdir /var/www/html/webcert/style
+susie112:~ # mkdir /var/www/html/webcert/export</code></pre>
+    <p>
+The export directory must be writeable by the webserver. It will be used to cache the exported certificates in pem, der or pkcs12 format for download.
+    </p>
+<pre><code>susie112:~ # chown wwwrun:www /var/www/html/webcert/export</code></pre>
+    <p>
+Now we can compile and install the software as root with "make" and "make install".
+    </p>
+<pre><code>susie112:/tmp/webcert-v1.7.3 # make
+cd src && make
+make[1]: Entering directory `/tmp/webcert-v1.7.3/src'
+gcc -O3 -Wall -g   -c -o buildrequest.o buildrequest.c
+gcc -O3 -Wall -g   -c -o pagehead.o pagehead.c
+gcc -O3 -Wall -g   -c -o handle_error.o handle_error.c
+gcc -L/home/lib -lcgic -lm -lssl -lcrypto buildrequest.o pagehead.o -o buildrequest.cgi
+...
+gcc -O3 -Wall -g   -c -o certexport.o certexport.c
+gcc -L/home/lib -lcgic -lm -lssl -lcrypto certexport.o pagehead.o handle_error.o -o certexport.cgi
+make[1]: Leaving directory `/tmp/webcert-v1.7.3/src'
+
+susie112:/tmp/webcert-v1.7.3 # make install
+cp html/index.htm /var/www/html/webcert
+cp style/style.css /var/www/html/webcert/style
+cp images/webcert-icon.gif images/webcert-logo.gif images/cert.gif /var/www/html/webcert/images 
+cp doc/help.txt doc/capolicy.txt /var/www/html/webcert/cgi-bin
+cd src && make install
+make[1]: Entering directory `/tmp/webcert-v1.7.3/src'
+strip buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi
+cp buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi /var/www/html/webcert/cgi-bin
+buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi installed in /var/www/html/webcert/cgi-bin.
+Checking for new export dir needed by certexport.cgi:
+...OK. /var/www/html/webcert/cgi-bin/../export exists.
+make[1]: Leaving directory `/tmp/webcert-v1.7.3/src'</code></pre>
+    <p>
+After the compilation and installation, the file structure should look like this (please compare carefully):
+    </p>
+<pre><code>susie112:~ # ls -lR /var/www/html/webcert
+   /var/www/html/webcert:
+   total 4
+   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 .
+   drwxr-xr-x    3 root     root           72 2005-06-28 13:45 ..
+   drwxr-xr-x    2 root     root          384 2005-06-28 13:45 cgi-bin
+   drwxr-xr-x    2 root     root          136 2005-06-28 13:45 images
+   -rwxr-xr-x    1 root     root          327 2005-06-28 13:45 index.htm
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:45 style
+   
+   /var/www/html/webcert/cgi-bin:
+   total 320
+   drwxr-xr-x    2 root     root          384 2005-06-28 13:45 .
+   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
+   -rwxr-xr-x    1 root     root        34784 2005-06-28 13:45 buildrequest.cgi
+   -rwxr-xr-x    1 root     root        30748 2005-06-28 13:45 capolicy.cgi
+   -rwxr-xr-x    1 root     root          848 2005-06-28 13:45 capolicy.txt
+   -rwxr-xr-x    1 root     root        27552 2005-06-28 13:45 certrequest.cgi
+   -rwxr-xr-x    1 root     root        43324 2005-06-28 13:45 certsign.cgi
+   -rwxr-xr-x    1 root     root        35548 2005-06-28 13:45 certstore.cgi
+   -rwxr-xr-x    1 root     root        31260 2005-06-28 13:45 certverify.cgi
+   -rwxr-xr-x    1 root     root        34972 2005-06-28 13:45 genrequest.cgi
+   -rwxr-xr-x    1 root     root        31516 2005-06-28 13:45 getcert.cgi
+   -rwxr-xr-x    1 root     root        30780 2005-06-28 13:45 help.cgi
+   -rwxr-xr-x    1 root     root         5268 2005-06-28 13:45 help.txt
+   
+   /var/www/html/webcert/images:
+   total 64
+   drwxr-xr-x    2 root     root          136 2005-06-28 13:45 .
+   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
+   -rwxr-xr-x    1 root     root        50267 2005-06-28 13:45 cert.gif
+   -rwxr-xr-x    1 root     root         2880 2005-06-28 13:45 webcert-icon.gif
+   -rwxr-xr-x    1 root     root         4737 2005-06-28 13:45 webcert-logo.gif
+   
+   /var/www/html/webcert/style:
+   total 4
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:45 .
+   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
+   -rwxr-xr-x    1 root     root          783 2005-06-28 13:45 style.css
+
+   /var/www/html/webcert/export:
+   drwxr-xr-x    2 wwwrun   www            80 2005-06-28 13:45 .
+   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..</code></pre>
+    <h3>Remaining Tasks - Webserver Configuration</h3>
+    <hr>
+    <p>
+After the installation, check the webserver configuration and declare
+the alias for /webcert/cgi-bin/ to match /var/www/html/webcert/cgi-bin/.
+Restart the webserver and check if the buildrequest.cgi page comes up properly.
+Assuming the webservers document root is in /var/www/html, we point the
+browser to http(s)://[your-ip-or-name]/webcert/ and we'll be forwarded to the
+buildrequest.cgi screen. Your apache configuration could look like this:
+    </p>
+<pre><code>susie112:~ # vi /etc/apache/vhosts.d/vhost.conf
+&lt;VirtualHost 192.168.103.32:443&gt;
+...
+  # Configure the CGI directories
+  ScriptAlias /webcert/cgi-bin/   "/var/www/html/webcert/cgi-bin/"
+
+  &lt;Directory "/var/www/html/webcert/cgi-bin"&gt;
+      Options +ExecCGI
+      AllowOverride None
+      Order allow,deny
+      Allow from all
+  &lt;/Directory&gt;
+...
+&lt;/VirtualHost&gt;</code></pre>
+
+    <h3>First Test - Create a sample certificate</h3>
+    <hr>
+    <p>
+Please fill out the template to generate your first certificate. If all goes
+well, your request will be signed and a new certificate is placed in the
+CA store. The menu item "List Certificates" should display your first cert.
+    </p>
+    <p>
+Enjoy WebCert!
+    </p>
+    <h3>Contact and Appreciation</h3>
+    <hr>
+    <p>
+Please let me know if these instructions are OK to follow and on which stage
+you run into a problem. If I learn were something isn't made clear, it will help me
+to improve the documentation.
+    </p>
+    <p>
+Please send your comments and complaints to <a href="mailto:support@frank4dd.com">support[at]frank4dd.com</a> and be patient with me for a response.
+    </p>
+    <p>
+If you want to do something really nice and encouraging besides
+just saying "Thanks", send me a photo picture of the area you are living in,
+either your town, your work, local sights or of your neighborhood. I enjoy
+collecting pictures from all over the world, and maybe I'll start a gallery.
+    </p>
+  </div>
+  <div id="sidecontent">
+    <h4>Topics:</h4>
+    <ul>
+      <li><a href="about.htm">About WebCert</a></li>
+      <li><a href="changelog.htm">Changelog</a></li>
+      <li><a href="cgi-bin/help.cgi">WebCert help</a></li>
+      <li><a href="index.htm">WebCert start</a></li>
+    </ul>
+    <p>
+<iframe src="http://rcm.amazon.com/e/cm?t=frank4ddcom-20&o=1&p=8&l=as1&asins=059600270X&fc1=000000&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=000000&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    <p>
+    <script type="text/javascript"><!--
+      google_ad_client = "pub-6688183504093504";
+      /* Opensource Software 120x600 */
+      google_ad_slot = "0003115987";
+      google_ad_width = 120;
+      google_ad_height = 600;
+      //-->
+    </script>
+    <script type="text/javascript"
+      src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+    </p>
+  </div>
+  <!--#include virtual="/site-discussion-template.htm" -->
+  <!--#include virtual="/site-footerdata-template.htm" -->
+</div>
+</body>
+</html>

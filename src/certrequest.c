@@ -1,0 +1,77 @@
+/* -------------------------------------------------------------------------- *
+ * file:         certrequest.c                                                *
+ * purpose:      cut & paste form for certificate request                     *
+ * ---------------------------------------------------------------------------*/
+
+#include <stdio.h>
+#include <string.h>
+#include <cgic.h>
+#include "webcert.h"
+
+int cgiMain() {
+
+   static char title[] = "Paste a Certificate Request";
+
+/* -------------------------------------------------------------------------- *
+ * start the html output                                                      *
+ * ---------------------------------------------------------------------------*/
+
+   pagehead(title);
+
+/* -------------------------------------------------------------------------- *
+ * start the form output                                                      *
+ * ---------------------------------------------------------------------------*/
+
+   fprintf(cgiOut, "<form action=\"certverify.cgi\" method=\"post\">\n");
+
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>");
+   fprintf(cgiOut, "Please paste your certificate request into the ");
+   fprintf(cgiOut, "field below:");
+   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<td class=\"getcert\">");
+   fprintf(cgiOut, "<textarea name=\"cert-request\" cols=\"65\" rows=\"15\">");
+   fprintf(cgiOut, "</textarea>");
+   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Verify\">");
+   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "</table>\n");
+
+   fprintf(cgiOut, "</form>");
+   fprintf(cgiOut, "<p></p>\n");
+   fprintf(cgiOut, "<form enctype=\"multipart/form-data\" action=\"certverify.cgi\" method=\"post\">\n");
+
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>");
+   fprintf(cgiOut, "Optionally, you can upload your certificate request file");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<input type=\"file\" name=\"requestfile\" value=\"\">");
+   fprintf(cgiOut, "</td>\n");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Upload\">");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "</table>\n");
+
+   fprintf(cgiOut, "</form>");
+
+/* -------------------------------------------------------------------------- *
+ * end the html output                                                        *
+ * ---------------------------------------------------------------------------*/
+
+   pagefoot();
+   return(0);
+}
