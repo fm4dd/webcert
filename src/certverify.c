@@ -11,41 +11,6 @@
 #include <openssl/pem.h>
 #include "webcert.h"
 
-void File()
-{
-  cgiFilePtr file;
-  char name[1024];
-  char contentType[1024];
-  char buffer[1024];
-  int size;
-  int got;
-        fprintf(cgiOut, "The filename submitted was: ");
-        cgiHtmlEscape(name);
-        fprintf(cgiOut, "<p>\n");
-        cgiFormFileSize("file", &size);
-        fprintf(cgiOut, "The file size was: %d bytes<p>\n", size);
-        cgiFormFileContentType("file", contentType, sizeof(contentType));
-        fprintf(cgiOut, "The alleged content type of the file was: ");
-        cgiHtmlEscape(contentType);
-        fprintf(cgiOut, "<p>\n");
-  fprintf(cgiOut, "Of course, this is only the claim the browser "
-    "made when uploading the file. Much like the filename, "
-    "it cannot be trusted.<p>\n");
-  fprintf(cgiOut, "The file's contents are shown here:<p>\n");
-  if (cgiFormFileOpen("file", &file) != cgiFormSuccess) {
-    fprintf(cgiOut, "Could not open the file.<p>\n");
-    return;
-  }
-  fprintf(cgiOut, "<pre>\n");
-  while (cgiFormFileRead(file, buffer, sizeof(buffer), &got) ==
-    cgiFormSuccess)
-  {
-    cgiHtmlEscapeData(buffer, got);
-  }
-  fprintf(cgiOut, "</pre>\n");
-  cgiFormFileClose(file);
-}
-
 int cgiMain() {
 
    BIO 			*inbio;
@@ -58,6 +23,7 @@ int cgiMain() {
    char 		reqtest[REQLEN] = "";
    char 		beginline[81]   = "";
    char 		endline[81]     = "";
+   char                 *char_pos       = NULL;
    static char 		title[] = "Verify Request";
 
    int                  filesize = 0;
@@ -108,6 +74,10 @@ int cgiMain() {
    }
    strtok(reqtest, "\n");
    strcpy(beginline, reqtest);
+
+   /* should there be a windows carriage return, we remove it here */
+   if ((char_pos = strchr(beginline, '\r'))) *char_pos='\0';
+   if ((char_pos = strchr(endline, '\r'))) *char_pos='\0';
 
    if(! ( (strcmp(beginline, "-----BEGIN CERTIFICATE REQUEST-----") == 0 &&
          strcmp(endline, "-----END CERTIFICATE REQUEST-----") == 0)
