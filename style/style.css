@@ -216,6 +216,8 @@ body a:visited {
 
 #content td.led-off {
     background: #999999;
+    margin: 0 0;
+    padding: 2 5;
     height: 5px;
     width: 12px;
 }
@@ -355,4 +357,25 @@ body a:visited {
 
 #footer .right {
     margin: 0 8px 0 0;
+}
+
+/*** Comment ***/
+
+#comment {
+    margin: 10px 0 0 0;
+    background: #fff;
+    float: left;
+    padding: 10px 15px 10px 15px;
+    width: 700px;
+    border: 1px solid #000000;
+    color: #000;
+}
+#comment h3 {
+    color: #815500;
+    font-size: 1.3em;
+    margin: 0;
+    padding: 10px 5px 0 0;
+    text-align: left;
+    background: inherit;
+    border: 0;
 }
