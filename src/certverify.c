@@ -109,7 +109,7 @@ int cgiMain() {
 
    pagehead(title);
 
-   fprintf(cgiOut, "<form action=\"certsign.cgi\" method=\"get\">");
+   fprintf(cgiOut, "<form action=\"certsign.cgi\" method=\"post\">");
    fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-request\" ");
    fprintf(cgiOut, "value=\"");
    fprintf(cgiOut, formreq);

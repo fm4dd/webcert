@@ -245,9 +245,24 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * Add X509V3 extensions                                                      *
  * ---------------------------------------------------------------------------*/
+   STACK_OF(X509_EXTENSION) *ext_list = NULL;
+   X509_EXTENSION *ext;
+   int i;
 
    X509V3_set_ctx(&ctx, cacert, newcert, NULL, NULL, 0);
-   X509_EXTENSION *ext;
+
+   /* if the certificte request contains extensions, we add them first */
+   if ((ext_list = X509_REQ_get_extensions(certreq)) != NULL) {
+     /* add each requested extension to the cert */
+     for (i=0; i<sk_X509_EXTENSION_num(ext_list); i++) {
+        ext = sk_X509_EXTENSION_value(ext_list, i);
+
+        if (! X509_add_ext(newcert, ext, -1))
+          int_error("Error adding X509 extension to certificate");
+
+        X509_EXTENSION_free(ext);
+     }
+   }
 
    /* Unless we sign a CA cert, always add the CA:FALSE constraint */
    if (strcmp(typelist[type_res], "ca") != 0) {
@@ -268,16 +283,7 @@ int cgiMain() {
    X509_EXTENSION_free(ext);
    }
 
-   /* If we sign a server cert, add the nsComment extension */
-   if (strcmp(typelist[type_res], "sv") == 0) {
-      if (! (ext = X509V3_EXT_conf(NULL, &ctx,
-                     "nsComment", "SSL enabling server cert")))
-         int_error("Error creating X509 extension object");
-   if (! X509_add_ext(newcert, ext, -1))
-      int_error("Error adding X509 extension to certificate");
-   X509_EXTENSION_free(ext);
-   }
-
+   /* If we sign a server cert, add the following key usage extension */
    if (strcmp(typelist[type_res], "sv") == 0) {
       if (! (ext = X509V3_EXT_conf(NULL, &ctx,
                      "keyUsage", "digitalSignature,keyEncipherment"))) {
@@ -360,7 +366,7 @@ int cgiMain() {
    }
 
   
-   /* if extended key usgaes has been requested,we add it here */
+   /* if extended key usages has been requested,we add it here */
    /* http://tools.ietf.org/html/rfc5280#section-4.2.1.12      */
    /* http://www.openssl.org/docs/apps/x509v3_config.html      */
    if (cgiFormCheckboxSingle("extkeyusage") == cgiFormSuccess) {
@@ -439,7 +445,7 @@ int cgiMain() {
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<td class=\"getcert\">\n");
    fprintf(cgiOut, "<pre>\n");
-   fprintf(cgiOut, "<div id=\"getpem\">\n");
+   fprintf(cgiOut, "<div class=\"showpem\">");
 
    if (! PEM_write_bio_X509(outbio, newcert))
       int_error("Error printing the signed certificate");

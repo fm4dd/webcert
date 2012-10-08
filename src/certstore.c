@@ -178,7 +178,7 @@ int cgiMain() {
    fprintf(cgiOut, "Certificate Subject Information");
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "<th colspan=2 width=\"60\">");
-   fprintf(cgiOut, "Expires");
+   fprintf(cgiOut, "Expiry");
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "<th width=\"65\">");
    fprintf(cgiOut, "Action");
@@ -200,7 +200,7 @@ int cgiMain() {
     snprintf(certfilestr, sizeof(certfilestr), "%s/%s",
                            CACERTSTORE, certstore_files[tempcounter]->d_name);
 
-    fprintf(cgiOut, "<tr>");
+    fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th rowspan=2>");
     fprintf(cgiOut, "%d", tempcounter+1);
     fprintf(cgiOut, "</th>\n");
@@ -241,13 +241,13 @@ int cgiMain() {
     else 
        fprintf(cgiOut, "Error: Can't open certificate file %s for reading.",
                                                                  certfilestr);
-    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "</td>\n");
 
     if(certvalidity == 0) {
 
       /* expiration bar display column */
-      fprintf(cgiOut, "<th rowspan=2>");
-      fprintf(cgiOut, "<table>");
+      fprintf(cgiOut, "<th rowspan=2>\n");
+      fprintf(cgiOut, "<table class=\"led\">\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
@@ -258,13 +258,13 @@ int cgiMain() {
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "</table>\n");
-      fprintf(cgiOut, "</th>");
+      fprintf(cgiOut, "</th>\n");
 
       /* remaining days before expiration column */
-      fprintf(cgiOut, "<th rowspan=2>");
+      fprintf(cgiOut, "<th rowspan=2>\n");
       fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#FF0000\">");
-      fprintf(cgiOut, "<b>Inval.<br>/Expd</b></font>");
-      fprintf(cgiOut, "</th>");
+      fprintf(cgiOut, "Inval<br />Expd</font>");
+      fprintf(cgiOut, "</th>\n");
     }
 
     if(certvalidity == 1) {
@@ -313,7 +313,7 @@ int cgiMain() {
   
       /* expiration bar display column */
       fprintf(cgiOut, "<th rowspan=2>\n");
-      fprintf(cgiOut, "<table>\n");
+      fprintf(cgiOut, "<table class=\"led\">\n");
       if (percent >= 90) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#00FF00></td></tr>\n");
       else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
       if (percent >= 80) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#00FF33></td></tr>\n");
@@ -350,15 +350,15 @@ int cgiMain() {
     }
 
     /* action column */
-    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
+    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
     fprintf(cgiOut, "<th>");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
     fprintf(cgiOut, "value=%s>", certstore_files[tempcounter]->d_name);
     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
     fprintf(cgiOut, "<input type=\"submit\" style=\"width:65px\" value=\"ViewPEM\">");
-    fprintf(cgiOut, "</th>");
-    fprintf(cgiOut, "</form>");
-    fprintf(cgiOut, "</tr>");
+    fprintf(cgiOut, "</th>\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>");
     fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
     fprintf(cgiOut, "<th>");
@@ -368,7 +368,7 @@ int cgiMain() {
     fprintf(cgiOut, "<input type=\"submit\" style=\"width:65px\" value=\"ViewTXT\">");
     fprintf(cgiOut, "</th>");
     fprintf(cgiOut, "</form>");
-    fprintf(cgiOut, "</tr>");
+    fprintf(cgiOut, "</tr>\n");
 
     if(strcmp(sorting, "asc") == 0) tempcounter++;
   }

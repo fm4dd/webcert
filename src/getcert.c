@@ -118,24 +118,24 @@ int cgiMain() {
  * ---------------------------------------------------------------------------*/
 
    fprintf(cgiOut, "<table width=100%%>\n");
-   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th>");
    fprintf(cgiOut, "certificate %s in %s format", certfilestr, format);
    fprintf(cgiOut, "</th>");
-   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<td class=\"getcert\">\n");
-   fprintf(cgiOut, "<pre>\n");
+   fprintf(cgiOut, "<pre>");
 
    if (strcmp(format, "pem") == 0) {
-      fprintf(cgiOut, "<div id=\"getpem\">\n");
+      fprintf(cgiOut, "<div class=\"showpem\">");
 
       if (! PEM_write_bio_X509(outbio, cert))
          int_error("Error printing the certificate");
    }
 
    if (strcmp(format, "text") == 0) {
-      fprintf(cgiOut, "<div id=\"gettext\">\n");
+      fprintf(cgiOut, "<div class=\"showtext\">");
 
       if (! (certname = X509_get_subject_name(cert)))
          int_error("Error getting subject data from certificate");
@@ -144,7 +144,7 @@ int cgiMain() {
          int_error("Error printing certificate text information");
 
    }
-   fprintf(cgiOut, "</div>\n");
+   fprintf(cgiOut, "</div>");
    fprintf(cgiOut, "</pre>\n");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");

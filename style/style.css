@@ -155,12 +155,17 @@ body a:visited {
 }
 
 #content table {
-    /* t r b l */
     border-spacing: 1;
     border: 1px solid black;
 }
 
+#content table.led {
+    border-spacing: 0;
+    border: none;
+}
+
 #content th {
+    /* t r b l */
     padding: 5px 5px 5px 5px;
     background-color: #004477;
     color: #FFFFFF;
@@ -172,11 +177,24 @@ body a:visited {
 }
 
 #content td {
+    /* t r b l */
     padding: 5px 5px 5px 5px;
     text-align: left;
     font-family: Arial, Helvetica, sans-serif;
     font-size: .8em;
     border: 1px solid black;
+}
+
+#content td.center {
+    text-align: center; 
+}
+
+#content td.success {
+    background: #66CDAA; 
+}
+
+#content td.failure {
+    background: #FFA07A;
 }
 
 #content td.odd {
@@ -187,28 +205,9 @@ body a:visited {
     background: #CFCFCF;
 }
 
-#content img {
-    border-style: none;
-}
-
-#content pre {
-    font-size: 10px;
-    line-height: 12px; /*--Height of each line of code--*/
-    white-space: pre-wrap;
-    margin: 0;
-}
-
-#copyright {
-    clear: both;
-    float: right;
-    margin: 0;
-    font-size: .8em;
-    padding: 15px 5px 0 0;
-    text-align: right;
-    background: inherit;
-}
-
 #content td.getcert {
+    /* t r b l */
+    padding: 10px 15px 10px 15px;
     text-align: center;
     vertical-align: middle;
     background: #CFCFCF;
@@ -229,26 +228,56 @@ body a:visited {
     width: 12px;
 }
 
+#content td.type {
+    background: #CFCFCF;
+    font-weight: bold;
+    width: 150px;
+}
+
+#content td.desc {
+    background: #AFAFAF;
+    color: #000080;
+}
+
+#content div.showpem {
+    background: #FFFFFF;
+    padding: 5px 5px 5px 5px;
+    margin: auto;
+}
+
+#content div.showtext {
+    /* t r b l */
+    padding: 5px 5px 5px 5px;
+    background: #FFFFFF;
+    text-align: left;
+    margin: auto; 
+    overflow: auto; /*--If the Code exceeds the width, a scrolling is available--*/
+}
+
+#content img {
+    border-style: none;
+}
+
+#content pre {
+    font-size: 10px;
+    line-height: 12px; /*--Height of each line of code--*/
+    white-space: pre-wrap;
+    margin: 0;
+}
+
 #content textarea {
     margin: 0 auto;
 }
 
-#getpem {
-    background: #FFFFFF;
-    padding: 5px 5px 5px 5px;
-    margin: auto;
-    width: 550px;
-    border: 1px solid black;
-}
 
-#gettext {
-    text-align: left;
-    background: #FFFFFF;
-    padding: 5px 5px 5px 5px;
-    margin: auto; 
-    width: 638px;
-    border: 1px solid black;
-    overflow: auto; /*--If the Code exceeds the width, a scrolling is available--*/
+#copyright {
+    clear: both;
+    float: right;
+    margin: 0;
+    font-size: .8em;
+    padding: 15px 5px 0 0;
+    text-align: right;
+    background: inherit;
 }
 
 /***** Side Content *****/
@@ -357,25 +386,4 @@ body a:visited {
 
 #footer .right {
     margin: 0 8px 0 0;
-}
-
-/*** Comment ***/
-
-#comment {
-    margin: 10px 0 0 0;
-    background: #fff;
-    float: left;
-    padding: 10px 15px 10px 15px;
-    width: 700px;
-    border: 1px solid #000000;
-    color: #000;
-}
-#comment h3 {
-    color: #815500;
-    font-size: 1.3em;
-    margin: 0;
-    padding: 10px 5px 0 0;
-    text-align: left;
-    background: inherit;
-    border: 0;
 }
