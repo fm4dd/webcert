@@ -251,7 +251,8 @@ body a:visited {
     background: #FFFFFF;
     text-align: left;
     margin: auto; 
-    overflow: auto; /*--If the Code exceeds the width, a scrolling is available--*/
+    width: 624px;
+    overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
 
 #content img {
