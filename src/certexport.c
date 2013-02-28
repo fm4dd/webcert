@@ -93,32 +93,35 @@ int cgiMain() {
     * start the html output                                                   *
     * ------------------------------------------------------------------------*/
       pagehead(title);
-      fprintf(cgiOut, "<table width=100%%>\n");
+      fprintf(cgiOut, "<table width=\"100%%\">\n");
+
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th>");
       fprintf(cgiOut, "Download URL for certificate %s in %s format",
                                                           certnamestr, format);
       fprintf(cgiOut, "</th>");
-      fprintf(cgiOut, "</tr>");
-      fprintf(cgiOut, "<tr>");
-      fprintf(cgiOut, "<td align=\"center\">");
-      fprintf(cgiOut, "<a href=\"http://%s%s/%s.%s\">", cgiServerName, CERTEXPORTURL,
-						          certnamestr, format);
-      fprintf(cgiOut, "http://%s%s/%s.%s</a>", cgiServerName, CERTEXPORTURL,
-                                                          certnamestr, format);
-      fprintf(cgiOut, "</td>");
-      fprintf(cgiOut, "</tr>");
+      fprintf(cgiOut, "</tr>\n");
+
       fprintf(cgiOut, "<tr>\n");
-   
-      fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
-      fprintf(cgiOut, "<th>");
-      fprintf(cgiOut, "<input type=\"submit\" value=\"Return\">");
+      fprintf(cgiOut, "<td class=\"center\">");
+      fprintf(cgiOut, "<a href=\"http://%s%s/%s.%s\">",
+                       cgiServerName, CERTEXPORTURL, certnamestr, format);
+      fprintf(cgiOut, "http://%s%s/%s.%s</a>",
+                       cgiServerName, CERTEXPORTURL, certnamestr, format);
+      fprintf(cgiOut, "</td>");
+      fprintf(cgiOut, "</tr>\n");
+
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<th>\n");
+      fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
+      fprintf(cgiOut, "<input type=\"submit\" value=\"Return\" />\n");
       fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-      fprintf(cgiOut, "value=\"%s\">", certfilestr);
-      fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
-      fprintf(cgiOut, "</th></form>\n");
-   
-      fprintf(cgiOut, "</tr>");
+      fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+      fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
+      fprintf(cgiOut, "</form>\n");
+      fprintf(cgiOut, "</th>\n");
+      fprintf(cgiOut, "</tr>\n");
+
       fprintf(cgiOut, "</table>\n");
       pagefoot();
       return(0);
@@ -139,56 +142,73 @@ int cgiMain() {
     * ------------------------------------------------------------------------*/
       pagehead(title);
       fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">");
-      fprintf(cgiOut, "<table width=100%%>\n");
+      fprintf(cgiOut, "<table width=\"100%%\">\n");
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th colspan=2>");
+      fprintf(cgiOut, "<th colspan=\"2\">");
       fprintf(cgiOut, "Please paste your certificate's private key into the ");
       fprintf(cgiOut, "field below (PEM format):");
-      fprintf(cgiOut, "</th>");
-      fprintf(cgiOut, "</tr>");
+      fprintf(cgiOut, "</th>\n");
+      fprintf(cgiOut, "</tr>\n");
 
-      fprintf(cgiOut, "<tr>");
-      fprintf(cgiOut, "<td class=\"getcert\" colspan=2>");
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<td class=\"getcert\" colspan=\"2\">\n");
       fprintf(cgiOut, "<textarea name=\"certkey\" cols=\"64\" rows=\"13\">");
       fprintf(cgiOut, "</textarea>");
-      fprintf(cgiOut, "<br><font size=\"2\" face=\"Arial\" color=\"#000080\">");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
+
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<td class=\"desc\" colspan=\"2\">");
       fprintf(cgiOut, "To create a PKCS12 certificate bundle,");
       fprintf(cgiOut, " the certificate's private key is required.");
-      fprintf(cgiOut, "</font>");
-     fprintf(cgiOut, "</td></tr>\n");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<td bgcolor=\"#CFCFCF\" width=\"335\" nowrap>");
-      fprintf(cgiOut, "<b>Passphrase to protect the PKCS12 file</b>");
-      fprintf(cgiOut, " (max 40 chars):");
-      fprintf(cgiOut, "</td>");
-      fprintf(cgiOut, "<td align=\"center\">");
-      fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" size=\"30\" ");
-      fprintf(cgiOut, "maxlength=\"PASSLEN\">");
-      fprintf(cgiOut, "</td>");
-      fprintf(cgiOut, "</tr>");
+      fprintf(cgiOut, "<td class=\"type250\">");
+      fprintf(cgiOut, "Passphrase to protect the PKCS12 file");
+      fprintf(cgiOut, "<br />(max 40 chars):");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "<td>");
+      fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" size=\"40\" ");
+      fprintf(cgiOut, "maxlength=\"PASSLEN\" />");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<td bgcolor=\"#CFCFCF\" nowrap>");
-      fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\">");
-      fprintf(cgiOut, "<b>Include the CA certificate in the container</b>");
-      fprintf(cgiOut, " (default yes):");
-      fprintf(cgiOut, "</font>");
-      fprintf(cgiOut, "</td>");
-      fprintf(cgiOut, "<td align=\"center\">");
+      fprintf(cgiOut, "<td class=\"desc\" colspan=\"2\">");
+      fprintf(cgiOut, "Because the PKCS12 certificate bundle contains the");
+      fprintf(cgiOut, " private key, the file needs to be secured by a passphrase.");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
+
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<td class=\"type\">");
+      fprintf(cgiOut, "Include the CA certificate in the container");
+      fprintf(cgiOut, "<br />(default yes):");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "<td id=\"cainc_td\">");
       fprintf(cgiOut, "<input type=\"checkbox\" name=\"cainc\" ");
-      fprintf(cgiOut, "value=\"yes\" checked>");
-      fprintf(cgiOut, "</td>");
-      fprintf(cgiOut, "</tr>");
+      fprintf(cgiOut, "value=\"yes\" checked=\"checked\" id=\"cainc_cb\" ");
+      fprintf(cgiOut, "onclick=\"switchGrey('cainc_cb', 'cainc_td', 'none');\" />");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th colspan=2>");
-      fprintf(cgiOut, "<input type=\"submit\" value=\"Generate PKCS12\">");
+      fprintf(cgiOut, "<td class=\"desc\" colspan=\"2\">");
+      fprintf(cgiOut, "PKCS12 certificate bundles can also carry the signing ");
+      fprintf(cgiOut, " CA certificate, this is generally the best option.");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
+
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<th colspan=\"2\">");
+      fprintf(cgiOut, "<input type=\"submit\" value=\"Generate PKCS12\" />");
       fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-      fprintf(cgiOut, "value=\"%s\">", certfilestr);
-      fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"p12\">");
-      fprintf(cgiOut, "</th>");
-      fprintf(cgiOut, "</tr>");
+      fprintf(cgiOut, "value=\"%s\" />", certfilestr);
+      fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"p12\" />");
+      fprintf(cgiOut, "</th>\n");
+      fprintf(cgiOut, "</tr>\n");
       fprintf(cgiOut, "</table>\n");
       fprintf(cgiOut, "</form>\n");
       pagefoot();
@@ -259,6 +279,12 @@ int cgiMain() {
      /* -------------------------------------------------------------------- *
       * check if a key was pasted with the BEGIN and END                     *
       * lines, assuming the key data in between is intact                    *
+      *                                                                      *
+      * The following line variations are expected:                          *
+      *                                                                      *
+      * -----BEGIN RSA PRIVATE KEY-----                                      *
+      * -----BEGIN DSA PRIVATE KEY-----                                      *
+      * -----BEGIN PRIVATE KEY-----                                          *
       * -------------------------------------------------------------------- */
 
       if (! strchr(privkeystr, '\n'))
@@ -273,15 +299,21 @@ int cgiMain() {
            strtok(strstr(privkeytst, "-----END RSA PRIVATE KEY-----"), "\n");
          if (strstr(privkeytst, "-----END DSA PRIVATE KEY-----") != NULL)
            strtok(strstr(privkeytst, "-----END DSA PRIVATE KEY-----"), "\n");
+         if (strstr(privkeytst, "-----END PRIVATE KEY-----") != NULL)
+           strtok(strstr(privkeytst, "-----END PRIVATE KEY-----"), "\n");
       }
       strncpy(endline, (strrchr(privkeytst, '\n') +1), sizeof(endline));
       strncpy(beginline, privkeytst, (strchr(privkeytst, '\n') - privkeytst));
 
+      /* check for the acceptable line variations */
       if(! ( (strcmp(beginline, "-----BEGIN RSA PRIVATE KEY-----") == 0 &&
             strcmp(endline, "-----END RSA PRIVATE KEY-----") == 0)
             ||
            (strcmp(beginline, "-----BEGIN DSA PRIVATE KEY-----") == 0 &&
-            strcmp(endline, "-----END DSA PRIVATE KEY-----") == 0) ) )
+            strcmp(endline, "-----END DSA PRIVATE KEY-----") == 0)
+            ||
+           (strcmp(beginline, "-----BEGIN PRIVATE KEY-----") == 0 &&
+            strcmp(endline, "-----END PRIVATE KEY-----") == 0) ) )
          int_error("Error invalid request format, no BEGIN/END lines");
 
      /* -------------------------------------------------------------------- *
@@ -332,7 +364,7 @@ int cgiMain() {
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
    pagehead(title);
-   fprintf(cgiOut, "<table width=100%%>\n");
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
    fprintf(cgiOut, "%s certificate in %s format", certfilestr, format);
@@ -341,22 +373,23 @@ int cgiMain() {
 
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<a href=\"http://%s%s/%s.%s\">", cgiServerName, CERTEXPORTURL,
-						          certnamestr, format);
-   fprintf(cgiOut, "http://%s%s/%s.%s</a>", cgiServerName, CERTEXPORTURL,
-                                                          certnamestr, format);
-   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "<a href=\"http://%s%s/%s.%s\">\n",
+                    cgiServerName, CERTEXPORTURL, certnamestr, format);
+   fprintf(cgiOut, "http://%s%s/%s.%s</a>\n",
+                    cgiServerName, CERTEXPORTURL, certnamestr, format);
+   fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>\n");
-   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Return\">");
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Return\" />\n");
    fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-   fprintf(cgiOut, "value=\"%s\">", certfilestr);
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
-   fprintf(cgiOut, "</th></form>\n");
-   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
+   fprintf(cgiOut, "</form>\n");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "</table>\n");
    pagefoot();
    return(0);

@@ -146,43 +146,65 @@ to cache exported certificates in pem, der or pkcs12 format for download.
    
    usie:~ # ls -lR /var/www/html/webcert
    /var/www/html/webcert:
-   total 4
-   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 .
-   drwxr-xr-x    3 root     root           72 2005-06-28 13:45 ..
-   drwxr-xr-x    2 root     root          384 2005-06-28 13:45 cgi-bin
-   drwxr-xr-x    2 root     root          136 2005-06-28 13:45 images
-   -rwxr-xr-x    1 root     root          327 2005-06-28 13:45 index.htm
-   drwxr-xr-x    2 root     root           80 2005-06-28 13:45 style
+   total 112
+   -rwxr-xr-x 1 root   root  7457 Feb 28 10:21 about.htm
+   drwxr-xr-x 2 root   root  4096 Feb 28 10:49 cgi-bin
+   -rwxr-xr-x 1 root   root 13239 Feb 28 10:48 changelog.htm
+   drwxr-xr-x 2 wwwrun www   4096 Feb 28 10:45 export
+   -rwxr-xr-x 1 root   root   683 Feb 28 10:48 footer-template.htm
+   -rwxr-xr-x 1 root   root 11634 Feb 28 10:45 help-template.htm
+   drwxr-xr-x 2 root   root  4096 Feb 28 10:15 images
+   -rwxr-xr-x 1 root   root  1611 Feb 28 10:33 index.htm
+   -rwxr-xr-x 1 root   root 15417 Feb 28 10:14 install.htm
+   -rwxr-xr-x 1 root   root  4920 Feb 28 10:50 policy-template.htm
+   -rwxr-xr-x 1 root   root  3273 Feb 28 10:46 roadmap.htm
+   -rwxr-xr-x 1 root   root  1015 Feb 28 10:53 sidebar-template.htm
+   drwxr-xr-x 2 root   root  4096 Feb 28 10:19 style
+   -rw-r--r-- 1 root   root   831 Feb 28 10:34 webcert.js
    
    /var/www/html/webcert/cgi-bin:
-   total 320
-   drwxr-xr-x    2 root     root          384 2005-06-28 13:45 .
-   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
-   -rwxr-xr-x    1 root     root        34784 2005-06-28 13:45 buildrequest.cgi
-   -rwxr-xr-x    1 root     root        30748 2005-06-28 13:45 capolicy.cgi
-   -rwxr-xr-x    1 root     root          848 2005-06-28 13:45 capolicy.txt
-   -rwxr-xr-x    1 root     root        27552 2005-06-28 13:45 certrequest.cgi
-   -rwxr-xr-x    1 root     root        43324 2005-06-28 13:45 certsign.cgi
-   -rwxr-xr-x    1 root     root        35548 2005-06-28 13:45 certstore.cgi
-   -rwxr-xr-x    1 root     root        31260 2005-06-28 13:45 certverify.cgi
-   -rwxr-xr-x    1 root     root        34972 2005-06-28 13:45 genrequest.cgi
-   -rwxr-xr-x    1 root     root        31516 2005-06-28 13:45 getcert.cgi
-   -rwxr-xr-x    1 root     root        30780 2005-06-28 13:45 help.cgi
-   -rwxr-xr-x    1 root     root         5268 2005-06-28 13:45 help.txt
-   
+   total 600
+   -rwxr-xr-x 1 root root 42752 Feb 28 10:34 buildrequest.cgi
+   -rwxr-xr-x 1 root root 34572 Feb 28 10:34 capolicy.cgi
+   -rwxr-xr-x 1 root root 46944 Feb 28 10:34 certexport.cgi
+   -rwxr-xr-x 1 root root 34560 Feb 28 10:34 certrequest.cgi
+   -rwxr-xr-x 1 root root 63388 Feb 28 10:34 certsearch.cgi
+   -rwxr-xr-x 1 root root 55316 Feb 28 10:34 certsign.cgi
+   -rwxr-xr-x 1 root root 46976 Feb 28 10:34 certstore.cgi
+   -rwxr-xr-x 1 root root 71808 Feb 28 10:34 certvalidate.cgi
+   -rwxr-xr-x 1 root root 46960 Feb 28 10:34 certverify.cgi
+   -rwxr-xr-x 1 root root 51160 Feb 28 10:34 genrequest.cgi
+   -rwxr-xr-x 1 root root 42784 Feb 28 10:34 getcert.cgi
+   -rwxr-xr-x 1 root root 34608 Feb 28 10:34 help.cgi
+
    /var/www/html/webcert/images:
-   total 64
-   drwxr-xr-x    2 root     root          136 2005-06-28 13:45 .
-   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
-   -rwxr-xr-x    1 root     root        50267 2005-06-28 13:45 cert.gif
-   -rwxr-xr-x    1 root     root         2880 2005-06-28 13:45 webcert-icon.gif
-   -rwxr-xr-x    1 root     root         4737 2005-06-28 13:45 webcert-logo.gif
-   
+   total 472
+   -rw-r--r-- 1 root root  1081 Feb 28 10:58 bgplastic-button.gif
+   -rw-r--r-- 1 root root   351 Feb 28 10:58 bgplastic.gif
+   -rw-r--r-- 1 root root  1112 Feb 28 10:58 bgplastic-red.gif
+   -rw-r--r-- 1 root root 46493 Feb 28 10:58 cert.gif
+   -rw-r--r-- 1 root root  4924 Feb 28 10:58 frank4dd-logo.gif
+   -rw-r--r-- 1 root root 10958 Feb 28 10:58 new-certificate-data-entry-icon.png
+   -rw-r--r-- 1 root root 50737 Feb 28 10:58 new-certificate-data-entry.png
+   -rw-r--r-- 1 root root  9414 Feb 28 10:58 new-certificate-generated-icon.png
+   -rw-r--r-- 1 root root 28718 Feb 28 10:58 new-certificate-generated.png
+   -rw-r--r-- 1 root root  8178 Feb 28 10:58 new-certificate-key-and_extensions-icon.png
+   -rw-r--r-- 1 root root 50005 Feb 28 10:58 new-certificate-key-and_extensions.png
+   -rw-r--r-- 1 root root  3069 Feb 28 10:58 openssl_button.gif
+   -rw-r--r-- 1 root root 16028 Feb 28 10:58 webcert-certificate-search-icon.png
+   -rw-r--r-- 1 root root 36021 Feb 28 10:58 webcert-certificate-search.png
+   -rw-r--r-- 1 root root 12734 Feb 28 10:58 webcert-certificate-store-icon.png
+   -rw-r--r-- 1 root root 42062 Feb 28 10:58 webcert-certificate-store.png
+   -rw-r--r-- 1 root root 12034 Feb 28 10:58 webcert-certificate-validation-icon.png
+   -rw-r--r-- 1 root root 42863 Feb 28 10:58 webcert-certificate-validation.png
+   -rw-r--r-- 1 root root  2880 Feb 28 10:58 webcert-icon.gif
+   -rw-r--r-- 1 root root  4737 Feb 28 10:58 webcert-logo.gif
+   -rw-r--r-- 1 root root 10251 Feb 28 10:58 webcert-request-paste-icon.png
+   -rw-r--r-- 1 root root 29994 Feb 28 10:58 webcert-request-paste.png
+
    /var/www/html/webcert/style:
-   total 4
-   drwxr-xr-x    2 root     root           80 2005-06-28 13:45 .
-   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
-   -rwxr-xr-x    1 root     root          783 2005-06-28 13:45 style.css
+   total 8
+   -rwxr-xr-x 1 root root 7324 Feb 28 10:22 style.css
 
    /var/www/html/webcert/export:
    drwxr-xr-x    2 wwwrun   www            80 2005-06-28 13:45 .

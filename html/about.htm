@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title>About WebCert</title>
   <!--#include virtual="/site-headermeta-template.htm" -->
@@ -17,9 +18,9 @@
   <!--#include virtual="/site-navigation-template.htm" -->
 
   <div id="content">
-    <div id=copyright>2005-06-28 by Frank4dd</div>
+    <div class="copyright">2005-06-28 by Frank4dd</div>
     <h3>Introduction</h3>
-    <hr>
+    <hr />
     <p>
 Digital Certificates are needed everywhere in today's world. They are used to enable SSL-protected web traffic, e-mail encryption and other technologies.
     </p>
@@ -40,44 +41,44 @@ External Dependencies:
       <li> OpenSSL libary and headers, see http://www.openssl.org/</li>
     </ul>
     <h3>Configuration</h3>
-    <hr>
+    <hr />
     <p>
 Apart from the Makefiles in the root and src/ dirextories, check the file webcert.h in the src/ directory. The upper section can be configured to set the URL location and the default webcert parameters.
     </p>
     <h3>Making and installing WebCert</h3>
-    <hr>
+    <hr />
     <ul>
       <li>vi Makefile and src/Makefile to adjust various path's for cgi and html destinations and ssl include and library directories</li>
       <li>vi src/webcert.h to adjust the path's for your webserver and cert store (if you have one - for listing of local certificate copies)</li>
-      <li>vi src/certsign.h if you want to adjust certificate properties such as lifetime, extensions, comments, etc\</li>
-      <li>make && make install</li>
-      <li>The application is expected to be accessed via URL http://<www.yourdomain.com>/webcert.</li>
+      <li>vi src/certsign.h if you want to adjust certificate properties such as lifetime, extensions, comments, etc</li>
+      <li>make &amp;&amp; make install</li>
+      <li>The application is expected to be accessed via URL http://www.yourdomain.com/webcert.</li>
       <li>don't forget to enable the cgi directory in your webserver, i.e. in apache's httpd.conf add the line: ScriptAlias /webcert/cgi-bin/ "/var/apache/htdocs/webcert/cgi-bin/"</li>
     </ul>
     <p>
 A more complete installation procedure is <a href="install.htm">here</a>.
     </p>
     <h3>Security</h3>
-    <hr>
+    <hr />
     <p>
-It is highly adviseable to provide access control and SSL encryption to the WebCert interface for any use other then experimental. The webserver writeable certificate and export directory should be secured (i.e. by a Apache <Directory> directive).
+It is highly adviseable to provide access control and SSL encryption to the WebCert interface for any use other then experimental. The webserver writeable certificate and export directory should be secured (i.e. by a Apache &lt;Directory&gt; directive).
     </p>
     <h3>Copyright and License</h3>
-    <hr>
+    <hr />
     <p>
 WebCert was written by Frank4DD. It is distributed under the GPL.  Anybody may reproduce it, use it, send it, print it, transfer on a T-shirt, etc. without modifying its content or removing the copyright.
     </p>
     <h3>Legal Disclaimer</h3>
-    <hr>
+    <hr />
     <p>
 Of course this software and its created certificates come WITHOUT ANY WARRANTY.
     </p>
     <h3>Thanks and Credits</h3>
-    <hr>
+    <hr />
     <ul>
       <li>to Thomas Boutell for providing the CGIC library</li>
       <li>to the authors of O'Reilly's book "Network Security with OpenSSL", who provided a guiding "light" in the OpenSSL jungle.</li>
-      </li>to the authors of OpenSSL, whose code ensures that only the true & dedicated will learn its power ;-) </li>
+      <li>to the authors of OpenSSL, whose code ensures that only the true and dedicated will learn its power ;-) </li>
     </ul>
     <p>
 CGIC, copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 by Thomas Boutell and Boutell.Com, Inc.. Permission is granted to use CGIC in any application, commercial or noncommercial, at no cost. HOWEVER, this copyright paragraph must appear on a "credits" page accessible in the public online and offline documentation of the program.  Modified versions of the CGIC library should not be distributed without the attachment of a clear statement regarding the author of the modifications, and this notice may in no case be removed.  Modifications may also be submitted to the author for inclusion in the main CGIC distribution.
@@ -86,7 +87,7 @@ CGIC, copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 by Thomas Boutell and B
 Enjoy WebCert!
     </p>
     <h3>Contact and Appreciation</h3>
-    <hr>
+    <hr />
     <p>
 Please send your comments and complaints to <a href="mailto:support@frank4dd.com">support[at]frank4dd.com</a> and be patient with me for a response.
     </p>
@@ -95,15 +96,20 @@ If you want to do something really nice and encouraging besides just saying "Tha
     </p>
   </div>
   <div id="sidecontent">
+ <br />
+ <a href="http://www.openssl.org"><img src="images/openssl_button.gif" alt="OpenSSL Logo" /></a>
+ <br />
     <h4>Topics:</h4>
     <ul>
       <li><a href="about.htm">About WebCert</a></li>
       <li><a href="changelog.htm">Changelog</a></li>
-      <li><a href="cgi-bin/help.cgi">WebCert help</a></li>
-      <li><a href="index.htm">WebCert start</a></li>
+      <li><a href="roadmap.htm">Roadmap</a></li>
+      <li><a href="cgi-bin/help.cgi">WebCert Help</a></li>
+      <li><a href="index.htm">WebCert Start</a></li>
     </ul>
     <p>
-<iframe src="http://rcm.amazon.com/e/cm?t=frank4ddcom-20&o=1&p=8&l=as1&asins=059600270X&fc1=000000&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=000000&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+<iframe src="http://rcm.amazon.com/e/cm?t=frank4ddcom-20&amp;o=1&amp;p=8&amp;l=as1&amp;asins=059600270X&amp;fc1=000000&amp;IS2=1&amp;lt1=_blank&amp;m=amazon&amp;lc1=0000FF&amp;bc1=000000&amp;bg1=FFFFFF&amp;f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    </p>
     <p>
     <script type="text/javascript"><!--
       google_ad_client = "pub-6688183504093504";

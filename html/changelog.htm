@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title>WebCert - Changelog</title>
   <!--#include virtual="/site-headermeta-template.htm" -->
@@ -17,10 +18,50 @@
   <!--#include virtual="/site-navigation-template.htm" -->
 
   <div id="content">
-    <p>
+    <h3>2013-02-28 new version 1.7.6 released</h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+      <li>
+Set specific certificate start and end dates: The certificate validity, in
+ addition to being set as days valid from "now", can now also be set for
+ specific start and end dates. This allows the creation of certs with a lifetime
+ of minutes, create certs for future dates, etc.
+      </li>
+      <li>
+Overhaul of display functions: cert requests and certificate data will now be
+ available in both text and PEM format on one, single page. A simple
+Javascript function will do the switching at the (browser) client side.
+      </li>
+      <li>
+Update of the certificate validations page:
+<p> The validation of remote servers will be able to display the details of
+remotely received certificate chains, i.e. the intermediate and root certificates.</p>
+      </li>
+      <li>
+A javascript print button for certificate requests, certificates and validation results has been added.
+ A stylesheet and icons clean-up now provides a decent print image with "background" printing enabled.
+      </li>
+      <li>
+For the online certificate request generation, expand the number of SubjectAltNames from two to four.
+      </li>
+      <li>
+Documentation update: The "Help" section should get the missing instructions
+ for the cert validation function. The "Installation" page is going to be updated as well.
+      </li>
+    <li>
+Updating the HTML code to validate as "XHTML v1.0 transitional".
+    </li>
+    </ul>
+    <h4>Bug fixes:</h4>
+    <ul>
+      <li>Fixing several bugs in the results list navigation of certsearch.cgi.</li>
+      <li>Update of time protection for the year 2038 integer overflow on 32bit systems.</li>
+      <li>Do not create duplicate extensions:
+      <p>I.e. Java keytool-generated CRS's already contain the "subject Key Identifier" extension</p></li>
+    </ul>
     <h3>2012-10-08 new version 1.7.5 released</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
     <ul>
       <li>
@@ -36,11 +77,8 @@ The obsolete "Netscape Comment" extension for server certificates has been remov
 Submitted certificate requests are now signed including their requested extensions.
       </li>
     </ul>
-    </p>
-    <p>
     <h3>2011-06-20 new version 1.7.4 released</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
     <ul>
       <li>
@@ -50,13 +88,11 @@ A html graphics layout overhaul has been done to better utilise external stylesh
 Improved cross-browser compatibility: Internet Explorer, Firefox, Safari, Chrome
       </li>
       <li>
-Existing certificate request files can now be uploaded in addition to copy and paste.
+Existing certificate request files can now be uploaded, in addition to copy and paste.
       </li>
     </ul>
-    </p>
     <h3>2010-11-10 new version 1.7.3 released</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
     <p>
   Implementation of "Extended Key Usage" parameter to allow the creation
@@ -64,6 +100,7 @@ Existing certificate request files can now be uploaded in addition to copy and p
   for Microsoft Windows to enable the active directory LDAPS function by
   adding the "SSL/TLS Web Server Authentication" extended key usage.
   At this time, only the extension values below have been implemented:
+    </p>
     <ul>
       <li>serverAuth,      SSL/TLS Web Server Authentication OID=1.3.6.1.5.5.7.3.1</li>
       <li>clientAuth,      SSL/TLS Web Client Authentication OID=1.3.6.1.5.5.7.3.2</li>
@@ -72,173 +109,185 @@ Existing certificate request files can now be uploaded in addition to copy and p
       <li>timeStamping,    Trusted Timestamping              OID=1.3.6.1.5.5.7.3.8</li>
       <li>ocspSigning,     Online Cert Status Protocol signing OID=1.3.6.1.5.5.7.3.9</li>
     </ul>
-    </p>
     <p>
   I did not implement the OID's 1.3.6.1.5.5.7.3.5-7. They belong to id-kp-ipsecEndSystem,
   id-kp-ipsecTunnel and id-kp-ipsecUser and are reported to be obsolete
   as per RFC 4945 section 5.1.3.12,  "ExtendedKeyUsage".
+    </p>
     <p>
   Regardless what the certificate request contains, the extended key usage
   must be always explicitly set at the request verification screen to be
   included in the certificate. Even if a externally generated request did
   not add this attribute, it can be set additionally with WebCert.
-    <p>
-    <p>
+    </p>
     <h3>2008-03-20 	new version 1.7.2 released	</h3>
-    <hr>
-    <p>
-    <h4>Bug Fix:</h4>
-    <p>
-- The nasty P12 export function still created a empty zero byte p12 file
-  in cases when no private key was paste'd at all. I also added an extra
-  comment that the private key file is really needed for pkcs12 export.
-    <p>
-    <p>
-    <h3>2007-12-20 	new version 1.7.1 released	</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>Bug fix only:</h4>
-    <p>
-- The P12 export function failed when a private key was paste'd with
-  multiple trailing empty lines, creating a empty zero byte p12 file.
-    <p>
-- A link to a S/Mime certificate creation How-To was added to help.
-    <p>
+    <ul>
+<li>The nasty P12 export function still created a empty zero byte p12 file
+ in cases when no private key was paste'd at all. I also added an extra
+ comment that the private key file is really needed for pkcs12 export.</li>
+    </ul>
+    <h3>2007-12-20 	new version 1.7.1 released	</h3>
+    <hr />
+    <h4>Bug fix only:</h4>
+    <ul>
+<li>The P12 export function failed when a private key was paste'd with
+ multiple trailing empty lines, creating a empty zero byte p12 file.</li>
+<li>A link to a S/Mime certificate creation How-To was added to the help section.</li>
+    </ul>
     <h3>2007-12-15 	new version 1.7.0 released	</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
-    <p>
-- Full support for generation of S/MIME certificates
-    <p>
-- the new certexport.cgi convienently converts a existing PEM certificate
-  into either DER or PKCS12 format. The files are copied into the export
-  directory of the webcert web application.  In the case of PKCS12, the
-  private key must be supplied in PEM format (cut&paste), together with a
-  passphrase for protection.
-    <p>
-- the certsearch.cgi function has been expanded to filter certificates by
-  their serial number
-    <p>
+    <ul>
+<li>Full support for generation of S/MIME certificates:
+ <p>
+ the new certexport.cgi convienently converts a existing PEM certificate
+ into either DER or PKCS12 format. The files are copied into the export
+ directory of the webcert web application.  In the case of PKCS12, the
+ private key must be supplied in PEM format (cut&amp;paste), together with a
+ passphrase for protection.</p></li>
+<li>the certsearch.cgi function has been expanded to filter certificates by
+ their serial number</li>
+    </ul>
     <h4>Bug fixes:</h4>
-    <p>
-- The <Go Back> button in genrequest.cgi was pointing to certrequest.cgi
-  instead of refering back to buildrequest.cgi.
-    <p>
-- the latest CGI were missing in the top level Makefile
-    <p>
-- the REQLEN parameter was to small for certificates with a 4096 bit key.
-    <p>
-- getcert.cgi had a minor display bug in the HTML table
-    <p>
+    <ul>
+<li>The [Go Back] button in genrequest.cgi was pointing to certrequest.cgi
+ instead of refering back to buildrequest.cgi.</li>
+<li>The latest CGI definitions were missing in the top level Makefile</li>
+<li>The REQLEN parameter was to small for certificates with a 4096 bit key</li>
+<li>getcert.cgi had a minor display bug in the HTML table</li>
+    </ul>
     <h3>2007-10-15 	new version 1.6.0 released	</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
-    <p>
-- to find particular certificates, the new certsearch CGI can filter
+    <ul>
+<li>New certificate search function:
+ <p>
+To find particular certificates, the new certsearch.cgi can filter
   the cert store per subject field, validation or expiration date.
   This helps to identify certificates that are about to expire,
-  and renew them before they become invalid.
-    <p>
-    <p>
-- set font to Arial in certverify.cgi and genrequest.cgi for consistent
-  look and feel across CGI's.
-    <p>
+  and renew them before they become invalid.</p></li>
+<li>For consistem look&amp;feel accross CGI's, the font has been set to
+ Arial in all CGI's (certverify.cgi and genrequest.cgi)</li>
+    </ul>
     <h3>2007-07-01 	new version 1.5.0 released	</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
-    <p>
-- certstore.cgi gets a new column, displaying how long the certificate is
+    <ul>
+<li>Certificate Store display enhancements:
+<p>
+  certstore.cgi gets a new "Expiration" column, displaying how long the certificate is
   still valid. It is shown in days remaining and as a pseudo-graphical bar
   representing the percentage of time left, compared to the certificate
   lifetime. The selection to display a certificate either in PEM or TXT
-  format has been added to certstore.cgi for quicker access.
-    <p>
+  format has been added to certstore.cgi for quicker access.</p></li>
+    </ul>
     <h4>Bug fixes:</h4>
-    <p>
-- certstore.cgi display fails to sort correctly if store has more then
+    <ul>
+<li>The certstore.cgi display fails to sort correctly if store has more then
   255 certificate files because alphasort fails when the .pem filename
   gets the next 2 digits added after FF.pem is reached (255).
-  I wrote hexsort to correct that.
-    <p>
-- fixed a minor display bug on the control panel in certstore.cgi, which
-  is visible in konqueror. Improved pixel count for displaying the bar.
-    <p>
-- fixed wrong page count for certstore.cgi. When the number of certs is
+  I wrote the hexsort function to correct that.</li>
+<li>I fixed a minor display bug on the control panel in certstore.cgi, which
+  is visible in Konqueror. Improved pixel count for displaying the bar.</li>
+<li>Wrong page count for certstore.cgi: When the number of certs is
   divisible through the max. entries per page without remainder,
   meaning that all pages are filled to the max, a extra empty page was
-  generated.
-    <p>
-- compiler warnings complain about pointer targets differ in signedness:
+  generated.</li>
+<li>Compiler warnings complain about pointer targets differ in signedness:
   new compilers are so picky and warn about implicit data type promotion.
-  I added explicit casting to avoid these errors.
-    <p>
+  I added explicit casting to avoid these errors.</li>
+    </ul>
     <h3>2006-02-10      new version 1.4.0 released</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
-    <p>
-- certificate options can be set: Client, Server, Signing, E-Mail,
-  Expiration ...
-    <p>
+    <ul>
+<li>Certificate key usage extensions can be set:
+<p>
+The correct combination is enabled by setting the certificate purpose:
+ Client, Server, Signing, E-Mail</p></li>
+<li>The certificate expiration can now be set:
+<p>
   Expiration is a most convenient feature. Usually certificates
   are valid several years. IF you want to experiment with short
-  validity, set days to 1.
+  validity, set valid days to 1.</p>
+<p>
   Further visions: Imagine you want to give access to a
   resource using a client certificate that should expire with the
   end of a contract at a certain date. How about being able to 
-  enter a start and end date similar to 'openssl ca -startdate -enddate'?
-    <p>
-- Expired certificates are marked red in the list by comparing their
-  expiration date to the date of the webcert host.
-    <p>
-- webcert verified to work with openssl-0.9.8a
-    <p>
+  enter a start and end date similar to 'openssl ca -startdate -enddate'?</p></li>
+<li>Display expired certificates in certstore.cgi list:
+<p>
+Expired certificates are marked red in the list by comparing their
+  expiration date to the date of the webcert host.</p></li>
+<li>WebCert has been verified to work with openssl-0.9.8a</li>
+    </ul>
     <h3>2005-06-25 	new version 1.3.0 released	</h3>
-    <hr>
-    <p>
+    <hr />
     <h4>New functionality:</h4>
-    <p>
-- Implementation of the serial number management is the base for further
-  improvements:
-    <p>
-	* certificates are not just displayed but also saved in the
-          /certs directory. The serial number serves as the file name
-          in tradition with identical OpenSSL behaviour.
-    <p>
-	* new certificate requests are generated with buildrequest.cgi
-          and genrequest.cgi, then forwarded for immediate signing.
-    <p>
-        * buildrequest.cgi is now the new entry page while certrequest.cgi
-          which handles paste of existing PEM requests, got a new menu item
-          on the top menu.
-    <p>
-- certstore.cgi has been re-written to display the certificates sorted by
-  creation time. Latest certs now appear first by default and it can be
-  switched to show oldest first, also.
-    <p>
+    <ul>
+<li>Implementation of the serial number management:
+<p>
+This is the base for further improvements. Now, certificates are not
+ only displayed, but also saved in the /certs directory. The serial
+ number serves as the file name in tradition with identical OpenSSL behaviour.</p></li>
+<li>New forms for online certificate request generation:
+<p>
+New certificate requests are generated with buildrequest.cgi
+ and genrequest.cgi, then forwarded for immediate signing. 
+The form buildrequest.cgi is became the new entry page, while certrequest.cgi
+ which handles the copy&amp;paste of existing PEM requests, got a new menu item
+ on the top menu.</p></li>
+<li>Re-design of certstore.cgi:
+<p>
+The certificate store CGI has been re-written to display the
+ certificates sorted by creation time. Latest certs now appear
+ first by default, and it can be switched to show oldest first, also.</p></li>
+    </ul>
     <h4>Bug Fixes:</h4>
-    <p>
-- certstore.cgi fails when certs are available in the certs directory,
+    <ul>
+<li>certstore.cgi fails when certs are available in the certs directory,
   but the webserver has no rights to read it. Fix: When a cert is not
-  readable, it is marked as not readable in the list.
-    <p>
-- Having a extra newline at the end of a cut-&-paste certificate request
+  readable, it is marked as not readable in the list.</li>
+<li>Having a extra newline at the end of a cut&amp;paste certificate request
   results in a BEGIN/END lines error. Now the additional newline will
-  be stripped off in certverify.cgi and certsign.cgi.
-    <p>
+  be stripped off in certverify.cgi and certsign.cgi.</li>
+    </ul>
+<p>
 Please send requests, bug reports and comments as usual to:
 	<a href="mailto:support@frank4dd.com">support[at]frank4dd.com</a>
+    </p>
+    <h3>2004-03-09      new version 1.2.0 released      </h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+<li>Webcert has been re-written in 'C' for performance and portability:
+<p>
+ WebCert is now using the OpenSSL library API instead of being a front-end to the
+ commandline tool. This radial design change supports future extension.</p></li>
+    </ul>
+    <h3>2003-06-30      new version 1.0.0 released      </h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+<li>Webcert has been written to provide a easy way for creating certificates:
+<p>
+Perl CGI's provide a web interface to take PEM-encoded certificate requests
+ and return a signed certificate, using our newly created, internal OpenSSL CA.</p></li>
+    </ul>
   </div>
   <div id="sidecontent">
+ <br />
+ <a href="http://www.openssl.org"><img src="images/openssl_button.gif" alt="OpenSSL Logo" /></a>
+ <br />
     <h4>Topics:</h4>
     <ul>
       <li><a href="about.htm">About WebCert</a></li>
+      <li><a href="roadmap.htm">Roadmap</a></li>
       <li><a href="install.htm">Installation</a></li>
-      <li><a href="cgi-bin/help.cgi">WebCert help</a></li>
-      <li><a href="index.htm">WebCert start</a></li>
+      <li><a href="cgi-bin/help.cgi">WebCert Help</a></li>
+      <li><a href="index.htm">WebCert Start</a></li>
     </ul>
     <p>
     <script type="text/javascript"><!--

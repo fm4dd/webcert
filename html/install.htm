@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title>WebCert - Installation</title>
   <!--#include virtual="/site-headermeta-template.htm" -->
@@ -17,20 +18,20 @@
   <!--#include virtual="/site-navigation-template.htm" -->
 
   <div id="content">
-    <div id=copyright>2005-06-28 by Frank4dd</div>
+    <div class="copyright">2005-06-28 by Frank4dd</div>
     <h3>Software dependencies</h3>
-    <hr>
+    <hr />
     <p>
 Webcert is a web-based 'C' application using CGI technology. It relies on Thomas Boutell's <a href="http://www.boutell.com/cgic/">CGIC library</a> and <a href="http://www.openssl.org/">OpenSSL</a>, the leading OpenSource security layer software. To compile it from source, you'll need a working 'C' compiler environment such as gcc.
     </p>
     <h3>Preparations - creating a OpenSSL CA</h3>
-    <hr>
+    <hr />
     <p>
 You just downloaded the software package <a href="http://www.frank4dd.com/sw/webcert/webcert-v1.7.3.tar.gz">here</a>, saved it to /tmp and looked into the README. You want to install webcert into "/var/www/html" instead of my chosen "/srv/www/std-root/frank4dd.com/sw" path and you would like to change the the CA directory structure from my "/srv/app/webCA" to "/var/myCA". Here is what you should
 do in order to make it all work.
     </p>
     <p>
-First, before we start unpacking the  software package, we create the CA directory structure with OpenSSL. We need to locate the script CA.pl, which is normally located in <openssl-home>/misc. Depending on your distributions OpenSSL deployment, this could be similar to OpenSuse and SLES, where it is found in <i>/usr/share/ssl/misc/CA.pl</i>.  We need to edit this script and change the line to match our new CA directory: [line numbers are in brackets]
+First, before we start unpacking the  software package, we create the CA directory structure with OpenSSL. We need to locate the script CA.pl, which is normally located in [openssl-home]/misc. Depending on your distributions OpenSSL deployment, this could be similar to OpenSuse and SLES, where it is found in <i>/usr/share/ssl/misc/CA.pl</i>.  We need to edit this script and change the line to match our new CA directory: [line numbers are in brackets]
     </p>
 <pre><code> susie112:~ # vi /usr/share/ssl/misc/CA.pl
 [47]	$CATOP="/var/myCA";</code></pre>
@@ -111,14 +112,14 @@ If not already created, we need to create theCA's  serial number file. We also n
    drwxr-xr-x    2 root     root           80 2005-06-28 13:10 private
    -rw-rw-r--    1 wwwrun   www             3 2005-06-28 13:25 serial</code></pre>
     <h3>Install The WebCert software package</h3>
-    <hr>
+    <hr />
     <p>
 Now we can un-tar the software package and change the software source package config files to match your setup [line numbers are in brackets]. Edit one line in webcert-[version]/Makefile:
     </p>
 <pre><code>susie112:~ # vi Makefile
 [3]     BASEDIR=/var/www/html</code></pre>
     <p>
-Edit one line in webcert-<version>/src/Makefile:
+Edit one line in webcert-[version]/src/Makefile:
     </p>
 <pre><code>susie112:~ # vi src/Makefile
 [6]    CGIDIR=/var/www/html/webcert/cgi-bin</code></pre>
@@ -159,7 +160,7 @@ The export directory must be writeable by the webserver. It will be used to cach
 Now we can compile and install the software as root with "make" and "make install".
     </p>
 <pre><code>susie112:/tmp/webcert-v1.7.3 # make
-cd src && make
+cd src &amp;&amp; make
 make[1]: Entering directory `/tmp/webcert-v1.7.3/src'
 gcc -O3 -Wall -g   -c -o buildrequest.o buildrequest.c
 gcc -O3 -Wall -g   -c -o pagehead.o pagehead.c
@@ -175,7 +176,7 @@ cp html/index.htm /var/www/html/webcert
 cp style/style.css /var/www/html/webcert/style
 cp images/webcert-icon.gif images/webcert-logo.gif images/cert.gif /var/www/html/webcert/images 
 cp doc/help.txt doc/capolicy.txt /var/www/html/webcert/cgi-bin
-cd src && make install
+cd src &amp;&amp; make install
 make[1]: Entering directory `/tmp/webcert-v1.7.3/src'
 strip buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi
 cp buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi /var/www/html/webcert/cgi-bin
@@ -230,7 +231,7 @@ After the compilation and installation, the file structure should look like this
    drwxr-xr-x    2 wwwrun   www            80 2005-06-28 13:45 .
    drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..</code></pre>
     <h3>Remaining Tasks - Webserver Configuration</h3>
-    <hr>
+    <hr />
     <p>
 After the installation, check the webserver configuration and declare
 the alias for /webcert/cgi-bin/ to match /var/www/html/webcert/cgi-bin/.
@@ -255,7 +256,7 @@ buildrequest.cgi screen. Your apache configuration could look like this:
 &lt;/VirtualHost&gt;</code></pre>
 
     <h3>First Test - Create a sample certificate</h3>
-    <hr>
+    <hr />
     <p>
 Please fill out the template to generate your first certificate. If all goes
 well, your request will be signed and a new certificate is placed in the
@@ -265,7 +266,7 @@ CA store. The menu item "List Certificates" should display your first cert.
 Enjoy WebCert!
     </p>
     <h3>Contact and Appreciation</h3>
-    <hr>
+    <hr />
     <p>
 Please let me know if these instructions are OK to follow and on which stage
 you run into a problem. If I learn were something isn't made clear, it will help me
@@ -282,15 +283,20 @@ collecting pictures from all over the world, and maybe I'll start a gallery.
     </p>
   </div>
   <div id="sidecontent">
+ <br />
+ <a href="http://www.openssl.org"><img src="images/openssl_button.gif" alt="OpenSSL Logo" /></a>
+ <br />
     <h4>Topics:</h4>
     <ul>
       <li><a href="about.htm">About WebCert</a></li>
       <li><a href="changelog.htm">Changelog</a></li>
-      <li><a href="cgi-bin/help.cgi">WebCert help</a></li>
-      <li><a href="index.htm">WebCert start</a></li>
+      <li><a href="roadmap.htm">Roadmap</a></li>
+      <li><a href="cgi-bin/help.cgi">WebCert Help</a></li>
+      <li><a href="index.htm">WebCert Start</a></li>
     </ul>
     <p>
-<iframe src="http://rcm.amazon.com/e/cm?t=frank4ddcom-20&o=1&p=8&l=as1&asins=059600270X&fc1=000000&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=000000&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+<iframe src="http://rcm.amazon.com/e/cm?t=frank4ddcom-20&amp;o=1&amp;p=8&amp;l=as1&amp;asins=059600270X&amp;fc1=000000&amp;IS2=1&amp;lt1=_blank&amp;m=amazon&amp;lc1=0000FF&amp;bc1=000000&amp;bg1=FFFFFF&amp;f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    </p>
     <p>
     <script type="text/javascript"><!--
       google_ad_client = "pub-6688183504093504";

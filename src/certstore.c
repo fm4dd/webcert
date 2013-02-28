@@ -47,6 +47,7 @@ int cgiMain() {
          char      certfilestr[225]  = "";
          FILE      *certfile         = NULL;
          BIO       *membio           = NULL;
+         BIO       *outbio           = NULL;
          char      membio_buf[128]   = "";
          X509      *cert             = NULL;
          X509_NAME *certsubject      = NULL;
@@ -154,6 +155,9 @@ int cgiMain() {
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
 
+  outbio = BIO_new(BIO_s_file());
+  BIO_set_fp(outbio, cgiOut, BIO_NOCLOSE);
+
   pagehead(title);
 
   //debugging only:
@@ -173,16 +177,16 @@ int cgiMain() {
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th width=\"20\">");
    fprintf(cgiOut, "#");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "<th width=\"495\">");
    fprintf(cgiOut, "Certificate Subject Information");
-   fprintf(cgiOut, "</th>");
-   fprintf(cgiOut, "<th colspan=2 width=\"60\">");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "<th colspan=\"2\" width=\"60\">");
    fprintf(cgiOut, "Expiry");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "<th width=\"65\">");
    fprintf(cgiOut, "Action");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "</tr>\n");
 
   for(dispcounter=0; dispcounter < dispmaxlines; dispcounter++) {
@@ -201,22 +205,24 @@ int cgiMain() {
                            CACERTSTORE, certstore_files[tempcounter]->d_name);
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=2>");
+    fprintf(cgiOut, "<th rowspan=\"2\">");
     fprintf(cgiOut, "%d", tempcounter+1);
     fprintf(cgiOut, "</th>\n");
 
     oddline_calc = div(tempcounter+1, 2);
     if(oddline_calc.rem)
-      fprintf(cgiOut, "<td rowspan=2 class=\"odd\">");
+      fprintf(cgiOut, "<td rowspan=\"2\" class=\"odd\">");
     else
-      fprintf(cgiOut, "<td rowspan=2 class=\"even\">");
+      fprintf(cgiOut, "<td rowspan=\"2\" class=\"even\">");
 
     if ( (certfile = fopen(certfilestr, "r")) != NULL) {
       PEM_read_X509(certfile, &cert, NULL, NULL);
       certsubject = X509_get_subject_name(cert);
 
-      /* display the cert subject here */
-      X509_NAME_print_ex_fp(cgiOut, certsubject, 0, 0);
+      /* display the subject data, use the UTF-8 flag to show  *
+       * Japanese Kanji, also needs the separator flag to work */
+      X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
+         ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
 
       /* store certificate start date for later eval */
       start_date = X509_get_notBefore(cert);
@@ -246,7 +252,7 @@ int cgiMain() {
     if(certvalidity == 0) {
 
       /* expiration bar display column */
-      fprintf(cgiOut, "<th rowspan=2>\n");
+      fprintf(cgiOut, "<th rowspan=\"2\">\n");
       fprintf(cgiOut, "<table class=\"led\">\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
@@ -261,9 +267,8 @@ int cgiMain() {
       fprintf(cgiOut, "</th>\n");
 
       /* remaining days before expiration column */
-      fprintf(cgiOut, "<th rowspan=2>\n");
-      fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#FF0000\">");
-      fprintf(cgiOut, "Inval<br />Expd</font>");
+      fprintf(cgiOut, "<th class=\"exnok\" rowspan=\"2\">\n");
+      fprintf(cgiOut, "Inval<br />Expd");
       fprintf(cgiOut, "</th>\n");
     }
 
@@ -312,192 +317,175 @@ int cgiMain() {
       /* ------ END calculate percentage of lifetime left   ------ */
   
       /* expiration bar display column */
-      fprintf(cgiOut, "<th rowspan=2>\n");
+      fprintf(cgiOut, "<th rowspan=\"2\">\n");
       fprintf(cgiOut, "<table class=\"led\">\n");
-      if (percent >= 90) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#00FF00></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 80) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#00FF33></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 70) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#99FF33></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 60) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FFFF00></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 50) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FFCC00></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 40) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF9900></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 30) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF6600></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 20) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF3300></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
-      if (percent >= 10) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF0000></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      if (percent >= 90) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#00FF00\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 80) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#00FF33\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 70) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#99FF33\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 60) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#FFFF00\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 50) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#FFCC00\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 40) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#FF9900\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 30) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#FF6600\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 20) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#FF3300\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
+      if (percent >= 10) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=\"#FF0000\"></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "</table>\n");
       fprintf(cgiOut, "</th>\n");
   
       /* remaining days before expiration column */
-      fprintf(cgiOut, "<th rowspan=2>\n");
       //fprintf(cgiOut, membio_buf);
-      if (percent < 10) fprintf(cgiOut, "<font color=\"#FF0000\">\n");
-      else fprintf(cgiOut, "<font color=\"#FFFFFF\">\n");
-      if(floor(remaining_secs/63072000) > 0) fprintf(cgiOut, "%.f<br>years", remaining_secs/31536000);
-      else if(floor(remaining_secs/86400) > 0 ) fprintf(cgiOut, "%.f<br>days", remaining_secs/86400);
-      else if(floor(remaining_secs/3600) > 0 ) fprintf(cgiOut, "%.f<br>hours", remaining_secs/3600);
-      else if(floor(remaining_secs/60) > 0 ) fprintf(cgiOut, "%.f<br>mins", remaining_secs/60);
-      else fprintf(cgiOut, "%.f<br>secs", remaining_secs);
-      fprintf(cgiOut, "</font>\n");
+      if (percent < 10) fprintf(cgiOut, "<th class=\"exnok\" rowspan=\"2\">\n");
+      else fprintf(cgiOut, "<th class=\"exok\" rowspan=\"2\">\n");
+      if(floor(remaining_secs/63072000) > 0) fprintf(cgiOut, "%.f<br />years", remaining_secs/31536000);
+      else if(floor(remaining_secs/86400) > 0 ) fprintf(cgiOut, "%.f<br />days", remaining_secs/86400);
+      else if(floor(remaining_secs/3600) > 0 ) fprintf(cgiOut, "%.f<br />hours", remaining_secs/3600);
+      else if(floor(remaining_secs/60) > 0 ) fprintf(cgiOut, "%.f<br />mins", remaining_secs/60);
+      else fprintf(cgiOut, "%.f<br />secs", remaining_secs);
       fprintf(cgiOut, "</th>\n");
     }
 
     /* action column */
+    fprintf(cgiOut, "<th>");
     fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
-    fprintf(cgiOut, "<th>");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-    fprintf(cgiOut, "value=%s>", certstore_files[tempcounter]->d_name);
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
-    fprintf(cgiOut, "<input type=\"submit\" style=\"width:65px\" value=\"ViewPEM\">");
-    fprintf(cgiOut, "</th>\n");
+    fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"ViewPEM\" />\n");
     fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
-    fprintf(cgiOut, "<tr>");
-    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
-    fprintf(cgiOut, "<th>");
+    fprintf(cgiOut, "<tr>\n");
+    fprintf(cgiOut, "<th>\n");
+    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-    fprintf(cgiOut, "value=%s>", certstore_files[tempcounter]->d_name);
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\">");
-    fprintf(cgiOut, "<input type=\"submit\" style=\"width:65px\" value=\"ViewTXT\">");
-    fprintf(cgiOut, "</th>");
-    fprintf(cgiOut, "</form>");
+    fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"ViewTXT\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
 
     if(strcmp(sorting, "asc") == 0) tempcounter++;
   }
 
-  fprintf(cgiOut, "</tr>\n");
-
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"5\">");
   fprintf(cgiOut, "Total # of certs: %d | ", certcounter);
   fprintf(cgiOut, "Page %d of %d", pagenumber, pagecounter);
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</tr>");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "</tr>\n");
   fprintf(cgiOut, "</table>\n");
 
   fprintf(cgiOut, "<p></p>\n");
 
-  fprintf(cgiOut, "<table width=100%%>\n");
+  fprintf(cgiOut, "<table width=\"100%%\">\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
+  fprintf(cgiOut, "<th>\n");
+  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"sort\" ");
-  fprintf(cgiOut, "value=\"desc\">\n");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "value=\"desc\" />\n");
   fprintf(cgiOut, "<input type=\"submit\" name=\"sort\"");
-  fprintf(cgiOut, " value=\"Latest Certs first\">");
+  fprintf(cgiOut, " value=\"Latest Certs first\" />\n");
+  fprintf(cgiOut, "</form>\n");
   fprintf(cgiOut, "</th>\n");
-  fprintf(cgiOut, "</form>");
 
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
+  fprintf(cgiOut, "<th>\n");
+  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"sort\" ");
-  fprintf(cgiOut, "value=\"asc\">\n");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "value=\"asc\" />\n");
   fprintf(cgiOut, "<input type=\"submit\" name=\"sort\"");
-  fprintf(cgiOut, " value=\"Oldest Certs first\">");
+  fprintf(cgiOut, " value=\"Oldest Certs first\" />\n");
+  fprintf(cgiOut, "</form>\n");
   fprintf(cgiOut, "</th>\n");
-  fprintf(cgiOut, "</form>");
 
   // filler 1
-  fprintf(cgiOut, "<th width=15>");
+  fprintf(cgiOut, "<th width=\"15\">");
   fprintf(cgiOut, "&nbsp;");
   fprintf(cgiOut, "</th>\n");
 
   // goto page 1
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"<<\">");
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "<th width=\"5\">\n");
+  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
+  fprintf(cgiOut, "<input type=\"submit\" value=\"&lt;&lt;\" />\n");
+  fprintf(cgiOut, "</form>\n");
+  fprintf(cgiOut, "</th>\n");
+
   // goto page before
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
+  fprintf(cgiOut, "<th width=\"5\">\n");
+  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
   fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
   fprintf(cgiOut, "value=\"");
   tempcounter = 0;
   if(pagenumber > 1) tempcounter = pagenumber - 1;
   else tempcounter = 1;
   fprintf(cgiOut, "%d", tempcounter);
-  fprintf(cgiOut, "\">\n");
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"< 1\">");
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "\" />\n");
+  fprintf(cgiOut, "<input type=\"submit\" value=\"&lt; 1\" />\n");
+  fprintf(cgiOut, "</form>\n");
+  fprintf(cgiOut, "</th>\n");
 
   // goto page after
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
+  fprintf(cgiOut, "<th width=\"5\">\n");
+  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
   fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
   fprintf(cgiOut, "value=\"");
   tempcounter = 0;
   if(pagecounter > pagenumber) tempcounter = pagenumber + 1;
   else tempcounter = pagecounter;
   fprintf(cgiOut, "%d", tempcounter);
-  fprintf(cgiOut, "\">\n");
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"1 >\">");
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "\" />\n");
+  fprintf(cgiOut, "<input type=\"submit\" value=\"1 &gt;\" />\n");
+  fprintf(cgiOut, "</form>\n");
+  fprintf(cgiOut, "</th>\n");
+
   // goto last page
+  fprintf(cgiOut, "<th width=\"5\">\n");
   fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
   fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
-  fprintf(cgiOut, "value=\"");
-  fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\">>\">");
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+  fprintf(cgiOut, "<input type=\"submit\" value=\"&gt;&gt;\" />\n");
+  fprintf(cgiOut, "</form>\n");
+  fprintf(cgiOut, "</th>\n");
 
   // goto page number
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
-  fprintf(cgiOut, "<th width=10 nowrap>");
+  fprintf(cgiOut, "<th width=\"120\">\n");
+  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"Goto\">");
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "<th width=10 nowrap>");
-  fprintf(cgiOut, "<input type=\"text\" name=\"page\" size=4 value=");
-  fprintf(cgiOut, "%d>\n", pagecounter);
-  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "\" />\n");
+  fprintf(cgiOut, "<input type=\"submit\" value=\"Goto\" />\n");
+  fprintf(cgiOut, "&nbsp; &nbsp;");
+  fprintf(cgiOut, "<input type=\"text\" name=\"page\" size=\"3\" ");
+  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+  fprintf(cgiOut, "</form>\n");
+  fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
-  fprintf(cgiOut, "</form>");
   fprintf(cgiOut, "</table>\n");
 
 /* ---------------------------------------------------------------------------*

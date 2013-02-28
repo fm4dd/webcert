@@ -1,5 +1,5 @@
 <h3>CA Policy</h3>
-<hr>
+<hr />
 <h4>Certification Practise Statement (CPS)</h4>
 <p>
 This is a experimental CA for demonstration and educational
@@ -23,3 +23,58 @@ certificate is saved on this server.
 <p>
 last update 06/20/2012			@2003-2012 Frank4DD
 </p>
+<h3>About WebCert</h3>
+    <hr />
+    <p>
+Digital Certificates are needed everywhere in today's world. They are used to enable SSL-protected web traffic, e-mail encryption and other technologies.
+    </p>
+    <p>
+To get a digital certificate, you'll either have to order one from a commercial provider such as Verisign who usually charges $$$, or you have to install, configure and run your own certificate authority. This costs also $$ and, at the very least is something more you need to learn and manage, which is time and resource consuming. Often we don't need the extensive functionality and complexity of a full CA management system with its distributed structure, separation of requestor and signer and the database structures to manage it all.
+    </p>
+    <p>
+For these reasons I wrote WebCert as a lightweight self-service application. It allows me to quickly generate certificates on my own, and to enable my colleagues without knowledge of the details to do so as well. The first version became an instant hit with over 300 certificate generations per year. It encouraged me to improve it to the version you see here.
+    </p>
+    <p>
+WebCert is using the OpenSSL libraries for certificate operations. It is not just a frontend to the OpenSSL program, but independently written. It only requires standard C libraries,  the OpenSSL libraries and the CGIC library from Thomas Boutell. No, you don't need to maintain any of the web-application enabling technologies like JSP, PHP, Phyton... and no database is required, either.  WebCert is using simple CGI technology for easiest installation and maintenance.
+    </p>
+    <p>
+External Dependencies:
+    </p>
+    <ul>
+      <li>Thomas Boutell's CGIC library, see http://www.boutell.com/cgic/</li>
+      <li> OpenSSL libary and headers, see http://www.openssl.org/</li>
+    </ul>
+    <p>
+It is highly adviseable to provide access control and SSL encryption to the WebCert interface for any use other then experimental. The webserver writeable certificate and export directory should be secured (i.e. by a Apache &lt;Directory&gt; directive).
+    </p>
+    <h3>Copyright and License</h3>
+    <hr />
+    <p>
+WebCert was written by Frank4DD. It is distributed under the GPL.  Anybody may reproduce it, use it, send it, print it, transfer on a T-shirt, etc. without modifying its content or removing the copyright.
+    </p>
+    <h3>Legal Disclaimer</h3>
+    <hr />
+    <p>
+Of course this software and its created certificates come WITHOUT ANY WARRANTY.
+    </p>
+    <h3>Thanks and Credits</h3>
+    <hr />
+    <ul>
+      <li>to Thomas Boutell for providing the CGIC library</li>
+      <li>to the authors of O'Reilly's book "Network Security with OpenSSL", who provided a guiding "light" in the OpenSSL jungle.</li>
+      <li>to the authors of OpenSSL, whose code ensures that only the true and dedicated will learn its power ;-) </li>
+    </ul>
+    <p>
+CGIC, copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 by Thomas Boutell and Boutell.Com, Inc.. Permission is granted to use CGIC in any application, commercial or noncommercial, at no cost. HOWEVER, this copyright paragraph must appear on a "credits" page accessible in the public online and offline documentation of the program.  Modified versions of the CGIC library should not be distributed without the attachment of a clear statement regarding the author of the modifications, and this notice may in no case be removed.  Modifications may also be submitted to the author for inclusion in the main CGIC distribution.
+</p>
+<p>
+Enjoy WebCert!
+    </p>
+    <h3>Contact and Appreciation</h3>
+    <hr />
+    <p>
+Please send your comments and complaints to <a href="mailto:support@frank4dd.com">support[at]frank4dd.com</a> and be patient with me for a response.
+    </p>
+    <p>
+If you want to do something really nice and encouraging besides just saying "Thanks", send me a photo picture of the area you are living in, either your town, your work, local sights or of your neighborhood. I enjoy collecting pictures from all over the world, and maybe I'll start a gallery.
+    </p>

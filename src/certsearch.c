@@ -66,6 +66,8 @@
          char      certfilestr[225]  = "";
          FILE      *certfile         = NULL;
 
+void resubmit();
+
 int hexsort(const struct dirent **test1, const struct dirent **test2) {
   char *endptr;
   return (strtol((*test1)->d_name, &endptr, 16)
@@ -243,194 +245,180 @@ int cgiMain() {
     snprintf(title, sizeof(title), "Search existing Certificates");
     pagehead(title);
     fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"get\">");
-    fprintf(cgiOut, "<table width=100%%>");
+    fprintf(cgiOut, "<table width=\"100%%\">");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th colspan=5>");
-    fprintf(cgiOut, "Select one of the following search criteria</font>");
+    fprintf(cgiOut, "<th colspan=\"5\">");
+    fprintf(cgiOut, "Select one of the following search criteria");
     fprintf(cgiOut, "</th>");
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Subject String */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"20\" rowspan=2>\n");
-    fprintf(cgiOut, "<input type=radio value=\"dn\" name=\"search\">");
+    fprintf(cgiOut, "<th width=\"20\" rowspan=\"2\">\n");
+    fprintf(cgiOut, "<input type=\"radio\" value=\"dn\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF width=180>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>Distinguished Name Field:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2><select name=\"field\" size=\"1\">");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "Distinguished Name Field:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
+    fprintf(cgiOut, "<select name=\"field\">");
     fprintf(cgiOut, "<option value=\"countryName\">Country</option>");
     fprintf(cgiOut, "<option value=\"stateOrProvinceName\">State</option>");
     fprintf(cgiOut, "<option value=\"localityName\">Location</option>");
     fprintf(cgiOut, "<option value=\"organizationName\">Organisation</option>");
     fprintf(cgiOut, "<option value=\"organizationalUnitName\">Department</option>");
     fprintf(cgiOut, "<option value=\"emailAddress\">E-Mail Addr</option>");
-    fprintf(cgiOut, "<option selected value=\"commonName\">Common Name</option>");
+    fprintf(cgiOut, "<option selected=\"selected\" value=\"commonName\">Common Name</option>");
     fprintf(cgiOut, "<option value=\"surname\">Surname</option>");
     fprintf(cgiOut, "<option value=\"givenName\">Given Name</option>");
     fprintf(cgiOut, "</select>");
-    fprintf(cgiOut, "</font></td>\n");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF width=180>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>Search String</b><br>[20 chars max]:");
-    fprintf(cgiOut, "</font></td>\n");
-    fprintf(cgiOut, "<td bgcolor=#CFCFCF align=center>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
-    fprintf(cgiOut, "<input type=text size=15 name=dnvalue value=\"changeme.com\">");
-    fprintf(cgiOut, "</font></td>");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "Search String<br />[20 chars max]:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
+    fprintf(cgiOut, "<input type=\"text\" size=\"15\" name=\"dnvalue\" value=\"changeme.com\" />");
+    fprintf(cgiOut, "</td>");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td bgcolor=#AFAFAF colspan=4>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000080\">");
+    fprintf(cgiOut, "<td class=\"desc\" colspan=\"4\">\n");
     fprintf(cgiOut, "Search for certificates that have the given string in the selected DN field. ");
     fprintf(cgiOut, "The search is case sensitive, so results for country=us can be different from country=US and country=Us.");
-    fprintf(cgiOut, "</font></td>\n");
+    fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Expiration Date */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=2>\n");
-    fprintf(cgiOut, "<input type=radio value=\"exp\" name=\"search\" checked>");
+    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<input type=\"radio\" value=\"exp\" name=\"search\" checked=\"checked\" />");
     fprintf(cgiOut, "</th>\n");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>Expiration Date is<br>between Start Date:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "Expiration Date is<br />between Start Date:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
     strftime(membio_buf, sizeof(membio_buf), "%d.%m.%Y", &start_tm);
-    fprintf(cgiOut, "<input type=text size=7 name=exp_startdate value=%s> ", membio_buf);
+    fprintf(cgiOut, "<input type=\"text\" size=\"9\" name=\"exp_startdate\" value=\"%s\" /> ", membio_buf);
     strftime(membio_buf, sizeof(membio_buf), "%H:%M", &start_tm);
-    fprintf(cgiOut, "<input type=text size=2 name=exp_starttime value=%s>", membio_buf);
-    fprintf(cgiOut, "</font></td>");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>and End Date</b><br>[default 90 days]:");
-    fprintf(cgiOut, "</font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
+    fprintf(cgiOut, "<input type=\"text\" size=\"3\" name=\"exp_starttime\" value=\"%s\" />", membio_buf);
+    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "and End Date<br />[default 90 days]:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
     /* set second time 3 months (90 days) into the future: 86400s/d*90d=7776000s */
     expiration = now + 7776000;
     expiration_tm = *gmtime(&expiration);
     strftime(membio_buf, sizeof(membio_buf), "%d.%m.%Y", &expiration_tm);
-    fprintf(cgiOut, "<input type=text size=7 name=exp_enddate value=%s> ", membio_buf);
+    fprintf(cgiOut, "<input type=\"text\" size=\"9\" name=\"exp_enddate\" value=\"%s\" /> ", membio_buf);
     strftime(membio_buf, sizeof(membio_buf), "%H:%M", &expiration_tm);
-    fprintf(cgiOut, "<input type=text size=2 name=exp_endtime value=%s>", membio_buf);
-    fprintf(cgiOut, "</font></td>");
+    fprintf(cgiOut, "<input type=\"text\" size=\"3\" name=\"exp_endtime\" value=\"%s\" />", membio_buf);
+    fprintf(cgiOut, "</td>");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td bgcolor=#AFAFAF colspan=4>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000080\">");
+    fprintf(cgiOut, "<td class=\"desc\" colspan=\"4\">\n");
     fprintf(cgiOut, "Search for certificates that expire(d) between the selected start and end date. ");
     fprintf(cgiOut, "By default, the search is pre-set to find certificates that expire in the next 3 months.");
-    fprintf(cgiOut, "</font></td>\n");
+    fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Enabled Date */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=2>\n");
-    fprintf(cgiOut, "<input type=radio value=\"ena\" name=\"search\">");
+    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<input type=\"radio\" value=\"ena\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>Enabled Date is<br>between Start Date:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "Enabled Date is<br />between Start Date:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
     /* set second time 3 months (90 days) into the past: 86400s/d*90d=7776000s */
     expiration = now - 7776000;
     expiration_tm = *gmtime(&expiration);
     strftime(membio_buf, sizeof(membio_buf), "%d.%m.%Y", &expiration_tm);
-    fprintf(cgiOut, "<input type=text size=7 name=ena_startdate value=%s> ", membio_buf);
+    fprintf(cgiOut, "<input type=\"text\" size=\"9\" name=\"ena_startdate\" value=\"%s\" /> ", membio_buf);
     strftime(membio_buf, sizeof(membio_buf), "%H:%M", &expiration_tm);
-    fprintf(cgiOut, "<input type=text size=2 name=ena_starttime value=%s>", membio_buf);
-    fprintf(cgiOut, "</font></td>");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>and End Date</b><br>[default now]:");
-    fprintf(cgiOut, "</font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
+    fprintf(cgiOut, "<input type=\"text\" size=\"3\" name=\"ena_starttime\" value=\"%s\" />", membio_buf);
+    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "and End Date<br />[default now]:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
     strftime(membio_buf, sizeof(membio_buf), "%d.%m.%Y", &start_tm);
-    fprintf(cgiOut, "<input type=text size=7 name=ena_enddate value=%s> ", membio_buf);
+    fprintf(cgiOut, "<input type=\"text\" size=\"9\" name=\"ena_enddate\" value=\"%s\" /> ", membio_buf);
     strftime(membio_buf, sizeof(membio_buf), "%H:%M", &start_tm);
-    fprintf(cgiOut, "<input type=text size=2 name=ena_endtime value=%s>", membio_buf);
-    fprintf(cgiOut, "</font></td>");
+    fprintf(cgiOut, "<input type=\"text\" size=\"3\" name=\"ena_endtime\" value=\"%s\" />", membio_buf);
+    fprintf(cgiOut, "</td>");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td bgcolor=#AFAFAF colspan=4>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000080\">");
+    fprintf(cgiOut, "<td class=\"desc\" colspan=\"4\">\n");
     fprintf(cgiOut, "Search for certificates that become valid between the selected start and end date. ");
     fprintf(cgiOut, "By default, the search is pre-set to show certificates created in the past 3 months.");
-    fprintf(cgiOut, "</font></td>\n");
+    fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Revocation Date */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=2>\n");
-    fprintf(cgiOut, "<input type=radio value=\"rev\" name=\"search\">");
+    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<input type=\"radio\" value=\"rev\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>Revocation Date is<br>between Start Date:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "Revocation Date is<br />between Start Date:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
     /* set second time 3 months (90 days) into the past: 86400s/d*90d=7776000s */
     expiration = now - 7776000;
     expiration_tm = *gmtime(&expiration);
     strftime(membio_buf, sizeof(membio_buf), "%d.%m.%Y", &expiration_tm);
-    fprintf(cgiOut, "<input type=text size=7 name=rev_startdate value=%s> ", membio_buf);
+    fprintf(cgiOut, "<input type=\"text\" size=\"9\" name=\"rev_startdate\" value=\"%s\" /> ", membio_buf);
     strftime(membio_buf, sizeof(membio_buf), "%H:%M", &expiration_tm);
-    fprintf(cgiOut, "<input type=text size=2 name=rev_starttime value=%s>", membio_buf);
-    fprintf(cgiOut, "</font></td>");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>and End Date</b><br>[now]:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
+    fprintf(cgiOut, "<input type=\"text\" size=\"3\" name=\"rev_starttime\" value=\"%s\"/>", membio_buf);
+    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "and End Date<br />[now]:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
     strftime(membio_buf, sizeof(membio_buf), "%d.%m.%Y", &start_tm);
-    fprintf(cgiOut, "<input type=text size=7 name=rev_enddate value=%s> ", membio_buf);
+    fprintf(cgiOut, "<input type=\"text\" size=\"9\" name=\"rev_enddate\" value=\"%s\" /> ", membio_buf);
     strftime(membio_buf, sizeof(membio_buf), "%H:%M", &start_tm);
-    fprintf(cgiOut, "<input type=text size=2 name=rev_endtime value=%s>", membio_buf);
-    fprintf(cgiOut, "</font></td>");
+    fprintf(cgiOut, "<input type=\"text\" size=\"3\" name=\"rev_endtime\" value=\"%s\" />", membio_buf);
+    fprintf(cgiOut, "</td>");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td bgcolor=#AFAFAF colspan=4>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000080\">");
+    fprintf(cgiOut, "<td class=\"desc\" colspan=\"4\">\n");
     fprintf(cgiOut, "Search for certificates that have been revoked from the start date until now. ");
     fprintf(cgiOut, "Revocation is not yet implemented in Webcert, therefore this returns nothing yet.");
-    fprintf(cgiOut, "</font></td>\n");
+    fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Serial Number */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=2>\n");
-    fprintf(cgiOut, "<input type=radio value=\"ser\" name=\"search\">");
+    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<input type=\"radio\" value=\"ser\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>Serial Number is<br>between Start Serial:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
-    fprintf(cgiOut, "<input type=text size=14 name=startserial ");
-    fprintf(cgiOut, "value=%s style=\"text-align:right;\">", startserstr);
-    fprintf(cgiOut, "</font></td>");
-    fprintf(cgiOut, "<td bgcolor=#FFFFFF>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000000\"><b>and End Serial</b><br>[max 10e11]:");
-    fprintf(cgiOut, "</b></font></td>\n");
-    fprintf(cgiOut, "<td align=center bgcolor=#CFCFCF>\n");
-    fprintf(cgiOut, "<font face=Arial size=2>");
-    fprintf(cgiOut, "<input type=text size=14 name=endserial ");
-    fprintf(cgiOut, "value=%s style=\"text-align:right;\">", endserstr);
-    fprintf(cgiOut, "</font></td>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "Serial Number is<br />between Start Serial:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
+    fprintf(cgiOut, "<input type=\"text\" size=\"14\" name=\"startserial\" ");
+    fprintf(cgiOut, "value=\"%s\" style=\"text-align:right;\" />", startserstr);
+    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "<td class=\"type\">\n");
+    fprintf(cgiOut, "and End Serial<br />[max 10e11]:");
+    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "<td class=\"center\">\n");
+    fprintf(cgiOut, "<input type=\"text\" size=\"14\" name=\"endserial\" ");
+    fprintf(cgiOut, "value=\"%s\" style=\"text-align:right;\" />", endserstr);
+    fprintf(cgiOut, "</td>");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td bgcolor=#AFAFAF colspan=4>\n");
-    fprintf(cgiOut, "<font size=\"2\" face=\"Arial\" color=\"#000080\">");
+    fprintf(cgiOut, "<td class=\"desc\" colspan=\"4\">\n");
     fprintf(cgiOut, "Search for certificates whose serial number is between the given ");
     fprintf(cgiOut, "start and end serial number in decimal format. To find a particular certificate, set start and end serial to be equal.");
-    fprintf(cgiOut, "</font></td>\n");
+    fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th colspan=5>");
-    fprintf(cgiOut, "<input type=\"submit\" value=\"Search Certificates\">");
+    fprintf(cgiOut, "<th colspan=\"5\">");
+    fprintf(cgiOut, "<input type=\"submit\" value=\"Search Certificates\" />");
     fprintf(cgiOut, "</th>");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "</table>\n");
@@ -617,29 +605,29 @@ int cgiMain() {
  * start the form output                                                      *
  * ---------------------------------------------------------------------------*/
 
-   fprintf(cgiOut, "<table width=100%%>");
+   fprintf(cgiOut, "<table width=\"100%%\">");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th width=\"20\">");
    fprintf(cgiOut, "#");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "<th width=\"495\">");
    fprintf(cgiOut, "Certificate Subject Information");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "<th width=\"60\" colspan=\"2\">");
    fprintf(cgiOut, "Expires");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "<th width=\"65\">");
    fprintf(cgiOut, "Action");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "</tr>\n");
 
   /* if our search did not return any certs, we display a note instead */
   if(certcounter<=0) {
-    fprintf(cgiOut, "<tr>");
-    fprintf(cgiOut, "<td colspan=5 bgcolor=\"CFCFCF\" align=\"center\">");
+    fprintf(cgiOut, "<tr>\n");
+    fprintf(cgiOut, "<td class=\"even\" colspan=\"5\">");
     fprintf(cgiOut, "Could not find any certificates for the given search criteria.");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<tr>");
+    fprintf(cgiOut, "</tr>\n");
   }
 
   for(dispcounter=0; dispcounter < dispmaxlines; dispcounter++) {
@@ -657,16 +645,16 @@ int cgiMain() {
     snprintf(certfilestr, sizeof(certfilestr), "%s/%s",
                            CACERTSTORE, certstore_files[tempcounter]->d_name);
 
-    fprintf(cgiOut, "<tr>");
-    fprintf(cgiOut, "<th rowspan=2>");
+    fprintf(cgiOut, "<tr>\n");
+    fprintf(cgiOut, "<th rowspan=\"2\">");
     fprintf(cgiOut, "%d", tempcounter+1);
     fprintf(cgiOut, "</th>\n");
 
     oddline_calc = div(tempcounter+1, 2);
     if(oddline_calc.rem)
-      fprintf(cgiOut, "<td rowspan=2 class=\"odd\">");
+      fprintf(cgiOut, "<td rowspan=\"2\" class=\"odd\">");
     else
-      fprintf(cgiOut, "<td rowspan=2 class=\"even\">");
+      fprintf(cgiOut, "<td rowspan=\"2\" class=\"even\">");
 
     if ( (certfile = fopen(certfilestr, "r")) != NULL) {
       PEM_read_X509(certfile, &cert, NULL, NULL);
@@ -698,13 +686,13 @@ int cgiMain() {
     else 
        fprintf(cgiOut, "Error: Can't open certificate file %s for reading.",
                                                                  certfilestr);
-    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "</td>\n");
 
     if(certvalidity == 0) {
 
       /* expiration bar display column */
-      fprintf(cgiOut, "<th rowspan=2>");
-      fprintf(cgiOut, "<table>");
+      fprintf(cgiOut, "<th rowspan=\"2\">\n");
+      fprintf(cgiOut, "<table class=\"led\">\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
@@ -715,13 +703,12 @@ int cgiMain() {
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "</table>\n");
-      fprintf(cgiOut, "</th>");
+      fprintf(cgiOut, "</th>\n");
 
       /* remaining days before expiration column */
-      fprintf(cgiOut, "<th rowspan=2>");
-      fprintf(cgiOut, "<font color=\"#FF0000\">");
-      fprintf(cgiOut, "<b>Inval.<br>/Expd</b></font>");
-      fprintf(cgiOut, "</th>");
+      fprintf(cgiOut, "<th class=\"exnok\" rowspan=\"2\">");
+      fprintf(cgiOut, "Inval.<br />/Expd");
+      fprintf(cgiOut, "</th>\n");
     }
 
     if(certvalidity == 1) {
@@ -768,369 +755,198 @@ int cgiMain() {
       /* ------ END calculate percentage of lifetime left   ------ */
   
       /* expiration bar display column */
-      fprintf(cgiOut, "<th rowspan=2>");
-      fprintf(cgiOut, "<table>");
+      fprintf(cgiOut, "<th rowspan=\"2\">");
+      fprintf(cgiOut, "<table class=\"led\">\n");
       if (percent >= 90) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#00FF00></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 80) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#00FF33></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 70) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#99FF33></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 60) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FFFF00></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 50) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FFCC00></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 40) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF9900></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 30) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF6600></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 20) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF3300></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       if (percent >= 10) fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#FF0000></td></tr>\n");
-      else fprintf(cgiOut, "  <tr><td class=\"led\" bgcolor=#999999></td></tr>\n");
+      else fprintf(cgiOut, "  <tr><td class=\"led-off\"></td></tr>\n");
       fprintf(cgiOut, "</table>\n");
       fprintf(cgiOut, "</th>");
   
       /* remaining days before expiration column */
-      fprintf(cgiOut, "<th rowspan=2>");
       //fprintf(cgiOut, membio_buf);
-      if (percent < 10) fprintf(cgiOut, "<font color=\"#FF0000\">");
-      else fprintf(cgiOut, "<font color=\"#FFFFFF\">");
-      if(floor(remaining_secs/63072000) > 0) fprintf(cgiOut, "%.f<br>years", remaining_secs/31536000);
-      else if(floor(remaining_secs/86400) > 0 ) fprintf(cgiOut, "%.f<br>days", remaining_secs/86400);
-      else if(floor(remaining_secs/3600) > 0 ) fprintf(cgiOut, "%.f<br>hours", remaining_secs/3600);
-      else if(floor(remaining_secs/60) > 0 ) fprintf(cgiOut, "%.f<br>mins", remaining_secs/60);
-      else fprintf(cgiOut, "%.f<br>secs", remaining_secs);
-      fprintf(cgiOut, "</font>");
-      fprintf(cgiOut, "</th>");
+      if (percent < 10) fprintf(cgiOut, "<th class=\"exnok\" rowspan=\"2\">\n");
+      else fprintf(cgiOut, "<th class=\"exok\" rowspan=\"2\">\n");
+      if(floor(remaining_secs/63072000) > 0) fprintf(cgiOut, "%.f<br />years", remaining_secs/31536000);
+      else if(floor(remaining_secs/86400) > 0 ) fprintf(cgiOut, "%.f<br />days", remaining_secs/86400);
+      else if(floor(remaining_secs/3600) > 0 ) fprintf(cgiOut, "%.f<br />hours", remaining_secs/3600);
+      else if(floor(remaining_secs/60) > 0 ) fprintf(cgiOut, "%.f<br />mins", remaining_secs/60);
+      else fprintf(cgiOut, "%.f<br />secs", remaining_secs);
+      fprintf(cgiOut, "</th>\n");
     }
 
     /* action column */
-    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
     fprintf(cgiOut, "<th>");
+    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-    fprintf(cgiOut, "value=%s>", certstore_files[tempcounter]->d_name);
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
-    fprintf(cgiOut, "<input type=\"submit\" style=\"width:65px\" value=\"ViewPEM\">");
-    fprintf(cgiOut, "</th>");
-    fprintf(cgiOut, "</form>");
-    fprintf(cgiOut, "</tr>");
-    fprintf(cgiOut, "<tr>");
-    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
+    fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"ViewPEM\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
+    fprintf(cgiOut, "</tr>\n");
+    fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th>");
+    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-    fprintf(cgiOut, "value=%s>", certstore_files[tempcounter]->d_name);
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\">");
-    fprintf(cgiOut, "<input type=\"submit\" style=\"width:65px\" value=\"ViewTXT\">");
-    fprintf(cgiOut, "</th>");
+    fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"ViewTXT\" />\n");
     fprintf(cgiOut, "</form>");
-    fprintf(cgiOut, "</tr>");
+    fprintf(cgiOut, "</th>\n");
+    fprintf(cgiOut, "</tr>\n");
 
     if(strcmp(sorting, "asc") == 0) tempcounter++;
   }
+
 
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"5\">");
   fprintf(cgiOut, "Total # of certs: %d | ", certcounter);
   fprintf(cgiOut, "Page %d of %d", pagenumber, pagecounter);
   fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</tr>\n");
+  fprintf(cgiOut, "</tr>");
   fprintf(cgiOut, "</table>\n");
 
   fprintf(cgiOut, "<p></p>\n");
 
-  fprintf(cgiOut, "<table width=100%%>");
+  fprintf(cgiOut, "<table width=\"100%%\">\n");
+
   fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th>");
   fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"sort\" ");
-  fprintf(cgiOut, "value=\"desc\">\n");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "value=\"desc\" />\n");
+  resubmit();
   fprintf(cgiOut, "<input type=\"submit\" name=\"sort\"");
-  fprintf(cgiOut, " value=\"Latest Certs first\">");
-  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, " value=\"Latest Certs first\" />");
   fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</th>\n");
 
+  fprintf(cgiOut, "<th>");
   fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"sort\" ");
   fprintf(cgiOut, "value=\"asc\">\n");
-  fprintf(cgiOut, "<th>");
+  resubmit();
   fprintf(cgiOut, "<input type=\"submit\" name=\"sort\"");
   fprintf(cgiOut, " value=\"Oldest Certs first\">");
-  fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</th>\n");
 
   // filler 1
-  fprintf(cgiOut, "<th width=15>");
+  fprintf(cgiOut, "<th width=\"15\">");
   fprintf(cgiOut, "&nbsp;");
   fprintf(cgiOut, "</th>\n");
 
   // goto page 1
+  fprintf(cgiOut, "<th width=\"5\">");
   fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
-  /* re-submit the initial search criteria */
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"search\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", search);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"dnvalue\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", dnvalue);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"field\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", field);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"startserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", startserstr);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"endserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", endserstr);
-
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"<<\">");
-  fprintf(cgiOut, "</th>");
+  resubmit();
+  fprintf(cgiOut, "<input type=\"submit\" value=\"&lt;&lt;\" />");
   fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</th>\n");
+
   // goto page before
+  fprintf(cgiOut, "<th width=\"5\">");
   fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
   fprintf(cgiOut, "value=\"");
   tempcounter = 0;
   if(pagenumber > 1) tempcounter = pagenumber - 1;
   else tempcounter = 1;
   fprintf(cgiOut, "%d", tempcounter);
-  fprintf(cgiOut, "\">\n");
-  /* re-submit the initial search criteria */
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"search\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", search);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"dnvalue\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", dnvalue);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"field\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", field);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"startserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", startserstr);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"endserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", endserstr);
-
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"< 1\">");
-  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "\" />\n");
+  resubmit();
+  fprintf(cgiOut, "<input type=\"submit\" value=\"&lt; 1\">");
   fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</th>\n");
 
   // goto page after
+  fprintf(cgiOut, "<th width=\"5\">");
   fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
   fprintf(cgiOut, "value=\"");
   tempcounter = 0;
   if(pagecounter > pagenumber) tempcounter = pagenumber + 1;
   else tempcounter = pagecounter;
   fprintf(cgiOut, "%d", tempcounter);
-  fprintf(cgiOut, "\">\n");
-  /* re-submit the initial search criteria */
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"search\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", search);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"dnvalue\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", dnvalue);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"field\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", field);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"startserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", startserstr);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"endserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", endserstr);
-
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"1 >\">");
-  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "\" />\n");
+  resubmit();
+  fprintf(cgiOut, "<input type=\"submit\" value=\"1 &gt;\" />");
   fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</th>\n");
+
   // goto last page
+  fprintf(cgiOut, "<th width=\"5\">");
   fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
-  /* re-submit the initial search criteria */
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"search\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", search);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"dnvalue\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", dnvalue);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"field\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", field);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"startserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", startserstr);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"endserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", endserstr);
-
-  fprintf(cgiOut, "<th width=5>");
-  fprintf(cgiOut, "<input type=\"submit\" value=\">>\">");
-  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "\" />\n");
+  resubmit();
+  fprintf(cgiOut, "<input type=\"submit\" value=\"&gt;&gt;\" />");
   fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</th>\n");
 
   // goto page number
-  fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">");
-  fprintf(cgiOut, "<th width=10 nowrap>");
+  fprintf(cgiOut, "<th width=\"120\">\n");
+  fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
-  fprintf(cgiOut, "\">\n");
+  fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
-  fprintf(cgiOut, "\">\n");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"Goto\">");
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "<th width=10 nowrap>");
-  fprintf(cgiOut, "<input type=\"text\" name=\"page\" size=4 value=");
-  fprintf(cgiOut, "%d>\n", pagecounter);
-  /* re-submit the initial search criteria */
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"search\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", search);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"dnvalue\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", dnvalue);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"field\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", field);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", exp_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", ena_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_startdate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_startdate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_starttime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_starttime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_enddate\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_enddate);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_endtime\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", rev_endtime);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"startseria\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", startserstr);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"endserial\" ");
-  fprintf(cgiOut, "value=\"%s\">\n", endserstr);
-  fprintf(cgiOut, "</th>");
-  fprintf(cgiOut, "</tr>\n");
+  fprintf(cgiOut, "\" />\n");
+  resubmit();
+  fprintf(cgiOut, "<input type=\"submit\" value=\"Goto\" />\n");
+  fprintf(cgiOut, "&nbsp; &nbsp;");
+  fprintf(cgiOut, "<input type=\"text\" name=\"page\" size=\"3\" ");
+  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+  fprintf(cgiOut, "</form>\n");
+  fprintf(cgiOut, "</th>\n");
 
-  fprintf(cgiOut, "</form>");
+  fprintf(cgiOut, "</tr>\n");
   fprintf(cgiOut, "</table>\n");
 
 /* ---------------------------------------------------------------------------*
@@ -1140,4 +956,42 @@ int cgiMain() {
   pagefoot();
 }
   return(0);
+}
+
+/* re-submit the initial search criteria */
+void resubmit() {
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"search\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", search);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"dnvalue\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", dnvalue);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"field\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", field);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_startdate\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", exp_startdate);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_starttime\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", exp_starttime);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_enddate\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", exp_enddate);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"exp_endtime\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", exp_endtime);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_startdate\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", ena_startdate);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_starttime\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", ena_starttime);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_enddate\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", ena_enddate);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"ena_endtime\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", ena_endtime);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_startdate\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", rev_startdate);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_starttime\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", rev_starttime);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_enddate\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", rev_enddate);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"rev_endtime\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", rev_endtime);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"startserial\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", startserstr);
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"endserial\" ");
+  fprintf(cgiOut, "value=\"%s\" />\n", endserstr);
 }

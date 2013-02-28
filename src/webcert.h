@@ -19,6 +19,8 @@
 #define PASS            "webca-secret"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
+/*********** The directory for the external, trusted CA bundles files *********/
+#define CABUNDLEDIR	"/srv/app/webCA/ca-bundles"
 /*********** The directory to write the exported certificates into ************/
 #define CERTEXPORTDIR   "/srv/www/std-root/frank4dd.com/sw/webcert/export"
 /*********** The export directory URL to download the certificates from *******/
@@ -33,12 +35,16 @@
 /* For internal use, you could take it out. */
 /* #define FORCE_SOURCE_IP_INCLUSION	TRUE */
 
+/* On most 32bit systems, the time calculation has the year-2038 bug, when  */
+/* the signed integer rolls over to the year 1901. Here is the protection.  */ 
+#define TIME_PROTECTION  TRUE
+
 /***************** *********************************** ************************/
 /***************** no changes required below this line ************************/
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@frank4dd.com"
-#define SW_VERSION	"WebCert v1.7.4 (21/06/2011)"
+#define SW_VERSION	"WebCert v1.7.6 (28/02/2013)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
@@ -49,7 +55,7 @@
 /****** html code template for adding code or scripts into the footer *********/
 #define FOOTER_TEMPL	"../footer-template.htm" /* optional */
 
-#define REQLEN		4096 /* Max length of a certificate request in bytes.*/
+#define REQLEN	       16384 /* Max length of a certificate request in bytes.*/
                              /* Often not bigger then 817 bytes with a 1024  */
 			     /* bit RSA key, size increases for bigger keys  */
 			     /* and when a lot of attributes are generated.  */

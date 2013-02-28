@@ -22,10 +22,10 @@ int cgiMain() {
  * start the form output                                                      *
  * ---------------------------------------------------------------------------*/
 
-   fprintf(cgiOut, "<form action=\"genrequest.cgi\" method=\"post\">");
-   fprintf(cgiOut, "<table width=100%%>\n");
+   fprintf(cgiOut, "<form action=\"genrequest.cgi\" method=\"post\" accept-charset=\"utf-8\">");
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=4>");
+   fprintf(cgiOut, "<th colspan=\"4\">");
    fprintf(cgiOut, "To generate a certificate request, please fill out ");
    fprintf(cgiOut, "the fields below:");
    fprintf(cgiOut, "</th>");
@@ -35,7 +35,7 @@ int cgiMain() {
    fprintf(cgiOut, "<th>C</th>");
    fprintf(cgiOut, "<td class=\"type\">Country</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"c\" size=20 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"c\" size=\"20\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "US, GB, DE, etc</td>");
@@ -46,7 +46,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "State or Province</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"st\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"st\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "CA, NV, etc</td>");
@@ -57,7 +57,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Location, City</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"l\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"l\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "Rocklin, Los Angeles, etc</td>");
@@ -68,7 +68,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Organisation, Company</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"o\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"o\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "Frank4DD, ACME Corp, etc</td>");
@@ -79,7 +79,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Dept or Subdivision</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"ou\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"ou\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "Support, Sales, etc</td>");
@@ -90,7 +90,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "E-Mail Address</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"email\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"email\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "you@somewhere.com</td>");
@@ -101,29 +101,29 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "System Name *</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"cn\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"cn\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "i.e. www.frank4dd.com</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=4>");
+   fprintf(cgiOut, "<th colspan=\"4\">");
    fprintf(cgiOut, "Optional: For serving multiple domains or IP's, set additional Host- or IP values:");
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th rowspan=2>SAN</th>");
+   fprintf(cgiOut, "<th rowspan=\"4\">SAN</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "<select name=\"typesan1\">\n");
-   fprintf(cgiOut, "<option value=\"DNS\" selected>DNS Name</option>\n");
-   fprintf(cgiOut, "<option value=\"IP\">IP Address</option>\n");
-   fprintf(cgiOut, "<option value=\"URI\">URI</option>\n");
-   fprintf(cgiOut, "<option value=\"otherName\">Other Name</option>\n");
+   fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 1</option>\n");
+   fprintf(cgiOut, "<option value=\"IP\">IP Address 1</option>\n");
+   fprintf(cgiOut, "<option value=\"URI\">URI 1</option>\n");
+   fprintf(cgiOut, "<option value=\"RID\">Registered ID 1</option>\n");
    fprintf(cgiOut, "</select></td>\n");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"datasan1\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"datasan1\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "Subject Alternative Name 1</td>");
@@ -132,20 +132,50 @@ int cgiMain() {
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "<select name=\"typesan2\">\n");
-   fprintf(cgiOut, "<option value=\"DNS\" selected>DNS Name</option>\n");
-   fprintf(cgiOut, "<option value=\"IP\">IP Address</option>\n");
-   fprintf(cgiOut, "<option value=\"URI\">URI</option>\n");
-   fprintf(cgiOut, "<option value=\"otherName\">Other Name</option>\n");
+   fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 2</option>\n");
+   fprintf(cgiOut, "<option value=\"IP\">IP Address 2</option>\n");
+   fprintf(cgiOut, "<option value=\"URI\">URI 2</option>\n");
+   fprintf(cgiOut, "<option value=\"RID\">Registered ID 2</option>\n");
    fprintf(cgiOut, "</select></td>\n");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"datasan2\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"datasan2\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "Subject Alternative Name 2</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=4>");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "<select name=\"typesan3\">\n");
+   fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 3</option>\n");
+   fprintf(cgiOut, "<option value=\"IP\">IP Address 3</option>\n");
+   fprintf(cgiOut, "<option value=\"URI\">URI 3</option>\n");
+   fprintf(cgiOut, "<option value=\"RID\">Registered ID 3</option>\n");
+   fprintf(cgiOut, "</select></td>\n");
+   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"datasan3\" size=\"40\" value=\"\" />");
+   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "Subject Alternative Name 3</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "<select name=\"typesan4\">\n");
+   fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 4</option>\n");
+   fprintf(cgiOut, "<option value=\"IP\">IP Address 4</option>\n");
+   fprintf(cgiOut, "<option value=\"URI\">URI 4</option>\n");
+   fprintf(cgiOut, "<option value=\"RID\">Registered ID 4</option>\n");
+   fprintf(cgiOut, "</select></td>\n");
+   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"datasan4\" size=\"40\" value=\"\" />");
+   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "Subject Alternative Name 4</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th colspan=\"4\">");
    fprintf(cgiOut, "Optional: For E-Mail Encryption (S/MIME) certificates, set the User Name:");
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "</tr>\n");
@@ -155,7 +185,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Given Name</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"gn\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"gn\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "First Name, i.e. John, Paul</td>");
@@ -166,28 +196,28 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Surname</td>");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"text\" name=\"sn\" size=40 value=>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"sn\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "Last Name, i.e. Doe, Miller</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=4>");
+   fprintf(cgiOut, "<th colspan=\"4\">");
    fprintf(cgiOut, "Select the options for the public/private key pair:");
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=radio checked name=keytype value=rsa></th>");
+   fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" checked=\"checked\" name=\"keytype\" value=\"rsa\" onclick=\"switchGrey('rsa_rb', 'rsa', 'dsa');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Generate RSA key pair</td>\n");
 
-   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<td id=\"rsa\">");
    fprintf(cgiOut, "<select name=\"rsastrength\">\n");
    fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
-   fprintf(cgiOut, "<option value=\"1024\" selected>");
+   fprintf(cgiOut, "<option value=\"1024\" selected=\"selected\">");
    fprintf(cgiOut, "Key Strength: 1024 bit (Good)</option>\n");
    fprintf(cgiOut, "<option value=\"2048\">Key Strength: 2048 bit (Better)</option>\n");
    fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
@@ -200,27 +230,27 @@ int cgiMain() {
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=radio name=keytype value=dsa></th>");
+   fprintf(cgiOut, "<input type=\"radio\" id=\"dsa_rb\" name=\"keytype\" value=\"dsa\" onclick=\"switchGrey('dsa_rb', 'dsa', 'rsa');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Generate DSA key pair</td>\n");
 
-   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<td id=\"dsa\" style=\"background-color: #CFCFCF;\">");
    fprintf(cgiOut, "<select name=\"dsastrength\">\n");
    fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
-   fprintf(cgiOut, "<option value=\"1024\" selected>");
+   fprintf(cgiOut, "<option value=\"1024\" selected=\"selected\">");
    fprintf(cgiOut, "Key Strength: 1024 bit (Good)</option>\n");
    fprintf(cgiOut, "<option value=\"2048\">Key Strength: 2048 bit (Better)</option>\n");
    fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
    fprintf(cgiOut, "</option>\n</select>");
-   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "</td>\n");
 
    fprintf(cgiOut, "<td class=\"desc\">");
    fprintf(cgiOut, "select DSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=4>");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Generate\">");
+   fprintf(cgiOut, "<th colspan=\"4\">");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Generate\" />");
 
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "</tr>\n");

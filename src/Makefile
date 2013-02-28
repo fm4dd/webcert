@@ -3,15 +3,19 @@ CFLAGS= -O3 -Wall -g
 LIBS= -L/home/lib -lcgic -lm -lssl -lcrypto
 AR=ar
 
+HTMDIR=/srv/www/std-root/frank4dd.com/sw/webcert
 CGIDIR=/srv/www/std-root/frank4dd.com/sw/webcert/cgi-bin
 EXPORTDIR=${CGIDIR}/../export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi about.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi
+
+ALLJS=webcert.js
 
 all: ${ALLCGI}
 
 install: 
 	strip ${ALLCGI}
+	cp ${ALLJS} ${HTMDIR}
 	cp ${ALLCGI} ${CGIDIR}
 	@echo ${ALLCGI} installed in ${CGIDIR}.
 	@echo "Checking for new export dir needed by certexport.cgi:"; \
@@ -43,9 +47,6 @@ help.cgi: help.o
 capolicy.cgi: capolicy.o
 	$(CC) ${LIBS} capolicy.o pagehead.o pagefoot.o handle_error.o -o capolicy.cgi
 
-about.cgi: about.o
-	$(CC) ${LIBS} about.o pagehead.o pagefoot.o handle_error.o -o about.cgi
-
 getcert.cgi: getcert.o
 	$(CC) ${LIBS} getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi
 
@@ -57,3 +58,6 @@ certsearch.cgi: certsearch.o
 
 certexport.cgi: certexport.o
 	$(CC) ${LIBS} certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi
+
+certvalidate.cgi: certvalidate.o
+	$(CC) ${LIBS} certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi

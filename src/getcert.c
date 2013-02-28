@@ -16,7 +16,6 @@ int cgiMain() {
 
    X509			*cert;
    BIO			*outbio;
-   X509_NAME		*certname;
    char			format[5]         = "";
    char 		certfilepath[255] = "";
    char 		expfilepath[255]  = "";
@@ -110,42 +109,57 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
-
    pagehead(title);
 
 /* -------------------------------------------------------------------------- *
  * start the form output                                                      *
  * ---------------------------------------------------------------------------*/
-
-   fprintf(cgiOut, "<table width=100%%>\n");
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "certificate %s in %s format", certfilestr, format);
+   fprintf(cgiOut, "certificate %s in PEM format", certfilestr);
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<td class=\"getcert\">\n");
-   fprintf(cgiOut, "<pre>");
+   fprintf(cgiOut, "<td class=\"getcert\">");
+   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certpem');\">\n");
+   fprintf(cgiOut, "Expand/Hide certificate data in PEM format</a>\n");
 
-   if (strcmp(format, "pem") == 0) {
-      fprintf(cgiOut, "<div class=\"showpem\">");
+   if (strcmp(format, "pem") == 0)
+      fprintf(cgiOut, "<div class=\"showpem\" id=\"certpem\" style=\"display: block\">\n");
+   else 
+      fprintf(cgiOut, "<div class=\"showpem\" id=\"certpem\" style=\"display: none\">\n");
 
-      if (! PEM_write_bio_X509(outbio, cert))
-         int_error("Error printing the certificate");
-   }
-
-   if (strcmp(format, "text") == 0) {
-      fprintf(cgiOut, "<div class=\"showtext\">");
-
-      if (! (certname = X509_get_subject_name(cert)))
-         int_error("Error getting subject data from certificate");
-      //if (! (X509_NAME_print_ex(outbio, certname, 3)))
-      if (! (X509_print_ex(outbio, cert, 0, XN_FLAG_SEP_MULTILINE)))
-         int_error("Error printing certificate text information");
-
-   }
-   fprintf(cgiOut, "</div>");
+   fprintf(cgiOut, "<pre>\n");
+   if (! PEM_write_bio_X509(outbio, cert))
+      int_error("Error printing the certificate");
    fprintf(cgiOut, "</pre>\n");
+   fprintf(cgiOut, "</div>\n");
+   fprintf(cgiOut, "</td>\n");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>");
+   fprintf(cgiOut, "certificate %s in Text format", certfilestr);
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<td class=\"getcert\">\n");
+   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certtext');\">\n");
+   fprintf(cgiOut, "Expand/Hide certificate data in Text format</a>\n");
+
+   if (strcmp(format, "text") == 0)
+      fprintf(cgiOut, "<div class=\"showtext\" id=\"certtext\"  style=\"display: block\">\n");
+   else 
+      fprintf(cgiOut, "<div class=\"showtext\" id=\"certtext\"  style=\"display: none\">\n");
+
+   fprintf(cgiOut, "<pre>\n");
+   if (! (X509_print_ex_fp(cgiOut, cert,
+          XN_FLAG_RFC2253&(~ASN1_STRFLGS_ESC_MSB), X509_FLAG_COMPAT)))
+      int_error("Error printing certificate text information");
+
+   fprintf(cgiOut, "</pre>\n");
+   fprintf(cgiOut, "</div>\n");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
 
@@ -158,77 +172,86 @@ int cgiMain() {
 
    fprintf(cgiOut, "<p></p>\n");
 
-   fprintf(cgiOut, "<table width=100%%>\n");
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
    fprintf(cgiOut, "<tr>\n");
-   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
+
+   // Show PEM format
    fprintf(cgiOut, "<th>\n");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Show PEM\">");
+   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Show PEM\" />\n");
    fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-   fprintf(cgiOut, "value=\"%s\">", certfilestr);
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
-   fprintf(cgiOut, "</th></form>\n");
+   fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
+   fprintf(cgiOut, "</form>\n");
+   fprintf(cgiOut, "</th>\n");
 
-   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Show Text\">");
+   // Show Text format
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Show Text\" />\n");
    fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-   fprintf(cgiOut, "value=\"%s\">", certfilestr);
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\">");
-   fprintf(cgiOut, "</th></form>\n");
+   fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
+   fprintf(cgiOut, "</form>\n");
+   fprintf(cgiOut, "</th>\n");
 
-   // filler 1 separating view from download
-   fprintf(cgiOut, "<th width=100>");
-   fprintf(cgiOut, "&nbsp;");
+   // Print View
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<input type=\"button\" value=\"Print Page\" ");
+   fprintf(cgiOut, "onclick=\"print(); return false;\" />");
    fprintf(cgiOut, "</th>\n");
 
    if (strlen(p12fileurl) == 0) {
-     fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">");
-     fprintf(cgiOut, "<th>");
-     fprintf(cgiOut, "<input type=\"submit\" value=\"Export P12\">");
+     fprintf(cgiOut, "<th>\n");
+     fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">\n");
+     fprintf(cgiOut, "<input type=\"submit\" value=\"Export P12\" />\n");
      fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-     fprintf(cgiOut, "value=\"%s\">", certfilestr);
-     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"p12\">");
-     fprintf(cgiOut, "</th></form>\n");
+     fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"p12\" />\n");
+     fprintf(cgiOut, "</form>\n");
+     fprintf(cgiOut, "</th>\n");
    }
    else {
-     fprintf(cgiOut, "<th>");
+     fprintf(cgiOut, "<th>\n");
      fprintf(cgiOut, "<input type=\"button\" value=\"Get P12\" ");
-     fprintf(cgiOut, "onClick=\"self.location.href='%s'\">", p12fileurl);
-     fprintf(cgiOut, "</th>");
+     fprintf(cgiOut, "onclick=\"self.location.href='%s'\" />\n", p12fileurl);
+     fprintf(cgiOut, "</th>\n");
    }
 
    if (strlen(pemfileurl) == 0) {
-     fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">");
-     fprintf(cgiOut, "<th>");
-     fprintf(cgiOut, "<input type=\"submit\" value=\"Export PEM\">");
+     fprintf(cgiOut, "<th>\n");
+     fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">\n");
+     fprintf(cgiOut, "<input type=\"submit\" value=\"Export PEM\" />\n");
      fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-     fprintf(cgiOut, "value=\"%s\">", certfilestr);
-     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\">");
-     fprintf(cgiOut, "</th></form>\n");
+     fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
+     fprintf(cgiOut, "</form>\n");
+     fprintf(cgiOut, "</th>\n");
    }
    else {
-     fprintf(cgiOut, "<th>");
+     fprintf(cgiOut, "<th>\n");
      fprintf(cgiOut, "<input type=\"button\" value=\"Get PEM\" ");
-     fprintf(cgiOut, "onClick=\"self.location.href='%s'\">", pemfileurl);
-     fprintf(cgiOut, "</th>");
+     fprintf(cgiOut, "onclick=\"self.location.href='%s'\" />", pemfileurl);
+     fprintf(cgiOut, "</th>\n");
    }
 
    if (strlen(derfileurl) == 0) {
-     fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">");
-     fprintf(cgiOut, "<th>");
-     fprintf(cgiOut, "<input type=\"submit\" value=\"Export DER\">");
+     fprintf(cgiOut, "<th>\n");
+     fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">\n");
+     fprintf(cgiOut, "<input type=\"submit\" value=\"Export DER\" />\n");
      fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-     fprintf(cgiOut, "value=\"%s\">", certfilestr);
-     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"der\">");
-     fprintf(cgiOut, "</th></form>\n");
+     fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"der\" />\n");
+     fprintf(cgiOut, "</form>\n");
+     fprintf(cgiOut, "</th>\n");
    }
    else {
-     fprintf(cgiOut, "<th>");
+     fprintf(cgiOut, "<th>\n");
      fprintf(cgiOut, "<input type=\"button\" value=\"Get DER\" ");
-     fprintf(cgiOut, "onClick=\"self.location.href='%s'\">", derfileurl);
-     fprintf(cgiOut, "</th>");
+     fprintf(cgiOut, "onclick=\"self.location.href='%s'\" />\n", derfileurl);
+     fprintf(cgiOut, "</th>\n");
    }
-   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "</table>\n");
    pagefoot();

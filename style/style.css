@@ -85,8 +85,8 @@ body a:visited {
 	float: left;
 	height: 20px;
 	padding-top: 7px;
-	padding-left: 24px;
-	padding-right: 24px;
+	padding-left: 18px;
+	padding-right: 18px;
 	text-transform: uppercase;
 	font-family: "Helvetica Neue",helvetica,"microsoft sans serif",arial,sans-serif;
 	font-size: 85%;
@@ -176,6 +176,18 @@ body a:visited {
     border: 1px solid black;
 }
 
+#content th.exok {
+    color: #ffffff;
+}
+
+#content th.exnok {
+    color: #ff0000;
+}
+
+#content input.getcert {
+    width: 70px;
+}
+
 #content td {
     /* t r b l */
     padding: 5px 5px 5px 5px;
@@ -216,14 +228,14 @@ body a:visited {
 #content td.led-off {
     background: #999999;
     margin: 0 0;
-    padding: 2 5;
+    padding: 0 0;
     height: 5px;
     width: 12px;
 }
 
 #content td.led {
     margin: 0 0;
-    padding: 2 5;
+    padding: 0 0;
     height: 5px;
     width: 12px;
 }
@@ -232,6 +244,18 @@ body a:visited {
     background: #CFCFCF;
     font-weight: bold;
     width: 150px;
+}
+
+#content td.type180 {
+    background: #CFCFCF;
+    font-weight: bold;
+    width: 180px;
+}
+
+#content td.type250 {
+    background: #CFCFCF;
+    font-weight: bold;
+    width: 250px;
 }
 
 #content td.desc {
@@ -254,6 +278,16 @@ body a:visited {
     width: 624px;
     overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
+
+#content div.pic {
+    float: left;
+    /* t r b l */
+    margin: 0px 10px 0px 0px;
+    background: inherit;
+    color: inherit;
+    border-style: none;
+}
+
 
 #content img {
     border-style: none;
@@ -341,6 +375,10 @@ body a:visited {
     background-color: #000000;
     height: 1px;
     border: none;
+}
+
+#sidecontent img {
+    border-style: none;
 }
 
 /***** Footer *****/
