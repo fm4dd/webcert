@@ -470,7 +470,7 @@ int cgiMain() {
 
   // goto page number
   fprintf(cgiOut, "<th width=\"120\">\n");
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
+  fprintf(cgiOut, "<form class=\"setpage\" action=\"certstore.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
@@ -479,9 +479,8 @@ int cgiMain() {
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", pagecounter);
   fprintf(cgiOut, "\" />\n");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"Goto\" />\n");
-  fprintf(cgiOut, "&nbsp; &nbsp;");
-  fprintf(cgiOut, "<input type=\"text\" name=\"page\" size=\"3\" ");
+  fprintf(cgiOut, "<input class=\"goto\" type=\"submit\" value=\"Goto\" />\n");
+  fprintf(cgiOut, "<input class=\"page\" type=\"text\" name=\"page\" ");
   fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
   fprintf(cgiOut, "</form>\n");
   fprintf(cgiOut, "</th>\n");

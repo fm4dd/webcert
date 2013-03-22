@@ -184,8 +184,29 @@ body a:visited {
     color: #ff0000;
 }
 
+#content input {
+    display: block;
+    vertical-align:middle;
+}
+
 #content input.getcert {
     width: 70px;
+}
+
+#content form {
+    margin: 0px;
+}
+
+#content input.goto {
+    display: inline;
+    vertical-align:middle;
+}
+
+#content input.page {
+    display: inline;
+    width: 25%;
+    padding-left: 20px;
+    vertical-align:middle;
 }
 
 #content td {
