@@ -185,7 +185,6 @@ body a:visited {
 }
 
 #content input {
-    display: block;
     vertical-align:middle;
 }
 
@@ -195,6 +194,7 @@ body a:visited {
 
 #content form {
     margin: 0px;
+    text-align: center;
 }
 
 #content input.goto {

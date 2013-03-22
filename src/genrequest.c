@@ -470,47 +470,49 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=type>");
    fprintf(cgiOut, "Set Validity (in Days):");
    fprintf(cgiOut, "</td>\n");
-   fprintf(cgiOut, "<td id=\"days_td\">");
-   fprintf(cgiOut, " From now until <input type=text name=\"daysvalid\" size=4 value=%d> Days", DAYS_VALID);
-   fprintf(cgiOut, "<br />");
-   fprintf(cgiOut, "365 = 1 year, 730 = 2 years, 1095 = 3 years, 1460 = 4 years, 1825 = 5 years");
+   fprintf(cgiOut, "<td id=\"days_td\">\n");
+   fprintf(cgiOut, "From now until\n");
+   fprintf(cgiOut, "<input type=\"text\" name=\"daysvalid\" size=\"4\" value=\"%d\" />\n", DAYS_VALID);
+   fprintf(cgiOut, "Days<br />\n");
+   fprintf(cgiOut, "365 = 1 year, 730 = 2 years, 1095 = 3 years, 1460 = 4 years, 1825 = 5 years\n");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
 
    /* Set validity by date, format */
    fprintf(cgiOut, "<tr>\n");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td')\" />");
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td')\" />");
    fprintf(cgiOut, "</th>\n");
 
-   fprintf(cgiOut, "<td class=type>");
+   fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Set Validity (by Date):");
    fprintf(cgiOut, "</td>\n");
-   fprintf(cgiOut, "<td id=\"date_td\" style=\"background-color: #CFCFCF;\">");
-   fprintf(cgiOut, "<input type=text name=\"startdate\" size=15 value=%s>", startdate);
-   fprintf(cgiOut, " Start Date ");
-   fprintf(cgiOut, "<input type=text name=\"starttime\" size=10 value=%s>", starttime);
-   fprintf(cgiOut, " Start Time (UTC)");
-   fprintf(cgiOut, "<br />");
-   fprintf(cgiOut, "<input type=text name=\"enddate\" size=15 value=%s>", enddate);
-   fprintf(cgiOut, " End Date &nbsp;");
-   fprintf(cgiOut, "<input type=text name=\"endtime\" size=10 value=%s>", endtime);
-   fprintf(cgiOut, " End Time (UTC)");
+   fprintf(cgiOut, "<td id=\"date_td\" style=\"background-color: #CFCFCF;\">\n");
+   fprintf(cgiOut, "<input type=text name=\"startdate\" size=\"15\" value=\"%s\" />\n", startdate);
+   fprintf(cgiOut, "Start Date\n");
+   fprintf(cgiOut, "<input type=text name=\"starttime\" size=\"10\" value=\"%s\" />\n", starttime);
+   fprintf(cgiOut, "Start Time (UTC)<br />\n");
+   fprintf(cgiOut, "<input type=text name=\"enddate\" size=\"15\" value=\"%s\" />\n", enddate);
+   fprintf(cgiOut, "End Date &nbsp;\n");
+   fprintf(cgiOut, "<input type=text name=\"endtime\" size=\"10\" value=\"%s\" />\n", endtime);
+   fprintf(cgiOut, " End Time (UTC)\n");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
 
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=\"3\">");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th colspan=\"3\">\n");
    fprintf(cgiOut, "<input type=\"button\" name=\"Forget it!\" value=");
    fprintf(cgiOut, "\"  Go Back  \" onclick=");
-   fprintf(cgiOut, "\"self.location.href='buildrequest.cgi'\">&nbsp;");
-   fprintf(cgiOut, "&nbsp;<input type=\"button\" value=\"Print Page\" ");
-   fprintf(cgiOut, "onclick=\"print(); return false;\">&nbsp;");
-   fprintf(cgiOut, "&nbsp;<input type=\"submit\" value=\"Sign Request\">");
-   fprintf(cgiOut, "</th>");
-   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "\"self.location.href='buildrequest.cgi'\" />\n");
+   fprintf(cgiOut, "&nbsp;&nbsp;");
+   fprintf(cgiOut, "<input type=\"button\" value=\"Print Page\" ");
+   fprintf(cgiOut, "onclick=\"print(); return false;\" />\n");
+   fprintf(cgiOut, "&nbsp;&nbsp;");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Sign Request\" />\n");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "</table>\n");
-   fprintf(cgiOut, "</form>");
+   fprintf(cgiOut, "</form>\n");
 
    fprintf(cgiOut, "<table width=100%%>");
 
