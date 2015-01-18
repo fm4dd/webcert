@@ -190,7 +190,7 @@ int cgiMain() {
       fprintf(cgiOut, "<td id=\"cainc_td\">");
       fprintf(cgiOut, "<input type=\"checkbox\" name=\"cainc\" ");
       fprintf(cgiOut, "value=\"yes\" checked=\"checked\" id=\"cainc_cb\" ");
-      fprintf(cgiOut, "onclick=\"switchGrey('cainc_cb', 'cainc_td', 'none');\" />");
+      fprintf(cgiOut, "onclick=\"switchGrey('cainc_cb', 'cainc_td', 'none', 'none');\" />");
       fprintf(cgiOut, "</td>\n");
       fprintf(cgiOut, "</tr>\n");
 

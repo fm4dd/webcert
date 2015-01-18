@@ -9,10 +9,13 @@ function elementHideShow(element) {
   else { el.style.display = "block"; }
 }
 
-function switchGrey(src, dst1, dst2) {
+function switchGrey(src, dst1, dst2, dst3) {
   var s = document.getElementById(src);
   var d1 = document.getElementById(dst1);
   var d2 = document.getElementById(dst2);
-  if (s.checked == true) { d1.style.backgroundColor = "#FFFFFF"; d2.style.backgroundColor = "#CFCFCF"; }
+  var d3 = document.getElementById(dst3);
+  if (s.checked == true) { d1.style.backgroundColor = "#FFFFFF";
+                           d2.style.backgroundColor = "#CFCFCF"; 
+                           d3.style.backgroundColor = "#CFCFCF"; }
   else {  d1.style.backgroundColor = "#CFCFCF"; }
 }

@@ -18,6 +18,7 @@
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>
+#include <openssl/ec.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/pem.h>
@@ -40,10 +41,13 @@ char * get_dns(char *ip) {
 int cgiMain() {
 
    X509_REQ 	*webrequest 	 = NULL;
-   EVP_PKEY	  *pkey		 = NULL;
+   EVP_PKEY	*pkey		 = NULL;
    X509_NAME 	*reqname	 = NULL;
    DSA 		*mydsa		 = NULL;
    RSA 		*myrsa		 = NULL;
+   EC_KEY       *myecc           = NULL;
+   //const EC_GROUP *eccgrp        = NULL;
+
    BIO 		*outbio		 = NULL;
    X509_NAME_ENTRY      *e;
    STACK_OF(X509_EXTENSION) 
@@ -72,6 +76,7 @@ int cgiMain() {
    char 	keytype[81]      = "";
    int	 	rsastrength	 = 0;
    int	 	dsastrength	 = 0;
+   char	 	eccstrength[255] ="";
    time_t       now              = 0;
    struct tm    *tm;
    char         startdate[11]    ="";
@@ -106,6 +111,7 @@ int cgiMain() {
    cgiFormString("keytype", keytype, sizeof(keytype));
    cgiFormInteger("rsastrength", &rsastrength, 0);
    cgiFormInteger("dsastrength", &dsastrength, 0);
+   cgiFormString("eccstrength", eccstrength, sizeof(eccstrength));
 
 /* we do not accept requests with no data, i.e. being empty with just a 
    public key. Although technically possible to sign and create a cert,
@@ -156,27 +162,40 @@ int cgiMain() {
       int_error("Error creating EVP_PKEY structure.");
 
    if(strcmp(keytype, "rsa") == 0) {
-
       myrsa = RSA_new();
       if (! (myrsa = RSA_generate_key(rsastrength, RSA_F4, NULL, NULL)))
          int_error("Error generating the RSA key.");
 
       if (!EVP_PKEY_assign_RSA(pkey,myrsa))
          int_error("Error assigning RSA key to EVP_PKEY structure.");
-   }
-   else if(strcmp(keytype, "dsa") == 0) {
+    }
 
+   else if(strcmp(keytype, "dsa") == 0) {
       mydsa = DSA_new();
       mydsa = DSA_generate_parameters(dsastrength, NULL, 0, NULL, NULL,
-                                                                  NULL, NULL);
+                                                            NULL, NULL);
       if (! (DSA_generate_key(mydsa)))
          int_error("Error generating the DSA key.");
 
       if (!EVP_PKEY_assign_DSA(pkey,mydsa))
          int_error("Error assigning DSA key to EVP_PKEY structure.");
    }
+
+   else if(strcmp(keytype, "ecc") == 0) {
+      myecc = EC_KEY_new();
+      int eccgrp = OBJ_txt2nid(eccstrength);
+      myecc = EC_KEY_new_by_curve_name(eccgrp);
+      /* Important to set the OPENSSL_EC_NAMED_CURVE flag,    *
+       * otherwise the cert will not work with an SSL server. */
+      EC_KEY_set_asn1_flag(myecc, OPENSSL_EC_NAMED_CURVE);
+      if (! (EC_KEY_generate_key(myecc)))
+         int_error("Error generating the ECC key.");
+
+      if (!EVP_PKEY_assign_EC_KEY(pkey,myecc))
+         int_error("Error assigning ECC key to EVP_PKEY structure.");
+   }
    else
-      int_error("Error: Wrong keytype - choose either RSA or DSA.");
+      int_error("Error: Wrong keytype - choose either RSA, DSA or ECC.");
 
 /* ------------------------------------------------------------------------- *
  * Generate the certificate request from scratch                             *
@@ -282,17 +301,23 @@ int cgiMain() {
    }
 
 /* ------------------------------------------------------------------------- *
- * Sign the certificate request: md5 for RSA keys, dss for DSA keys          *
+ * Sign the certificate request: sha256 for RSA keys, dss for DSA keys          *
  * ------------------------------------------------------------------------- */
 
    if(strcmp(keytype, "rsa") == 0) {
-      if (!X509_REQ_sign(webrequest,pkey,EVP_md5()))
-         int_error("Error MD5 signing X509_REQ structure.");
+      if (!X509_REQ_sign(webrequest,pkey,EVP_sha256()))
+         int_error("Error signing X509_REQ structure with SHA256.");
    }
    else if(strcmp(keytype, "dsa") == 0) {
       if (!X509_REQ_sign(webrequest,pkey,EVP_dss()))
          int_error("Error DSS signing X509_REQ structure.");
    }
+
+   else if(strcmp(keytype, "ecc") == 0) {
+      if (!X509_REQ_sign(webrequest,pkey,EVP_ecdsa()))
+         int_error("Error ECC signing X509_REQ structure.");
+   }
+
 
 /* ------------------------------------------------------------------------- *
  *  and sort out the content plus start the html output                      *
@@ -309,32 +334,32 @@ int cgiMain() {
    if (! PEM_write_bio_X509_REQ(outbio, webrequest))
       int_error("Error printing the request");
    fprintf(cgiOut, "\">\n");
-   fprintf(cgiOut, "<table width=100%%>");
+   fprintf(cgiOut, "<table width=\"100%%\">");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th colspan=\"2\">");
    fprintf(cgiOut, "Subject data of this certificate request:");
-   fprintf(cgiOut, "</th>");
-   fprintf(cgiOut, "</tr>");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "</tr>\n");
 
    for (i = 0; i < X509_NAME_entry_count(reqname); i++) {
       e = X509_NAME_get_entry(reqname, i);
       OBJ_obj2txt(buf, 80, e->object, 0);
 
-      fprintf(cgiOut, "<tr>");
-      fprintf(cgiOut, "<td class=type180>");
-      fprintf(cgiOut, "%s</td>", buf);
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<td class=\"type180\">");
+      fprintf(cgiOut, "%s</td>\n", buf);
       fprintf(cgiOut, "<td>");
       ASN1_STRING_print_ex(outbio, e->value, ASN1_STRFLGS_UTF8_CONVERT);
-      fprintf(cgiOut, "</td>");
+      fprintf(cgiOut, "</td>\n");
       fprintf(cgiOut, "</tr>\n");
    }
 
    /* If our certificate request includes extensions, we display here */
    if ((ext_list = X509_REQ_get_extensions(webrequest)) != NULL) {
-     fprintf(cgiOut, "<tr>");
+     fprintf(cgiOut, "<tr>\n");
      fprintf(cgiOut, "<th colspan=\"2\">");
      fprintf(cgiOut, "Extensions within this certificate request: %d", sk_X509_EXTENSION_num(ext_list));
-     fprintf(cgiOut, "</th>");
+     fprintf(cgiOut, "</th>\n");
      fprintf(cgiOut, "</tr>\n");
 
      /* display the cert extension list here */
@@ -345,10 +370,10 @@ int cgiMain() {
         ext = sk_X509_EXTENSION_value(ext_list, i);
         obj = X509_EXTENSION_get_object(ext);
 
-        fprintf(cgiOut, "<tr>");
-        fprintf(cgiOut, "<td class=type180>");
+        fprintf(cgiOut, "<tr>\n");
+        fprintf(cgiOut, "<td class=\"type180\">");
         i2a_ASN1_OBJECT(outbio, obj);
-        fprintf(cgiOut, "</td>");
+        fprintf(cgiOut, "</td>\n");
 
         fprintf(cgiOut, "<td>");
         if (!X509V3_EXT_print(outbio, ext, 0, 0)) {
@@ -357,17 +382,17 @@ int cgiMain() {
           fprintf(cgiOut, "%*s", 0, "");
           M_ASN1_OCTET_STRING_print(outbio, ext->value);
         }
-        fprintf(cgiOut, "</td>");
+        fprintf(cgiOut, "</td>\n");
         fprintf(cgiOut, "</tr>\n");
      }
    }
 
   /* display the key type and size here */
-  fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th colspan=2>Public key data for this certificate request:");
-  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">Public key data for this certificate request:");
+  fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
-  fprintf(cgiOut, "<td colspan=2 class=getcert>");
+  fprintf(cgiOut, "<td colspan=\"2\" class=\"getcert\">");
   if (pkey) {
     switch (pkey->type) {
       case EVP_PKEY_RSA:
@@ -376,8 +401,14 @@ int cgiMain() {
       case EVP_PKEY_DSA:
         fprintf(stdout, "%d bit DSA Key", EVP_PKEY_bits(pkey));
         break;
+      case EVP_PKEY_EC:
+        myecc = EVP_PKEY_get1_EC_KEY(pkey);
+        const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
+        fprintf(stdout, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
+                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
+        break;
       default:
-        fprintf(stdout, "%d bit non-RSA/DSA Key", EVP_PKEY_bits(pkey));
+        fprintf(stdout, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(pkey->type));
         break;
     }
   }
@@ -394,80 +425,115 @@ int cgiMain() {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
-  fprintf(cgiOut, "<tr>");
+
+
+  ASN1_STRING     *asn1_sig = NULL;
+  X509_ALGOR      *sig_type = NULL;
+  size_t          sig_bytes = 0;
+  char   sig_type_str[1024] = "";
+
+  /* ---------------------------------------------------------- *
+   * Extract the certificate's signature data.                  *
+   * ---------------------------------------------------------- */
+  sig_type = webrequest->sig_alg;
+  asn1_sig = webrequest->signature;
+  sig_bytes = asn1_sig->length;
+  OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
+
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">Signature:</th>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<td  colspan=\"2\" class=\"getcert\">");
+
+  fprintf(cgiOut, "%s, Length: %d Bytes\n", sig_type_str, (int) sig_bytes);
+  fprintf(cgiOut, "<a href=\"javascript:elementHideShow('reqsig');\">\n");
+  fprintf(cgiOut, "Expand or Hide Signature Data</a>");
+  /* display the signature in hex byte format here */
+  fprintf(cgiOut, "<div class=\"showpem\" id=\"reqsig\"  style=\"display: none\"><pre>");
+  if (X509_signature_dump(outbio, asn1_sig, 0) != 1)
+    BIO_printf(outbio, "Error printing the signature data\n");
+  fprintf(cgiOut, "</pre></div>\n");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"2\">");
   fprintf(cgiOut, "&nbsp;");
-  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
   fprintf(cgiOut, "</table>\n");
   fprintf(cgiOut, "<p></p>\n");
 
    /* Add Certificate extensions, Define validity */
-   fprintf(cgiOut, "<table width=100%%>");
+   fprintf(cgiOut, "<table width=\"100%%\">\n");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th colspan=\"3\">");
    fprintf(cgiOut, "Define certificate details:");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "</tr>\n");
 
    /* Add Key Usage */
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"checkbox\" name=\"keyusage\" checked id=\"key_cb\" onclick=\"switchGrey('key_cb', 'key_td', 'none');\" />");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<input type=\"checkbox\" name=\"keyusage\" checked id=\"key_cb\" onclick=\"switchGrey('key_cb', 'key_td', 'none', 'none');\" />\n");
+   fprintf(cgiOut, "</th>\n");
 
-   fprintf(cgiOut, "<td class=type>");
-   fprintf(cgiOut, "Key Usage:</td>");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "Key Usage:</td>\n");
    fprintf(cgiOut, "<td id=\"key_td\" style=\"padding: 0;\">");
-   fprintf(cgiOut, "<table style=\"width: 100%%; border-style: none;\"><tr><td>");
-   fprintf(cgiOut, "<input type=radio name=\"type\" value=sv checked>");
-   fprintf(cgiOut, " SSL Server</td></tr><tr>");
-   fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=radio name=\"type\" value=cl>");
+   fprintf(cgiOut, "<table style=\"width: 100%%; border-style: none;\"><tr><td>\n");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"type\" value=\"sv\" checked=\"checked\" />\n");
+   fprintf(cgiOut, " SSL Server</td></tr>\n");
+   fprintf(cgiOut, "<tr><td>\n");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"type\" value=\"cl\" />\n");
    fprintf(cgiOut, " SSL Client</td></tr><tr>\n");
-   fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=radio name=\"type\" value=em>");
+   fprintf(cgiOut, "<td>\n");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"type\" value=\"em\" />\n");
    fprintf(cgiOut, " E-Mail Encryption ");
-   fprintf(cgiOut, "<input type=text size=20 name=\"ename\">");
-   fprintf(cgiOut, " Address</td></tr><tr>");
-   fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=radio name=\"type\" value=os>");
-   fprintf(cgiOut, " Object Signing</td></tr><tr>\n");
-   fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=radio name=\"type\" value=ca>");
-   fprintf(cgiOut, " CA Certificate</td></tr>");
-   fprintf(cgiOut, "</td></tr></table></td></tr>");
+   fprintf(cgiOut, "<input type=\"text\" size=\"20\" name=\"ename\" />\n");
+   fprintf(cgiOut, " Address</td></tr>\n");
+   fprintf(cgiOut, "<tr><td>\n");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"type\" value=\"os\" />\n");
+   fprintf(cgiOut, " Object Signing</td></tr>\n");
+   fprintf(cgiOut, "<tr><td>\n");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"type\" value=\"ca\" />\n");
+   fprintf(cgiOut, " CA Certificate</td></tr>\n");
+   fprintf(cgiOut, "</td></tr></table>\n");
+   fprintf(cgiOut, "</td></tr>\n");
 
    /* Add extended key usage */
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"checkbox\" name=\"extkeyusage\" id=\"exkey_cb\" onclick=\"switchGrey('exkey_cb', 'exkey_td', 'none');\" />");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "<tr>\n");
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<input type=\"checkbox\" name=\"extkeyusage\" id=\"exkey_cb\" onclick=\"switchGrey('exkey_cb', 'exkey_td', 'none', 'none');\" />\n");
+   fprintf(cgiOut, "</th>\n");
 
-   fprintf(cgiOut, "<td class=type>");
+   fprintf(cgiOut, "<td class=\"type\">\n");
    fprintf(cgiOut, "Extended Key Usage:");
-   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "</td>\n");
 
-   fprintf(cgiOut, "<td id=\"exkey_td\" style=\"background-color: #CFCFCF;\">");
-   fprintf(cgiOut, "<select name=\"extkeytype\">");
-   fprintf(cgiOut, "<option value=\"tlsws\" selected>");
-   fprintf(cgiOut, "TLS Web server authentication</option>");
-   fprintf(cgiOut, "<option value=\"tlscl\">TLS Web client authentication</option>");
-   fprintf(cgiOut, "<option value=\"cs\">Code Signing</option>");
-   fprintf(cgiOut, "<option value=\"ep\">Email Protection</option>");
-   fprintf(cgiOut, "<option value=\"ts\">Time Stamping</option>");
-   fprintf(cgiOut, "<option value=\"ocsp\">OCSP Signing</option>");
-   fprintf(cgiOut, "</select>");
-   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "<td id=\"exkey_td\" style=\"background-color: #CFCFCF;\">\n");
+   fprintf(cgiOut, "<select name=\"extkeytype\">\n");
+   fprintf(cgiOut, "<option value=\"tlsws\" selected=\"selected\">");
+   fprintf(cgiOut, "TLS Web server authentication</option>\n");
+   fprintf(cgiOut, "<option value=\"tlscl\">TLS Web client authentication</option>\n");
+   fprintf(cgiOut, "<option value=\"cs\">Code Signing</option>\n");
+   fprintf(cgiOut, "<option value=\"ep\">Email Protection</option>\n");
+   fprintf(cgiOut, "<option value=\"ts\">Time Stamping</option>\n");
+   fprintf(cgiOut, "<option value=\"ocsp\">OCSP Signing</option>\n");
+   fprintf(cgiOut, "</select>\n");
+   fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
 
    /* Set validity from now */
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"days_cb\" value=vd checked onclick=\"switchGrey('days_cb', 'days_td', 'date_td');\" />");
+   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"days_cb\" value=\"vd\" checked onclick=\"switchGrey('days_cb', 'days_td', 'date_td', 'none');\" />");
    fprintf(cgiOut, "</th>\n");
 
-   fprintf(cgiOut, "<td class=type>");
+   fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Set Validity (in Days):");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "<td id=\"days_td\">\n");
@@ -481,7 +547,7 @@ int cgiMain() {
    /* Set validity by date, format */
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>\n");
-   fprintf(cgiOut, "<input type=\"radio\" name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td')\" />");
+   fprintf(cgiOut, "<input type=\"radio\" name=\"valid\" id=\"date_cb\" value=\"se\" onclick=\"switchGrey('date_cb', 'date_td', 'days_td', 'none')\" />");
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "<td class=\"type\">");
@@ -490,11 +556,11 @@ int cgiMain() {
    fprintf(cgiOut, "<td id=\"date_td\" style=\"background-color: #CFCFCF;\">\n");
    fprintf(cgiOut, "<input type=text name=\"startdate\" size=\"15\" value=\"%s\" />\n", startdate);
    fprintf(cgiOut, "Start Date\n");
-   fprintf(cgiOut, "<input type=text name=\"starttime\" size=\"10\" value=\"%s\" />\n", starttime);
+   fprintf(cgiOut, "<input type=\"text\" name=\"starttime\" size=\"10\" value=\"%s\" />\n", starttime);
    fprintf(cgiOut, "Start Time (UTC)<br />\n");
-   fprintf(cgiOut, "<input type=text name=\"enddate\" size=\"15\" value=\"%s\" />\n", enddate);
+   fprintf(cgiOut, "<input type=\"text\" name=\"enddate\" size=\"15\" value=\"%s\" />\n", enddate);
    fprintf(cgiOut, "End Date &nbsp;\n");
-   fprintf(cgiOut, "<input type=text name=\"endtime\" size=\"10\" value=\"%s\" />\n", endtime);
+   fprintf(cgiOut, "<input type=\"text\" name=\"endtime\" size=\"10\" value=\"%s\" />\n", endtime);
    fprintf(cgiOut, " End Time (UTC)\n");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
@@ -513,17 +579,17 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "</table>\n");
    fprintf(cgiOut, "</form>\n");
+   fprintf(cgiOut, "<p></p>\n");
 
-   fprintf(cgiOut, "<table width=100%%>");
-
+   fprintf(cgiOut, "<table width=\"100%%\">");
    /* display the request content in PEM format here */
-   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th colspan=\"2\">");
    fprintf(cgiOut, "Show certificate request data in PEM format:");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "</th>\n");
    fprintf(cgiOut, "</tr>\n");
 
-   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<td class=\"getcert\">");
    fprintf(cgiOut, "<a href=\"javascript:elementHideShow('reqpem');\">\n");
    fprintf(cgiOut, "Expand/Hide Request data in PEM format</a>\n");
@@ -538,9 +604,11 @@ int cgiMain() {
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
    if(strcmp(keytype, "rsa") == 0) 
-      fprintf(cgiOut, "Private Key Pair - %d Bit RSA:</th></tr>\n", rsastrength);
+      fprintf(cgiOut, "Private Key - %d Bit RSA:</th></tr>\n", rsastrength);
    if(strcmp(keytype, "dsa") == 0) 
-      fprintf(cgiOut, "Private Key Pair - %d Bit DSA:</th></tr>\n", dsastrength);
+      fprintf(cgiOut, "Private Key - %d Bit DSA:</th></tr>\n", dsastrength);
+   if(strcmp(keytype, "ecc") == 0) 
+      fprintf(cgiOut, "Private Key - ECC type %s:</th></tr>\n", eccstrength);
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<td class=\"getcert\">\n");
    fprintf(cgiOut, "<a href=\"javascript:elementHideShow('keypem');\">\n");
@@ -562,7 +630,7 @@ int cgiMain() {
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
    fprintf(cgiOut, "Copy and save to file for use with the certificate.</th></tr>\n");
-   fprintf(cgiOut, "</table>");
+   fprintf(cgiOut, "</table>\n");
    pagefoot();
    BIO_free(outbio);
    return(0);

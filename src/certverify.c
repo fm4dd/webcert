@@ -13,6 +13,36 @@
 #include <openssl/x509v3.h>
 #include "webcert.h"
 
+/* add hardcoded definitions for the s/mime extension */
+#define SMIME_OP        0x10
+#define SMIME_IP        0x20
+#define SMIME_SIGNERS   0x40
+#define SMIME_ENCRYPT   (1 | SMIME_OP)
+#define SMIME_DECRYPT   (2 | SMIME_IP)
+#define SMIME_SIGN      (3 | SMIME_OP | SMIME_SIGNERS)
+#define SMIME_VERIFY    (4 | SMIME_IP)
+#define SMIME_PK7OUT    (5 | SMIME_IP | SMIME_OP)
+#define SMIME_RESIGN    (6 | SMIME_IP | SMIME_OP | SMIME_SIGNERS)
+
+/* 
+[ smime_seq ]
+SMIMECapability.0 = SEQWRAP,OID:sha1
+SMIMECapability.1 = SEQWRAP,OID:sha256
+SMIMECapability.2 = SEQWRAP,OID:sha1WithRSA
+SMIMECapability.3 = SEQWRAP,OID:aes-256-ecb
+SMIMECapability.4 = SEQWRAP,OID:aes-256-cbc
+SMIMECapability.5 = SEQWRAP,OID:aes-256-ofb
+SMIMECapability.6 = SEQWRAP,OID:aes-128-ecb
+SMIMECapability.7 = SEQWRAP,OID:aes-128-cbc
+SMIMECapability.8 = SEQWRAP,OID:aes-128-ecb
+SMIMECapability.9 = SEQUENCE:rsa_enc
+*/
+
+/* ---------------------------------------------------------- *
+ * This function adds missing OID's to the internal structure *
+ * ---------------------------------------------------------- */
+void add_missing_smime_oids();
+
 int cgiMain() {
 
    BIO 			    *inbio   = NULL;
@@ -214,25 +244,32 @@ int cgiMain() {
      }
    }
 
-   /* display the key type and size here */
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=2>Public key data for this certificate request:");
-   fprintf(cgiOut, "</th>");
-   fprintf(cgiOut, "</tr>\n");
-   fprintf(cgiOut, "<td colspan=2 class=getcert>");
-   if (pkey) {
-     switch (pkey->type) {
-       case EVP_PKEY_RSA:
-         fprintf(stdout, "%d bit RSA Key", EVP_PKEY_bits(pkey));
-         break;
-       case EVP_PKEY_DSA:
-         fprintf(stdout, "%d bit DSA Key", EVP_PKEY_bits(pkey));
-         break;
-       default:
-         fprintf(stdout, "%d bit non-RSA/DSA Key", EVP_PKEY_bits(pkey));
-         break;
-     }
-   }
+  /* display the key type and size here */
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">Public key data for this certificate request:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "</tr>\n");
+  fprintf(cgiOut, "<td colspan=\"2\" class=\"getcert\">");
+  if (pkey) {
+    EC_KEY *myecc = NULL;
+    switch (pkey->type) {
+      case EVP_PKEY_RSA:
+        fprintf(stdout, "%d bit RSA Key", EVP_PKEY_bits(pkey));
+        break;
+      case EVP_PKEY_DSA:
+        fprintf(stdout, "%d bit DSA Key", EVP_PKEY_bits(pkey));
+        break;
+      case EVP_PKEY_EC:
+        myecc = EVP_PKEY_get1_EC_KEY(pkey);
+        const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
+        fprintf(stdout, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
+                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
+        break;
+      default:
+        fprintf(stdout, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(pkey->type));
+        break;
+    }
+  }
  
    fprintf(cgiOut, " <a href=\"javascript:elementHideShow('pubkey');\">\n");
    fprintf(cgiOut, "Expand or Hide Public Key Data</a>");
@@ -243,6 +280,37 @@ int cgiMain() {
    fprintf(cgiOut, "</div></pre>\n");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
+
+  ASN1_STRING     *asn1_sig = NULL;
+  X509_ALGOR      *sig_type = NULL;
+  size_t          sig_bytes = 0;
+  char   sig_type_str[1024] = "";
+
+  /* ---------------------------------------------------------- *
+   * Extract the certificate's signature data.                  *
+   * ---------------------------------------------------------- */
+  sig_type = webrequest->sig_alg;
+  asn1_sig = webrequest->signature;
+  sig_bytes = asn1_sig->length;
+  OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">Signature:</th>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<td  colspan=\"2\" class=\"getcert\">");
+
+  fprintf(cgiOut, "%s, Length: %d Bytes\n", sig_type_str, (int) sig_bytes);
+  fprintf(cgiOut, "<a href=\"javascript:elementHideShow('reqsig');\">\n");
+  fprintf(cgiOut, "Expand or Hide Signature Data</a>");
+  /* display the signature in hex byte format here */
+  fprintf(cgiOut, "<div class=\"showpem\" id=\"reqsig\"  style=\"display: none\"><pre>");
+  if (X509_signature_dump(outbio, asn1_sig, 0) != 1)
+    BIO_printf(outbio, "Error printing the signature data\n");
+  fprintf(cgiOut, "</pre></div>\n");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th colspan=\"2\">");
@@ -263,7 +331,7 @@ int cgiMain() {
    /* Add Key Usage */
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"checkbox\" name=\"keyusage\" checked id=\"key_cb\" onclick=\"switchGrey('key_cb', 'key_td', 'none');\" />");
+   fprintf(cgiOut, "<input type=\"checkbox\" name=\"keyusage\" checked id=\"key_cb\" onclick=\"switchGrey('key_cb', 'key_td', 'none', 'none');\" />");
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "<td class=type>");
@@ -291,7 +359,7 @@ int cgiMain() {
    /* Add extended key usage */
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"checkbox\" name=\"extkeyusage\" id=\"exkey_cb\" onclick=\"switchGrey('exkey_cb', 'exkey_td', 'none');\" />");
+   fprintf(cgiOut, "<input type=\"checkbox\" name=\"extkeyusage\" id=\"exkey_cb\" onclick=\"switchGrey('exkey_cb', 'exkey_td', 'none', 'none');\" />");
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "<td class=type>");
@@ -314,7 +382,7 @@ int cgiMain() {
    /* Set validity from now */
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"days_cb\" value=vd checked onclick=\"switchGrey('days_cb', 'days_td', 'date_td');\" />");
+   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"days_cb\" value=vd checked onclick=\"switchGrey('days_cb', 'days_td', 'date_td', 'none');\" />");
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "<td class=type>");
@@ -330,7 +398,7 @@ int cgiMain() {
    /* Set validity by date */
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td')\" />");
+   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td', 'none')\" />");
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "<td class=type>");
@@ -361,6 +429,7 @@ int cgiMain() {
    fprintf(cgiOut, "</table>\n");
    fprintf(cgiOut, "</form>\n");
 
+   fprintf(cgiOut, "<p></p>");
    fprintf(cgiOut, "<table width=100%%>\n");
 
    /* display the request content in PEM format here */
@@ -388,4 +457,50 @@ int cgiMain() {
    BIO_free(inbio);
    BIO_free(outbio);
    return(0);
+}
+
+/* ---------------------------------------------------------- *
+ * OpenSSL seems to lack a few OID's used for EV certificates *
+ * ---------------------------------------------------------- */
+void add_missing_smime_oids() {
+/* get the nid integer for the S/MIME Capapbilities */
+/* 1.2.840.113549.1.9.15 */
+int smime_nid = OBJ_ln2nid("S/MIME Capabilities");
+/* convert the NID into a ASN1 Object */
+ASN1_OBJECT* smime_obj = OBJ_nid2obj(smime_nid);
+
+    /* Create data to be included in the extension */
+    ASN1_OCTET_STRING* data = ASN1_OCTET_STRING_new();
+    ASN1_OCTET_STRING_set(data, (const unsigned char *) "our data", -1);
+
+    /**
+     * This will create our new extension, identified by our OID (obj
+     * parameter). And with the data created above (data
+     * parameter). The 0 means that the extension is non-critical.
+     */
+    X509_EXTENSION_create_by_OBJ(NULL, smime_obj, 0, data);
+
+  /* --------------------------------------------------------- *
+   * OBJ_create():                                             *
+   * First field is the OID, which will be converted to DER    *
+   * encoding. Next are the long and short description of      *
+   * this OID. The descriptions will not be included as the    *
+   * extension identifier, but the DER encoding of the OID.    *
+   * --------------------------------------------------------- */
+  OBJ_create("1.3.6.1.4.1.311.60.2.1.1",
+             "jurisdiction Of Incorporation LocalityName",
+             "jurisdiction Of Incorporation LocalityName");
+
+  OBJ_create("1.3.6.1.4.1.311.60.2.1.2",
+             "jurisdiction Of Incorporation StateOrProvinceName",
+             "jurisdiction Of Incorporation StateOrProvinceName");
+
+  OBJ_create("1.3.6.1.4.1.311.60.2.1.3",
+             "jurisdiction Of Incorporation CountryName",
+             "jurisdiction Of Incorporation CountryName");
+
+  /* Logo Type definition, see http://www.ietf.org/rfc/rfc3709 */
+  OBJ_create("1.3.6.1.5.5.7.1.12",
+             "id-pe-logotype",
+             "id-pe-logotype");
 }

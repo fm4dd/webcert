@@ -493,7 +493,7 @@ int cgiMain() {
    if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_DSA)
       digest = EVP_dss1();
    else if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_RSA)
-      digest = EVP_sha1();
+      digest = EVP_sha256();
    else
       int_error("Error checking CA private key for valid digest");
    if (! X509_sign(newcert, ca_privkey, digest))

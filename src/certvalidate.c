@@ -177,7 +177,7 @@ int cgiMain() {
   
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "<input type=\"radio\" id=\"lf_rb\" name=\"crt_type\" value=\"lf\" checked=\"checked\" onclick=\"switchGrey('lf_rb', 'lf', 'ru');\" />\n");
+    fprintf(cgiOut, "<input type=\"radio\" id=\"lf_rb\" name=\"crt_type\" value=\"lf\" checked=\"checked\" onclick=\"switchGrey('lf_rb', 'lf', 'ru', 'none');\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Upload Your certificate (PEM format)");
@@ -189,7 +189,7 @@ int cgiMain() {
 
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "<input type=\"radio\" id=\"ru_rb\" name=\"crt_type\" value=\"ru\" onclick=\"switchGrey('ru_rb', 'ru', 'lf');\" />\n");
+    fprintf(cgiOut, "<input type=\"radio\" id=\"ru_rb\" name=\"crt_type\" value=\"ru\" onclick=\"switchGrey('ru_rb', 'ru', 'lf', 'none');\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Remote certificate check - type URL");
@@ -209,8 +209,8 @@ int cgiMain() {
     fprintf(cgiOut, "Because the certificate validation happens low-level, non-http ");
     fprintf(cgiOut, "ports like ldaps or imaps can also be specified here. More examples:\n");
     fprintf(cgiOut, "<ul><li>https://server.domain.tld:8883</li>\n");
-    fprintf(cgiOut, "<li>ldaps://www.frank4dd.com</li>\n");
-    fprintf(cgiOut, "<li>imaps://www.frank4dd.com</li>\n");
+    fprintf(cgiOut, "<li>ldaps://fm4dd.com</li>\n");
+    fprintf(cgiOut, "<li>imaps://fm4dd.com</li>\n");
     fprintf(cgiOut, "</ul>\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -332,7 +332,7 @@ int cgiMain() {
   
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "<input type=\"checkbox\" name=\"X509_V_FLAG_X509_STRICT\" id=\"strict_cb\" onclick=\"switchGrey('strict_cb', 'strict_td', 'none');\" />\n");
+    fprintf(cgiOut, "<input type=\"checkbox\" name=\"X509_V_FLAG_X509_STRICT\" id=\"strict_cb\" onclick=\"switchGrey('strict_cb', 'strict_td', 'none', 'none');\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td id=\"strict_td\" style=\"background-color: #CFCFCF;\">\n");
     fprintf(cgiOut, "<b>X509_V_FLAG_X509_STRICT</b> - disable workarounds, verify strictly per X509 rules.\n");
@@ -1110,7 +1110,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
 
   pkey = X509_get_pubkey(ct);
 
-  fprint_type = EVP_sha1();
+  fprint_type = EVP_sha256();
   if (!X509_digest(ct, fprint_type, fprint, &thumb_size))
     int_error("Error creating the certificate fingerprint.");
 
@@ -1244,12 +1244,19 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
   if (pkey) {
+    EC_KEY *myecc = NULL;
     switch (pkey->type) {
       case EVP_PKEY_RSA:
         fprintf(stdout, "%d bit RSA Key", EVP_PKEY_bits(pkey));
         break;
       case EVP_PKEY_DSA:
         fprintf(stdout, "%d bit DSA Key", EVP_PKEY_bits(pkey));
+        break;
+      case EVP_PKEY_EC:
+        myecc = EVP_PKEY_get1_EC_KEY(pkey);
+        const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
+        fprintf(stdout, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
+                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
         break;
       default:
         fprintf(stdout, "%d bit non-RSA/DSA Key", EVP_PKEY_bits(pkey));
@@ -1273,7 +1280,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   if (strstr(sig_type_str, "Md5") || strstr(sig_type_str, "md5"))
     fprintf(cgiOut, "<td bgcolor=\"#cf0f0f\">");
   else fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
-  fprintf(cgiOut, "%s, Length: %d Bytes\n", sig_type_str, sig_bytes);
+  fprintf(cgiOut, "%s, Length: %d Bytes\n", sig_type_str, (int) sig_bytes);
   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certsig_%s%d');\">\n", chain_type, level);
   fprintf(cgiOut, "Expand or Hide Signature Data</a>");
   /* display the cert signature in hex byte format here */

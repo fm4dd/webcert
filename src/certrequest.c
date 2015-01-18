@@ -33,7 +33,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<td class=\"getcert\">");
-   fprintf(cgiOut, "<textarea name=\"cert-request\" cols=\"65\" rows=\"15\">");
+   fprintf(cgiOut, "<textarea name=\"cert-request\" cols=\"65\" rows=\"25\">");
    fprintf(cgiOut, "</textarea>");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "</tr>\n");

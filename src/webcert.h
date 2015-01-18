@@ -16,13 +16,13 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "webca-secret"
+#define PASS            "secret-pass"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
 #define CABUNDLEDIR	"/srv/app/webCA/ca-bundles"
 /*********** The directory to write the exported certificates into ************/
-#define CERTEXPORTDIR   "/srv/www/std-root/frank4dd.com/sw/webcert/export"
+#define CERTEXPORTDIR   "/srv/www/std-root/fm4dd.com/sw/webcert/export"
 /*********** The export directory URL to download the certificates from *******/
 #define CERTEXPORTURL   "/sw/webcert/export"
 /*********** where the ca's serial file is ************************************/
@@ -43,8 +43,8 @@
 /***************** no changes required below this line ************************/
 /***************** *********************************** ************************/
 
-#define CONTACT_EMAIL	"support@frank4dd.com"
-#define SW_VERSION	"WebCert v1.7.6 (28/02/2013)"
+#define CONTACT_EMAIL	"support@fm4dd.com"
+#define SW_VERSION	"WebCert v1.7.7 (18/01/2015)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
