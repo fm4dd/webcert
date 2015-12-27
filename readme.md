@@ -1,5 +1,6 @@
-WebCert - a Web Tool for Generation and Management of digital Certificates
-==========================================================================
+## WebCert - a Web Tool for Generation and Management of digital Certificates
+
+* * *
 
 Digital Certificates are needed everywhere in today's world. They are used
 to enable secure SSL web traffic, e-mail encryption and other technologies.
@@ -24,7 +25,7 @@ library from Thomas Boutell. As a result, you don't need to maintain any of
 the web-application enabling technologies like JSP, PHP, Phyton...
 It is using simple CGI technology for easiest installation and maintenance.
 
-External Dependencies:
+### External Dependencies:
 
 *	Thomas Boutell's CGIC library, see http://www.boutell.com/cgic/
 
@@ -35,14 +36,13 @@ External Dependencies:
 	-I<path-to-openssl-includes> and -L<path-to-openssl-lib>
 	 in the Makefiles
 
-Configuration:
---------------
+### Configuration:
 
 Apart from the Makefiles in the root and src/ dirextories, check the file
 webcert.h in the src/ directory. The upper section can be configured to set
 the URL location and the default webcert parameters.
 
-Making and installing WebCert:
+### Making and installing WebCert:
 
 *	vi Makefile and src/Makefile to adjust various path's for cgi and html
 	destinations and ssl include and library directories
@@ -65,28 +65,24 @@ Making and installing WebCert:
 
 A more complete installation procedure is provided in INSTALL.
 
-Security:
----------
+#### Security:
 
 It is highly adviseable to provide access control and SSL encryption
 to the WebCert interface for any use other then experimental.
 The webserver writeable certificate and export directory should be secured
 (i.e. by a Apache <Directory> directive).
 
-Copyright and License:
-----------------------
+#### Copyright and License:
 
 WebCert was written by Frank4DD. It is distributed under the GPL.
 Anybody may reproduce it, use it, send it, print it, transfer on a T-shirt,
 etc. without modifying its content or removing the copyright.
 
-Legal Disclaimer:
------------------
+#### Legal Disclaimer:
 
 Of course this software and its created certificates come WITHOUT ANY WARRANTY.
 
-Thanks and Credits:
--------------------
+#### Thanks and Credits:
 
 *	to Thomas Boutell for providing the CGIC library:
 *	to the authors of O'Reilly's book "Network Security with OpenSSL"
