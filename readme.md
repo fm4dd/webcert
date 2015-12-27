@@ -37,7 +37,7 @@ Make sure you have:
 
 ### Configuration:
 
-Apart from the Makefiles in the root and src/ dirextories, check the file
+Apart from the Makefiles in the root and src/ directories, check the file
 webcert.h in the src/ directory. The upper section can be configured to set
 the URL location and the default webcert parameters.
 
