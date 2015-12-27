@@ -1,4 +1,5 @@
-## WebCert - a Web Tool for Generation and Management of digital Certificates
+## WebCert
+#### A Web Tool for Generation and Management of digital Certificates
 
 Digital Certificates are needed everywhere in today's world. They are used
 to enable secure SSL web traffic, e-mail encryption and other technologies.
