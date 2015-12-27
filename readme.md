@@ -1,7 +1,5 @@
 ## WebCert - a Web Tool for Generation and Management of digital Certificates
 
-* * *
-
 Digital Certificates are needed everywhere in today's world. They are used
 to enable secure SSL web traffic, e-mail encryption and other technologies.
 
@@ -31,9 +29,9 @@ It is using simple CGI technology for easiest installation and maintenance.
 
 *	OpenSSL libary and headers, see http://www.openssl.org/
 
-        make sure you have:
-	-I<path-to-cgic-includes> and -L<path-to-cgic-lib> and
-	-I<path-to-openssl-includes> and -L<path-to-openssl-lib>
+Make sure you have:
+	`-I<path-to-cgic-includes>` and `-L<path-to-cgic-lib>`, and
+	`-I<path-to-openssl-includes>` and `-L<path-to-openssl-lib>`
 	 in the Makefiles
 
 ### Configuration:
