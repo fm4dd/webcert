@@ -558,11 +558,15 @@ int cgiMain() {
       }
 
       /* ---------------------------------------------------------- *
-       * Get the PKCS12 file requested for analyze                  *
+       * Get and check the PKCS12 passphrase                        *
        * ---------------------------------------------------------- */
       char p12pass[P12PASSLEN] = "";
       if (! (cgiFormString("p12pass", p12pass, sizeof(p12pass)) == cgiFormSuccess)) {
          int_error("Error retrieving mandatory PKCS12 passphrase.");
+      }
+
+      if (! (ret = PKCS12_verify_mac(p12,p12pass,strlen(p12pass)))){
+         int_error("Error wrong PKCS12 passphrase.");
       }
 
       static char title[] = "PKCS12 Converter - PKCS12 Data Extract";
