@@ -27,7 +27,7 @@ Webcert is a web-based 'C' application using CGI technology. It relies on Thomas
     <h3>Preparations - creating a OpenSSL CA</h3>
     <hr />
     <p>
-You just downloaded the software package <a href="http://fm4dd.com/sw/webcert/source/webcert-v1.7.7.tar.gz">here</a>, saved it to /tmp and looked into the README. You want to install webcert into "/var/www/html" instead of my chosen "/srv/www/std-root/frank4dd.com/sw" path and you would like to change the the CA directory structure from my "/srv/app/webCA" to "/var/myCA". Here is what you should
+You just downloaded the software package <a href="http://fm4dd.com/sw/webcert/source/webcert-v1.7.8.tar.gz">here</a>, saved it to /tmp and looked into the README. You want to install webcert into "/var/www/html" instead of my chosen "/srv/www/std-root/frank4dd.com/sw" path and you would like to change the the CA directory structure from my "/srv/app/webCA" to "/var/myCA". Here is what you should
 do in order to make it all work.
     </p>
     <p>
@@ -274,7 +274,7 @@ buildrequest.cgi screen. Your apache configuration could look like this:
       Order allow,deny
       Allow from all
   &lt;/Directory&gt;
-  &lt;Directory "/srv/www/std-root/fm4dd.com/sw/webcert/export"&gt;
+  &lt;Directory "/var/www/html/webcert/export"&gt;
     # Force cert files as download (requires mod_headers)
     &lt;Files *.der&gt;
       ForceType application/octet-stream
