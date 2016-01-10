@@ -289,7 +289,7 @@ int cgiMain() {
         snprintf(error_str, sizeof(error_str), "Error reading cert structure of %s into memory", cert_name);
         int_error(error_str);
       }
-      //BIO_free(certbio);
+      BIO_free(certbio);
 
       /* ---------------------------------------------------------- *
        * Get the PKCS12 part-2: get the private key file name       *
@@ -341,7 +341,7 @@ int cgiMain() {
         snprintf(error_str, sizeof(error_str), "Error reading private key structure of %s into memory", key_name);
         int_error(error_str);
       }
-      //BIO_free(keybio);
+      BIO_free(keybio);
 
       /* ---------------------------------------------------------- *
        * Get the PKCS12 part-3: get the signing certs file name     *
