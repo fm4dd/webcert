@@ -23,7 +23,7 @@ int cgiMain() {
  * ---------------------------------------------------------------------------*/
 
    fprintf(cgiOut, "<form action=\"genrequest.cgi\" method=\"post\" accept-charset=\"utf-8\">");
-   fprintf(cgiOut, "<table width=\"100%%\">\n");
+   fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th colspan=\"4\">");
    fprintf(cgiOut, "To generate a certificate request, please fill out ");

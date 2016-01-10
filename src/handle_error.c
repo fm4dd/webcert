@@ -9,14 +9,15 @@
 #include <openssl/err.h>
 #include "webcert.h"
 
-void handle_error(const char *file, int lineno, const char *msg)
-{
+void handle_error(const char *file, int lineno, const char *msg) {
+   void ERR_load_crypto_strings(void);
+   void ERR_free_strings(void);
+
    static char title[] = "System Error Information";
 
 /* -------------------------------------------------------------------------- *
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
-
    pagehead(title);
 
    fprintf(cgiOut, "<h3>%s Error</h3>\n", SW_VERSION);
@@ -25,9 +26,9 @@ void handle_error(const char *file, int lineno, const char *msg)
 
    fprintf(cgiOut, "<h3>Additional Information</h3>\n");
    fprintf(cgiOut, "<hr />");
-   fprintf(cgiOut, "<p>");
+   fprintf(cgiOut, "<p><pre>");
    ERR_print_errors_fp(cgiOut);
-   fprintf(cgiOut, "</p>");
+   fprintf(cgiOut, "</pre></p>");
 
    fprintf(cgiOut, "<p>");
    fprintf(cgiOut, "For most common errors, please see section 10. under <a href=\"help.cgi\">Help</a>.\n");

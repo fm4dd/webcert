@@ -7,7 +7,7 @@ HTMDIR=/srv/www/std-root/fm4dd.com/sw/webcert
 CGIDIR=/srv/www/std-root/fm4dd.com/sw/webcert/cgi-bin
 EXPORTDIR=${CGIDIR}/../export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi
 
 ALLJS=webcert.js
 
@@ -27,37 +27,40 @@ clean:
 	rm -f *.o *.cgi
 
 buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o
-	$(CC) ${LIBS} buildrequest.o pagehead.o pagefoot.o -o buildrequest.cgi
+	$(CC) buildrequest.o pagehead.o pagefoot.o -o buildrequest.cgi ${LIBS}
 
 genrequest.cgi: genrequest.o pagehead.o pagefoot.o handle_error.o
-	$(CC) ${LIBS} handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi
+	$(CC) handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
 
 certsign.cgi: pagehead.o pagefoot.o handle_error.o serial.o certsign.o
-	$(CC) ${LIBS} pagehead.o pagefoot.o handle_error.o serial.o certsign.o -o certsign.cgi
+	$(CC) pagehead.o pagefoot.o handle_error.o serial.o certsign.o -o certsign.cgi ${LIBS}
 
 certrequest.cgi: certrequest.o
-	$(CC) ${LIBS} certrequest.o pagehead.o pagefoot.o -o certrequest.cgi
+	$(CC) certrequest.o pagehead.o pagefoot.o -o certrequest.cgi ${LIBS}
 
 certverify.cgi: certverify.o
-	$(CC) ${LIBS} certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi
+	$(CC) certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
 
 help.cgi: help.o
-	$(CC) ${LIBS} help.o pagehead.o pagefoot.o handle_error.o -o help.cgi
+	$(CC) help.o pagehead.o pagefoot.o handle_error.o -o help.cgi ${LIBS}
 
 capolicy.cgi: capolicy.o
-	$(CC) ${LIBS} capolicy.o pagehead.o pagefoot.o handle_error.o -o capolicy.cgi
+	$(CC) capolicy.o pagehead.o pagefoot.o handle_error.o -o capolicy.cgi ${LIBS}
 
 getcert.cgi: getcert.o
-	$(CC) ${LIBS} getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi
+	$(CC) getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
 
 certstore.cgi: certstore.o
-	$(CC) ${LIBS} certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi
+	$(CC) certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
 
 certsearch.cgi: certsearch.o
-	$(CC) ${LIBS} certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi
+	$(CC) certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
 
 certexport.cgi: certexport.o
-	$(CC) ${LIBS} certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi
+	$(CC) certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
 
-certvalidate.cgi: certvalidate.o
-	$(CC) ${LIBS} certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi
+certvalidate.cgi: webcert.o certvalidate.o
+	$(CC) webcert.o certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi ${LIBS}
+
+p12convert.cgi: webcert.o p12convert.o
+	$(CC) webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}

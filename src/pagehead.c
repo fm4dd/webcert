@@ -38,6 +38,7 @@ void pagehead(char* title) {
    fprintf(cgiOut, "<li><a href=\"certstore.cgi\"><span>List Certs</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"certsearch.cgi\"><span>Search Certs</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"certvalidate.cgi\"><span>Verify Certs</span></a></li>\n");
+   fprintf(cgiOut, "<li><a href=\"p12convert.cgi\"><span>P12 Convert</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"help.cgi\"><span>Help</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"capolicy.cgi\"><span>About</span></a></li>\n");
    fprintf(cgiOut, "</ul>\n");

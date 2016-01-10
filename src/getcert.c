@@ -114,7 +114,7 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * start the form output                                                      *
  * ---------------------------------------------------------------------------*/
-   fprintf(cgiOut, "<table width=\"100%%\">\n");
+   fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th>");
    fprintf(cgiOut, "certificate %s in PEM format", certfilestr);
@@ -149,9 +149,9 @@ int cgiMain() {
    fprintf(cgiOut, "Expand/Hide certificate data in Text format</a>\n");
 
    if (strcmp(format, "text") == 0)
-      fprintf(cgiOut, "<div class=\"showtext\" id=\"certtext\"  style=\"display: block\">\n");
+      fprintf(cgiOut, "<div class=\"showtxt\" id=\"certtext\"  style=\"display: block\">\n");
    else 
-      fprintf(cgiOut, "<div class=\"showtext\" id=\"certtext\"  style=\"display: none\">\n");
+      fprintf(cgiOut, "<div class=\"showtxt\" id=\"certtext\"  style=\"display: none\">\n");
 
    fprintf(cgiOut, "<pre>\n");
    if (! (X509_print_ex_fp(cgiOut, cert,
@@ -172,7 +172,7 @@ int cgiMain() {
 
    fprintf(cgiOut, "<p></p>\n");
 
-   fprintf(cgiOut, "<table width=\"100%%\">\n");
+   fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>\n");
 
    // Show PEM format

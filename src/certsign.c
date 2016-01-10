@@ -510,7 +510,7 @@ int cgiMain() {
 
    pagehead(title);
 
-   fprintf(cgiOut, "<table width=\"100%%\">");
+   fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>\n");
    fprintf(cgiOut, "Your new certificate %s is displayed below:", certfile);
@@ -534,7 +534,7 @@ int cgiMain() {
    fprintf(cgiOut, "</table>\n");
 
    fprintf(cgiOut, "<p></p>\n");
-   fprintf(cgiOut, "<table width=\"100%%\">");
+   fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
 
    fprintf(cgiOut, "<th>\n");

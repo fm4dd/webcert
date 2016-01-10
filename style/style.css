@@ -34,7 +34,7 @@ body a:visited {
     width: 100%;
     color: #FFFFFF;
     background-color: #004477;
-    background-image:url('../images/frank4dd-logo.gif');
+    background-image:url('../images/logo.gif');
     background-position:98% 50%;
     background-repeat:no-repeat;
 }
@@ -85,8 +85,8 @@ body a:visited {
 	float: left;
 	height: 20px;
 	padding-top: 7px;
-	padding-left: 18px;
-	padding-right: 18px;
+	padding-left: 14px;
+	padding-right: 14px;
 	text-transform: uppercase;
 	font-family: "Helvetica Neue",helvetica,"microsoft sans serif",arial,sans-serif;
 	font-size: 85%;
@@ -155,6 +155,7 @@ body a:visited {
 }
 
 #content table {
+    width: 100%;
     border-spacing: 1;
     border: 1px solid black;
 }
@@ -187,6 +188,13 @@ body a:visited {
 #content input {
     vertical-align:middle;
 }
+
+#content input.p12pass, input.url {
+    background-color: #EFEFEF;
+    color: #004477;
+    width: 98%;
+}
+
 
 #content input.getcert {
     width: 70px;
@@ -290,13 +298,22 @@ body a:visited {
     margin: auto;
 }
 
-#content div.showtext {
+#content div.showext {
+    padding: 5px 5px 5px 5px;
+    background: #FFFFFF;
+    text-align: left;
+    margin: auto;
+    width: 580px;
+    overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
+}
+
+#content div.showtxt {
     /* t r b l */
     padding: 5px 5px 5px 5px;
     background: #FFFFFF;
     text-align: left;
     margin: auto; 
-    width: 624px;
+    width: 650px;
     overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
 

@@ -357,8 +357,8 @@ int cgiMain() {
     fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
     fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
-    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"ViewPEM\" />\n");
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"Detail\" />\n");
     fprintf(cgiOut, "</form>\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -368,7 +368,7 @@ int cgiMain() {
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
     fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
     fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
-    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"ViewTXT\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"Renew\" />\n");
     fprintf(cgiOut, "</form>\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -386,7 +386,7 @@ int cgiMain() {
 
   fprintf(cgiOut, "<p></p>\n");
 
-  fprintf(cgiOut, "<table width=\"100%%\">\n");
+  fprintf(cgiOut, "<table>\n");
 
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th>\n");

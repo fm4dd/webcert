@@ -16,7 +16,7 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "secret-pass"
+#define PASS            "webca-secret"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
@@ -44,7 +44,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.7.7 (18/01/2015)"
+#define SW_VERSION	"WebCert v1.7.8 (01/09/2016)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
@@ -55,14 +55,18 @@
 /****** html code template for adding code or scripts into the footer *********/
 #define FOOTER_TEMPL	"../footer-template.htm" /* optional */
 
-#define REQLEN	       16384 /* Max length of a certificate request in bytes.*/
+#define REQLEN	       32768 /* Max length of a certificate request in bytes.*/
                              /* Often not bigger then 817 bytes with a 1024  */
-			     /* bit RSA key, size increases for bigger keys  */
+			     /* bit RSA key. Increase size for bigger keys   */
 			     /* and when a lot of attributes are generated.  */
 
-#define KEYLEN          4096 /* this is the max length of a private key in   */
+#define KEYLEN         32768 /* this is the max length of a private key in   */
                              /* PEM format used for the PKCS12 cert bundle   */
-                             /* generation.                                  */
+                             /* generation. 32KByte should cover large keys. */
+
+#define CALISTLEN    4194304 /* this is the max length of a CA list file in  */
+                             /* PEM format used for the PKCS12 cert bundle   */
+                             /* generation. (4MB)                            */
 
 #define P12PASSLEN      41   /* this is the max length for the password used */
                              /* as protection for the PKCS12 cert bundle.    */

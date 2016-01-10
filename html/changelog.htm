@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title>WebCert - Changelog</title>
-  <!--#include virtual="/site-headermeta-template.htm" -->
+  <!--#include virtual="/site-headermeta.htm" -->
 <meta name="Title" content="WebCert - CHangelog" />
 <meta name="Description" content="Code change log for the WebCert Digital Certificate Management software." />
 <meta name="Keywords" content="SSL, HTTPS, TLS, certificate, x509, changelog" />
@@ -15,9 +15,42 @@
     <h1>WebCert - Changelog</h1>
     <h2>Web-based Digital Certificate Management - Software Changes</h2>
   </div>
-  <!--#include virtual="/site-navigation-template.htm" -->
+  <!--#include virtual="/site-navigation.htm" -->
 
   <div id="content">
+    <h3>2016-01-12 new version 1.7.8 released</h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+      <li>A PKCS12 converter tool allows to create, analyze and extract PKCS12 files online.</li>
+      <li>Certstore button labels now prepare for the new certificate renewal function.</li>
+    </ul>
+    <h4>Bug fixes:</h4>
+    <ul>
+      <li>Certs with very long extension data caused a display window overlap in the verification screen</li>
+      <li>Web server headers now enforce that cert file download links prompt for download</li>
+    </ul>
+    <h4>Known Bugs:</h4>
+    <ul>
+      <li>Certificate verification tool does not always include server-side intermediate certs in validation</li>
+    </ul>
+    <h3>2015-01-18 new version 1.7.7 released</h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+      <li>
+Because SHA1 is widely phased out, WebCert changed the CSR and certificate generation signing to SHA256.
+      </li>
+      <li>
+WebCert now handles Elliptic Curve Cryptography (ECC) for certificates and requests. Certificate requests can be build using the most common ECC key types secp224r1, secp256k1, secp384r1 and secp521r1.
+      </li>
+      <li>
+Certificate requests now display the signature algorithm and data.
+      </li>
+      <li>
+The default key size has been raised to 2048 bit, and the key rating has been updated to reflect that 1024bit keys are below par.
+      </li>
+    </ul>
     <h3>2013-02-28 new version 1.7.6 released</h3>
     <hr />
     <h4>New functionality:</h4>
@@ -265,7 +298,7 @@ Please send requests, bug reports and comments as usual to:
 <li>Webcert has been re-written in 'C' for performance and portability:
 <p>
  WebCert is now using the OpenSSL library API instead of being a front-end to the
- commandline tool. This radial design change supports future extension.</p></li>
+ commandline tool. This radical design change supports future extension.</p></li>
     </ul>
     <h3>2003-06-30      new version 1.0.0 released      </h3>
     <hr />
@@ -303,8 +336,8 @@ Perl CGI's provide a web interface to take PEM-encoded certificate requests
     </script>
     </p>
   </div>
-  <!--#include virtual="/site-discussion-template.htm" -->
-  <!--#include virtual="/site-footerdata-template.htm" -->
+  <!--#include virtual="/site-discussion.htm" -->
+  <!--#include virtual="/site-footerdata.htm" -->
 </div>
 </body>
 </html>

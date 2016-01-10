@@ -189,9 +189,9 @@ int cgiMain() {
    fprintf(cgiOut, "<form action=\"certsign.cgi\" method=\"post\">");
    fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-request\" ");
    fprintf(cgiOut, "value=\"");
-   fprintf(cgiOut, formreq);
+   fprintf(cgiOut, "%s", formreq);
    fprintf(cgiOut, "\">\n");
-   fprintf(cgiOut, "<table width=100%%>");
+   fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th colspan=\"2\">");
    fprintf(cgiOut, "Subject data of this certificate request:");
@@ -254,19 +254,19 @@ int cgiMain() {
     EC_KEY *myecc = NULL;
     switch (pkey->type) {
       case EVP_PKEY_RSA:
-        fprintf(stdout, "%d bit RSA Key", EVP_PKEY_bits(pkey));
+        fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
         break;
       case EVP_PKEY_DSA:
-        fprintf(stdout, "%d bit DSA Key", EVP_PKEY_bits(pkey));
+        fprintf(cgiOut, "%d bit DSA Key", EVP_PKEY_bits(pkey));
         break;
       case EVP_PKEY_EC:
         myecc = EVP_PKEY_get1_EC_KEY(pkey);
         const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
-        fprintf(stdout, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
+        fprintf(cgiOut, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
                             OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
         break;
       default:
-        fprintf(stdout, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(pkey->type));
+        fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(pkey->type));
         break;
     }
   }
@@ -321,7 +321,7 @@ int cgiMain() {
    fprintf(cgiOut, "<p></p>\n");
 
    /* Add Certificate extensions, Define validity */
-   fprintf(cgiOut, "<table width=100%%>");
+   fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th colspan=\"3\">");
    fprintf(cgiOut, "Define certificate details:");
@@ -337,7 +337,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=type>");
    fprintf(cgiOut, "Key Usage:</td>");
    fprintf(cgiOut, "<td id=\"key_td\" style=\"padding: 0;\">");
-   fprintf(cgiOut, "<table style=\"width: 100%%; border-style: none;\"><tr><td>");
+   fprintf(cgiOut, "<table style=\"border-style: none;\"><tr><td>");
    fprintf(cgiOut, "<input type=radio name=\"type\" value=sv checked>");
    fprintf(cgiOut, " SSL Server</td></tr><tr>");
    fprintf(cgiOut, "<td>");
@@ -430,7 +430,7 @@ int cgiMain() {
    fprintf(cgiOut, "</form>\n");
 
    fprintf(cgiOut, "<p></p>");
-   fprintf(cgiOut, "<table width=100%%>\n");
+   fprintf(cgiOut, "<table>\n");
 
    /* display the request content in PEM format here */
    fprintf(cgiOut, "<tr>\n");

@@ -93,7 +93,7 @@ int cgiMain() {
     * start the html output                                                   *
     * ------------------------------------------------------------------------*/
       pagehead(title);
-      fprintf(cgiOut, "<table width=\"100%%\">\n");
+      fprintf(cgiOut, "<table>\n");
 
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th>");
@@ -129,7 +129,7 @@ int cgiMain() {
 
 /* -------------------------------------------------------------------------- *
  * If the requested format is PKCS12, check if private key and cacert include *
- * flag was provided. Otherwise request pricate key and cacert include flag.  *
+ * flag was provided. Otherwise request private key and cacert include flag.  *
  * ---------------------------------------------------------------------------*/
    if (strcmp(format, "p12") == 0 &&
        (! (cgiFormString("certkey", privkeystr, KEYLEN) == cgiFormSuccess ) ||
@@ -142,7 +142,7 @@ int cgiMain() {
     * ------------------------------------------------------------------------*/
       pagehead(title);
       fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">");
-      fprintf(cgiOut, "<table width=\"100%%\">\n");
+      fprintf(cgiOut, "<table>\n");
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th colspan=\"2\">");
       fprintf(cgiOut, "Please paste your certificate's private key into the ");
@@ -170,8 +170,7 @@ int cgiMain() {
       fprintf(cgiOut, "<br />(max 40 chars):");
       fprintf(cgiOut, "</td>\n");
       fprintf(cgiOut, "<td>");
-      fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" size=\"40\" ");
-      fprintf(cgiOut, "maxlength=\"PASSLEN\" />");
+      fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" class=\"p12pass\"/>");
       fprintf(cgiOut, "</td>\n");
       fprintf(cgiOut, "</tr>\n");
 
@@ -346,7 +345,7 @@ int cgiMain() {
                                    0            // int keytype (default no flag)
                                  );
      if ( pkcs12bundle == NULL)
-        int_error("Error generating a valid PKCS12 certificate.");
+        int_error("Error generating a valid PKCS12 structure.");
 
      if (! (exportfile=fopen(exportfilestr, "w")))
         printf("Error open PKCS12 certificate file bundle for writing.\n");
@@ -364,7 +363,7 @@ int cgiMain() {
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
    pagehead(title);
-   fprintf(cgiOut, "<table width=\"100%%\">\n");
+   fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th>");
    fprintf(cgiOut, "%s certificate in %s format", certfilestr, format);

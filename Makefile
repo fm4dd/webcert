@@ -11,7 +11,8 @@ WWWGROUP=www
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 
-BASEDIR=/srv/www/std-root/frank4dd.com/sw
+CADIR=/srv/app/webCA
+BASEDIR=/srv/www/std-root/fm4dd.com/sw
 HTMDIR=${BASEDIR}/webcert
 STLDIR=${BASEDIR}/webcert/style
 IMGDIR=${BASEDIR}/webcert/images
@@ -21,7 +22,8 @@ EXPORTDIR=${BASEDIR}/webcert/export
 ALLHTM=html/*.htm
 ALLSTL=style/style.css
 ALLIMG=images/*.gif
-ALLCGI=src/buildrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/help.cgi src/capolicy.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi
+ALLCGI=src/buildrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/help.cgi src/capolicy.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/p12convert.cgi
+ALLSCR=scripts/*.sh
 
 all: 
 	cd src && ${MAKE}
@@ -34,6 +36,8 @@ install:
 	install -v -d ${CGIDIR}
 	install -v -d ${EXPORTDIR} -o ${WWWUSER} -g ${WWWGROUP}
 	if [ ! -d ${EXPORTDIR} ]; then echo "${EXPORTDIR} does not exist."; exit; fi
+	install -v -d ${EXPORTDIR}/tmp -o ${WWWUSER} -g ${WWWGROUP}
+	if [ ! -d ${EXPORTDIR}/tmp ]; then echo "${EXPORTDIR}/tmp does not exist."; exit; fi
 
 	@echo -e "\n######## Installing HTML files..."
 	install -v  ${ALLHTM} ${HTMDIR}
@@ -43,6 +47,12 @@ install:
 	install -v ${ALLIMG} ${IMGDIR} 
 	@echo
 	cd ./src && ${MAKE} install
+
+	install -v -d ${CADIR} -o root -g root -m=755
+	if [ ! -d ${CADIR} ]; then echo "${CADIR} does not exist."; exit; fi
+	install -v -d ${CADIR}/scripts -o root -g root -m=755
+	if [ ! -d ${CADIR}/scripts ]; then echo "${CADIR}/scripts does not exist."; exit; fi
+	install -v ${ALLSCR} ${CADIR}/scripts
 
 clean:
 	cd src && ${MAKE} clean
