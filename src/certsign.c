@@ -13,46 +13,48 @@
 #include <openssl/pem.h>
 #include "webcert.h"
 
+/* ---------------------------------------------------------- *
+ * csr_validate() does a basic check for the CSR's PEM format *
+ * ---------------------------------------------------------- */
+void csr_validate(char *);
+
 char * mkdatestr(char *, char *);
 
 int check_ext_presence(X509_EXTENSION *test_ext, X509 *cert);
 
 int cgiMain() {
 
-   BIGNUM			*bserial;
-   ASN1_INTEGER			*aserial = NULL;
-   EVP_PKEY                     *ca_privkey, *req_pubkey;
-   EVP_MD                       const *digest = NULL;
-   X509                         *newcert, *cacert;
-   X509_REQ                     *certreq;
-   X509_NAME                    *name;
-   X509V3_CTX                   ctx;
-   FILE                         *fp;
-   BIO                          *inbio, *outbio, *savbio;
-   static char			title[]         = "Signed Certificate";
-   char 			formreq[REQLEN] = "";
-   char 			reqtest[REQLEN] = "";
-   char				beginline[81]   = "";
-   char				endline[81]     = "";
-   char				certfile[81]    = "";
-   char				email_head[255] = "email:";
-   char				email_name[248] = "";
-   char				certfilestr[255]= "";
-   char				   *validlist[] = { "vd","se" };
-   int				      valid_res = 0;
-   char                        startdatestr[16] = "";
-   char                           startdate[11] = "";
-   char                            starttime[9] = "";
-   char                          enddatestr[16] = "";
-   char                             enddate[11] = "";
-   char                              endtime[9] = "";
-   char				validdaystr[255]= "";
-   char				*typelist[] = { "sv","cl","em","os","ca" };
-   int				type_res = 0;
-   char				extkeytype[81]  = "";
-   long				valid_days = 0;
-   long				valid_secs = 0;
-   time_t                              now = 0;
+   BIGNUM       *bserial;
+   ASN1_INTEGER	*aserial = NULL;
+   EVP_PKEY     *ca_privkey, *req_pubkey;
+   EVP_MD        const *digest = NULL;
+   X509          *newcert, *cacert;
+   X509_REQ      *certreq;
+   X509_NAME     *name;
+   X509V3_CTX    ctx;
+   FILE          *fp;
+   BIO           *inbio, *outbio, *savbio;
+   static char 	 title[]  = "Signed Certificate";
+   char   formreq[REQLEN] = "";
+   char	  certfile[81]    = "";
+   char	  email_head[255] = "email:";
+   char	  email_name[248] = "";
+   char	 certfilestr[255] = "";
+   char	     *validlist[] = { "vd","se" };
+   int	        valid_res = 0;
+   char  startdatestr[16] = "";
+   char     startdate[11] = "";
+   char      starttime[9] = "";
+   char    enddatestr[16] = "";
+   char       enddate[11] = "";
+   char        endtime[9] = "";
+   char	 validdaystr[255] = "";
+   char	      *typelist[] = { "sv","cl","em","os","ca" };
+   int	         type_res = 0;
+   char	   extkeytype[81] = "";
+   long	       valid_days = 0;
+   long	       valid_secs = 0;
+   time_t             now = 0;
 
 /* -------------------------------------------------------------------------- *
  * These function calls are essential to make many PEM + other openssl        *
@@ -65,8 +67,8 @@ int cgiMain() {
  * check if a certificate was handed to certsign.cgi                          *
  * or if someone just tried to call us directly without a request             *
  * -------------------------------------------------------------------------- */
-   if (cgiFormString("cert-request", formreq, REQLEN) != cgiFormSuccess )
-      int_error("Error getting request from certverify.cgi form");
+   if (cgiFormString("sign-request", formreq, REQLEN) != cgiFormSuccess )
+      int_error("Error getting CSR data from certverify.cgi form");
 
    if (cgiFormRadio("valid", validlist, 2, &valid_res, 0) == cgiFormNotFound )
       int_error("Error getting the date range type from previous form");
@@ -130,33 +132,9 @@ int cgiMain() {
     }
 
 /* -------------------------------------------------------------------------- *
- * check if a certificate was pasted or if someone just typed                 *
- * a line of garbage                                                          *
+ * check if a CSR was pasted or if someone just sends garbage                 *
  * -------------------------------------------------------------------------- */
-   if (! strchr(formreq, '\n'))
-      int_error("Error invalid request format, received garbage line");
-
-/* -------------------------------------------------------------------------- *
- * check if a certificate was pasted with the BEGIN and END                   *
- * lines, assuming the request in between is intact                           *
- * -------------------------------------------------------------------------- */
-   strcpy(reqtest, formreq);
-   strcpy(endline, (strrchr(reqtest, '\n') +1));
-   /* should there be a extra newline at the end, we remove it here */
-   if(strlen(endline) == 0 && strlen(reqtest) > 0) {
-      reqtest[strlen(reqtest)-1]='\0';
-      strcpy(endline, (strrchr(reqtest, '\n') +1));
-   }
-   strtok(reqtest, "\n");
-   strcpy(beginline, reqtest);
-
-   if(! ( (strcmp(beginline, "-----BEGIN CERTIFICATE REQUEST-----") == 0 &&
-         strcmp(endline, "-----END CERTIFICATE REQUEST-----") == 0)
-         ||
-
-        (strcmp(beginline, "-----BEGIN NEW CERTIFICATE REQUEST-----") == 0 &&
-         strcmp(endline, "-----END NEW CERTIFICATE REQUEST-----") == 0) ) )
-      int_error("Error invalid request format, no BEGIN/END lines");
+   csr_validate(formreq);
 
 /* -------------------------------------------------------------------------- *
  * input seems OK, write the request to a temporary BIO buffer                *

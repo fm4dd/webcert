@@ -18,6 +18,92 @@
 #include <openssl/x509_vfy.h>
 
 /* ---------------------------------------------------------- *
+ * csr_validate() does a basic check for the CSR's PEM format * 
+ * ---------------------------------------------------------- */
+void csr_validate(char * form) {
+   char reqtest[REQLEN] = "";
+   char beginline[81]   = "";
+   char endline[81]     = "";
+   char *char_pos       = NULL;
+
+
+   if (! strchr(form, '\n'))
+      int_error("Error invalid request format, received garbage line");
+
+   /* ---------------------------------------------------------- *
+    * check if a CSR was pasted with the BEGIN and END           *
+    * lines, assuming the request in between is intact           *
+    * ---------------------------------------------------------- */
+   strcpy(reqtest, form);
+   strcpy(endline, (strrchr(reqtest, '\n') +1));
+   /* should there be a extra newline at the end, we remove it here */
+   if(strlen(endline) == 0 && strlen(reqtest) > 0) {
+      reqtest[strlen(reqtest)-1]='\0';
+      strcpy(endline, (strrchr(reqtest, '\n') +1));
+   }
+   strtok(reqtest, "\n");
+   strcpy(beginline, reqtest);
+
+   /* should there be a windows carriage return, we remove it here */
+   if ((char_pos = strchr(beginline, '\r'))) *char_pos='\0';
+   if ((char_pos = strchr(endline, '\r'))) *char_pos='\0';
+
+   if(! ( (strcmp(beginline, "-----BEGIN CERTIFICATE REQUEST-----") == 0 &&
+         strcmp(endline, "-----END CERTIFICATE REQUEST-----") == 0)
+         ||
+
+        (strcmp(beginline, "-----BEGIN NEW CERTIFICATE REQUEST-----") == 0 &&
+         strcmp(endline, "-----END NEW CERTIFICATE REQUEST-----") == 0) ) )
+      int_error("Error invalid request format, no BEGIN/END lines");
+}
+
+/* ---------------------------------------------------------- *
+ * key_validate() does a basic check for the Key's PEM format * 
+ * ---------------------------------------------------------- */
+void key_validate(char * form) {
+   char reqtest[REQLEN] = "";
+   char beginline[81]   = "";
+   char endline[81]     = "";
+
+   /* -------------------------------------------------------------------- *
+    * check if a key was pasted with the BEGIN and END                     *
+    * lines, assuming the key data in between is intact.                   *
+    * The following line variations are expected:                          *
+    * -----BEGIN RSA PRIVATE KEY-----                                      *
+    * -----BEGIN DSA PRIVATE KEY-----                                      *
+    * -----BEGIN PRIVATE KEY-----                                          *
+    * -------------------------------------------------------------------- */
+
+    if (! strchr(form, '\n'))
+       int_error("Error invalid key format, received garbage line.");
+
+    strcpy(reqtest, form);
+    strcpy(endline, (strrchr(reqtest, '\n') +1));
+    /* should there be extra newlines at the end, we remove it here */
+    if(strlen(endline) == 0 && strlen(reqtest) > 0) {
+       if (strstr(reqtest, "-----END RSA PRIVATE KEY-----") != NULL)
+         strtok(strstr(reqtest, "-----END RSA PRIVATE KEY-----"), "\n");
+       if (strstr(reqtest, "-----END DSA PRIVATE KEY-----") != NULL)
+         strtok(strstr(reqtest, "-----END DSA PRIVATE KEY-----"), "\n");
+       if (strstr(reqtest, "-----END PRIVATE KEY-----") != NULL)
+         strtok(strstr(reqtest, "-----END PRIVATE KEY-----"), "\n");
+    }
+    strncpy(endline, (strrchr(reqtest, '\n') +1), sizeof(endline));
+    strncpy(beginline, reqtest, (strchr(reqtest, '\n') - reqtest));
+
+    /* check for the acceptable line variations */
+    if(! ( (strcmp(beginline, "-----BEGIN RSA PRIVATE KEY-----") == 0 &&
+          strcmp(endline, "-----END RSA PRIVATE KEY-----") == 0)
+          ||
+         (strcmp(beginline, "-----BEGIN DSA PRIVATE KEY-----") == 0 &&
+          strcmp(endline, "-----END DSA PRIVATE KEY-----") == 0)
+          ||
+         (strcmp(beginline, "-----BEGIN PRIVATE KEY-----") == 0 &&
+          strcmp(endline, "-----END PRIVATE KEY-----") == 0) ) )
+       int_error("Error invalid request format, no BEGIN/END lines");
+}
+
+/* ---------------------------------------------------------- *
  * X509_signature_dump() converts binary signature data into  *
  * hex bytes, separated with : and a newline after 54 chars.  *
  * (2 chars + 1 ':' = 3 chars, 3 chars * 18 = 54)             *
@@ -87,7 +173,7 @@ void display_key(EVP_PKEY *pkey) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th width=\"70px\">Private Key:");
+  fprintf(cgiOut, "<th width=\"75px\">Private Key:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
@@ -126,7 +212,7 @@ void display_key(EVP_PKEY *pkey) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th width=\"70px\">Public Key:");
+  fprintf(cgiOut, "<th width=\"75px\">Public Key:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
@@ -235,11 +321,12 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"2\">");
   fprintf(cgiOut, "%s Certificate Information", ct_type);
+  if (level >= 0) fprintf(cgiOut, " %d", level+1);
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th width=\"70px\">Version:");
+  fprintf(cgiOut, "<th width=\"75px\">Version:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert subject here */
@@ -248,7 +335,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th width=\"70px\">Subject:");
+  fprintf(cgiOut, "<th width=\"75px\">Subject:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert subject here */

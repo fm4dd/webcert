@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------- *
  * file:	certverify.cgi                                                *
- * purpose:	verify the certificate entries before signing                 *
+ * purpose:	verify the certificate entries before signing the CSR         *
  * compile:     gcc -I/usr/local/ssl/include -L/usr/local/ssl/lib             *
  * certverify.c -o certverify.cgi -lcgic -lssl -lcrypto                       *
  * ---------------------------------------------------------------------------*/
@@ -43,6 +43,11 @@ SMIMECapability.9 = SEQUENCE:rsa_enc
  * ---------------------------------------------------------- */
 void add_missing_smime_oids();
 
+/* ---------------------------------------------------------- *
+ * csr_validate() does a basic check for the CSR's PEM format *
+ * ---------------------------------------------------------- */
+void csr_validate(char *);
+
 int cgiMain() {
 
    BIO 			    *inbio   = NULL;
@@ -56,10 +61,6 @@ int cgiMain() {
    int 			i;
    char 		buf[80] = "";
    char 		formreq[REQLEN] = "";
-   char 		reqtest[REQLEN] = "";
-   char 		beginline[81]   = "";
-   char 		endline[81]     = "";
-   char                 *char_pos       = NULL;
    static char 		title[] = "Verify Request";
 
    int                  filesize = 0;
@@ -71,68 +72,35 @@ int cgiMain() {
    char         starttime[9]     ="";
    char         endtime[9]       ="";
 
-/* ------------------------------------------------------------------------- *
- * check if a certificate request was handed to certverify.cgi               *
- * or if someone just tried to call us directly without a request            *
- * --------------------------------------------------------------------------*/
-
-   if (! (cgiFormString("cert-request", formreq, REQLEN) == cgiFormSuccess )) {
-   /* we did not get a cert-request pasted, let's see if we got a file */
-      if (! (cgiFormFileSize("requestfile", &filesize) == cgiFormSuccess)) {
+  /* ------------------------------------------------------------------------- *
+   * Check form data if we got CSR data, or a CSR file, or nothing at all      *
+   * --------------------------------------------------------------------------*/
+   if (! (cgiFormString("csr-data", formreq, REQLEN) == cgiFormSuccess )) {
+     if (! (cgiFormFileSize("csr-file", &filesize) == cgiFormSuccess)) {
          /* if we did not get a file either, we report failure */
          int_error("Error getting request from certrequest.cgi form");
-      } else {
-         /* we got a file, check the size is between 0 and REQLEN */
-         if (filesize <=0 || filesize > REQLEN)
-            int_error("Error uploaded request file size is to big");
-         else
-            /* we open the file to get a file handle */
-            cgiFormFileOpen( "requestfile", &file);
-            /* we read the file content into our formreq buffer */
-            if (! (cgiFormFileRead(file, formreq, REQLEN, &filesize) == cgiFormSuccess))
-               int_error("Error uploaded request file is not readable");
       }
+      /* we got a file, check the size is between 0 and REQLEN */
+      if (filesize <=0 || filesize > REQLEN)
+         int_error("Error uploaded request file size is to big");
+     
+      /* Try to open the file and get a file handle */
+      if (cgiFormFileOpen("csr-file", &file) != cgiFormSuccess)
+         int_error("Error unable to open the CSR file");
+
+      /* we read the file content into our formreq buffer */
+      if (! (cgiFormFileRead(file, formreq, REQLEN, &filesize) == cgiFormSuccess))
+         int_error("Error uploaded request file is not readable");
    }
 
 /* ------------------------------------------------------------------------- *
- * check if a certificate was pasted or if someone just typed                *
- * a line of garbage                                                         *
+ * check if a CSR was pasted or if someone just sends garbage                *
  * --------------------------------------------------------------------------*/
-
-   if (! strchr(formreq, '\n'))
-      int_error("Error invalid request format, received garbage line");
-
-/* ------------------------------------------------------------------------- *
- * check if a certificate was pasted with the BEGIN and END                  *
- * lines, assuming the request in between is intact                          *
- * ------------------------------------------------------------------------- */
-
-   strcpy(reqtest, formreq);
-   strcpy(endline, (strrchr(reqtest, '\n') +1));
-   /* should there be a extra newline at the end, we remove it here */
-   if(strlen(endline) == 0 && strlen(reqtest) > 0) {
-      reqtest[strlen(reqtest)-1]='\0';
-      strcpy(endline, (strrchr(reqtest, '\n') +1));
-   }
-   strtok(reqtest, "\n");
-   strcpy(beginline, reqtest);
-
-   /* should there be a windows carriage return, we remove it here */
-   if ((char_pos = strchr(beginline, '\r'))) *char_pos='\0';
-   if ((char_pos = strchr(endline, '\r'))) *char_pos='\0';
-
-   if(! ( (strcmp(beginline, "-----BEGIN CERTIFICATE REQUEST-----") == 0 &&
-         strcmp(endline, "-----END CERTIFICATE REQUEST-----") == 0)
-         ||
-
-        (strcmp(beginline, "-----BEGIN NEW CERTIFICATE REQUEST-----") == 0 &&
-         strcmp(endline, "-----END NEW CERTIFICATE REQUEST-----") == 0) ) )
-      int_error("Error invalid request format, no BEGIN/END lines");
+   csr_validate(formreq);
 
 /* ------------------------------------------------------------------------- *
  * input seems OK, write the request to a temporary mem BIO                  *
  * ------------------------------------------------------------------------- */
-
    inbio = BIO_new_mem_buf(formreq, -1);
 
 /* ------------------------------------------------------------------------- *
@@ -187,10 +155,8 @@ int cgiMain() {
    pagehead(title);
 
    fprintf(cgiOut, "<form action=\"certsign.cgi\" method=\"post\">");
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-request\" ");
-   fprintf(cgiOut, "value=\"");
-   fprintf(cgiOut, "%s", formreq);
-   fprintf(cgiOut, "\">\n");
+   fprintf(cgiOut, "<input type=\"hidden\" name=\"sign-request\" ");
+   fprintf(cgiOut, "value=\"%s\">\n", formreq);
    fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th colspan=\"2\">");

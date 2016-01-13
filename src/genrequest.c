@@ -329,7 +329,7 @@ int cgiMain() {
    pagehead(title);
 
    fprintf(cgiOut, "<form action=\"certsign.cgi\" method=\"post\">");
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-request\" ");
+   fprintf(cgiOut, "<input type=\"hidden\" name=\"sign-request\" ");
    fprintf(cgiOut, "value=\"");
    if (! PEM_write_bio_X509_REQ(outbio, webrequest))
       int_error("Error printing the request");

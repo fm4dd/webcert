@@ -31,7 +31,7 @@
 #define CB_STRLEN 255
 #define MOZI_PREFIX "mozilla-bundle-"
 #define VERI_PREFIX "verisign-bundle-"
-#define SUSE_PREFIX "opensuse-bundle-"
+#define UBUN_PREFIX "ubuntu-bundle-"
 
 /* ---------------------------------------------------------- *
  * get_latest_ca_bundle() checks for the most recent file     *
@@ -96,13 +96,13 @@ int cgiMain() {
   int            veri_fsize = 0;
   int          wcca_counter = 0;
   int          veri_counter = 0;
-  int          suse_counter = 0;
+  int          ubun_counter = 0;
   int          wbct_counter = 0;
   char          **form_data = NULL;  /* string array for query data */
   char cafilestr[CB_STRLEN] = "";
   struct stat wcca_stat; 
   struct stat veri_stat; 
-  struct stat suse_stat; 
+  struct stat ubun_stat; 
   struct stat wbct_stat; 
   time_t now;
   int ret;
@@ -141,9 +141,9 @@ int cgiMain() {
     sk_X509_INFO_pop_free(list, X509_INFO_free);
   }
 
-  file_prefix = SUSE_PREFIX;
+  file_prefix = UBUN_PREFIX;
   if(get_latest_ca_bundle(cafilestr) > 0) {
-    list = X509_load_ca_file(&suse_counter, &suse_stat, cafilestr);
+    list = X509_load_ca_file(&ubun_counter, &ubun_stat, cafilestr);
     sk_X509_INFO_pop_free(list, X509_INFO_free);
   }
 
@@ -245,14 +245,14 @@ int cgiMain() {
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
-    if (suse_counter) {
+    if (ubun_counter) {
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th>");
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"os\" />");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td colspan=\"2\">");
-      fprintf(cgiOut, "<b>OpenSuse Root certificates</b> - %d certificates, %ld Bytes, last update %s</td>\n",
-                      suse_counter, suse_stat.st_size, ctime(&suse_stat.st_mtime));
+      fprintf(cgiOut, "<b>Ubuntu Root certificates</b> - %d certificates, %ld Bytes, last update %s</td>\n",
+                      ubun_counter, ubun_stat.st_size, ctime(&ubun_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
     if (wbct_counter) {
@@ -536,7 +536,7 @@ int cgiMain() {
     }
 
     if (strcmp(cab_type, "os") == 0) {
-      file_prefix = SUSE_PREFIX;
+      file_prefix = UBUN_PREFIX;
       if(get_latest_ca_bundle(cafilestr) > 0) {
         list = X509_load_ca_file(&veri_counter, &veri_stat, cafilestr);
       }
@@ -620,7 +620,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"70px\">Date:");
+    fprintf(cgiOut, "<th width=\"75px\">Date:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     fprintf(cgiOut, "%s", ctime(&now));
@@ -628,7 +628,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"70px\">Target:");
+    fprintf(cgiOut, "<th width=\"75px\">Target:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     if(strcmp(crt_type, "lf") == 0) fprintf(cgiOut, "%s", req_name);
@@ -691,7 +691,7 @@ int cgiMain() {
     }
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"70px\">CA Bundle:");
+    fprintf(cgiOut, "<th width=\"75px\">CA Bundle:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     /* display the CA file bundle type here */
@@ -702,7 +702,7 @@ int cgiMain() {
       fprintf(cgiOut, "<b>Verisign Root certificate bundle</b> - %d certificates, %ld Bytes, last update %s",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
     if (strcmp(cab_type, "os") == 0)
-      fprintf(cgiOut, "<b>OpenSuse Root certificate bundle</b> - %d certificates, %ld Bytes, last update %s",
+      fprintf(cgiOut, "<b>Ubuntu Root certificate bundle</b> - %d certificates, %ld Bytes, last update %s",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
     if (strcmp(cab_type, "wc") == 0)
       fprintf(cgiOut, "<b>WebCert's own Root certificate</b> - %d certificates, %ld Bytes, last update %s",

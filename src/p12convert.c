@@ -43,6 +43,7 @@ void add_missing_ev_oids();
  * ---------------------------------------------------------- */
 void display_cert(X509 *cert, char ct_type[], char chain_type[], int level);
 void display_p12(PKCS12 *p12, char *pass);
+void display_stack(STACK_OF(X509) *ca);
 void display_key(EVP_PKEY *pkey);
 
 int cgiMain() {
@@ -476,7 +477,7 @@ int cgiMain() {
       fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th width=\"70px\">");
+      fprintf(cgiOut, "<th width=\"75px\">");
       fprintf(cgiOut, "PKCS12 URL:</th>");
       fprintf(cgiOut, "<td>");
       fprintf(cgiOut, "<a href=\"http://%s%s/tmp/%s\">",
@@ -574,6 +575,7 @@ int cgiMain() {
        * start the html output to display the PKCS12 data           *
        * -----------------------------------------------------------*/
       pagehead(title);
+
       fprintf(cgiOut, "<table>\n");
       fprintf(cgiOut, "<th colspan=\"2\">");
       fprintf(cgiOut, "PKCS12 File Information for %s", p12_name);
@@ -581,9 +583,38 @@ int cgiMain() {
       fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th width=\"70px\">File Size:</th>\n");
+      fprintf(cgiOut, "<th width=\"75px\">File Size:</th>\n");
       fprintf(cgiOut, "<td>%d Bytes</td>\n", p12_fsize);
       fprintf(cgiOut, "</tr>\n");
+
+      if (p12->version) {
+        fprintf(cgiOut, "<tr>\n");
+        fprintf(cgiOut, "<th width=\"75px\">Version:</th>\n");
+        fprintf(cgiOut, "<td>%ld (3 == PKCS#12 v1.1)</td>\n",
+                        ASN1_INTEGER_get(p12->version));
+        fprintf(cgiOut, "</tr>\n");
+      }
+
+      /* P12 using password integrity mode? */
+      if (p12->mac) {
+        fprintf(cgiOut, "<tr>\n");
+        fprintf(cgiOut, "<th width=\"75px\">Auth Mode:</th>\n");
+        fprintf(cgiOut, "<td>Password</td>\n");
+        fprintf(cgiOut, "</tr>\n");
+
+        fprintf(cgiOut, "<tr>\n");
+        fprintf(cgiOut, "<th width=\"75px\">MAC Algorithm:</th>\n");
+        char buf[1024];
+        OBJ_obj2txt(buf, 1024, p12->mac->dinfo->algor->algorithm, 0);
+        fprintf(cgiOut, "<td>%s</td>\n", buf);
+        fprintf(cgiOut, "</tr>\n");
+
+        fprintf(cgiOut, "<tr>\n");
+        fprintf(cgiOut, "<th width=\"75px\">MAC Iteration:</th>\n");
+        fprintf(cgiOut, "<td>%ld (Default: 1)</td>\n",
+                        p12->mac->iter ? ASN1_INTEGER_get(p12->mac->iter) : 1);
+        fprintf(cgiOut, "</tr>\n");
+      }
 
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th colspan=\"2\">&nbsp;</th>\n");
@@ -615,12 +646,44 @@ void display_p12(PKCS12 *p12, char *pass) {
     int_error(error_str);
   }
 
-   display_cert(cert, "Server/System/Application", "wct_chain", 1);
-   fprintf(cgiOut, "<p></p>\n");
+  /* level -1 switch of the level display in the cert table header */
+  if (cert != NULL) {
+    display_cert(cert, "Server/System/Application", "wct_chain", -1);
+    fprintf(cgiOut, "<p></p>\n");
+  }
+  else {
+    fprintf(cgiOut, "<p>This PKCS12 file carries no certificate.</p>\n");
+  }
 
-   display_key(pkey);
-   fprintf(cgiOut, "<p></p>\n");
+  if (pkey != NULL) {
+    display_key(pkey);
+    fprintf(cgiOut, "<p></p>\n");
+  }
+  else {
+    fprintf(cgiOut, "<p>This PKCS12 file carries no private key file.</p>\n");
+  }
 
-   //display_cert(ca, "CA", "wct_chain", 1, outbio);
-   fprintf(cgiOut, "<p></p>\n");
+  if (ca != NULL) {
+    display_stack(ca);
+    fprintf(cgiOut, "<p></p>\n");
+  }
+  else {
+    fprintf(cgiOut, "<p>This PKCS12 file carries no signing certificate chain.</p>\n");
+  }
+}
+/* ---------------------------------------------------------- *
+ * Function display_stack shows all certs of a STACK_OF(X509) *
+ * ---------------------------------------------------------- */
+void display_stack(STACK_OF(X509) *ca) {
+  int certnum = sk_X509_num(ca);
+  unsigned int counter = 0;
+  X509 *cert;
+
+  for(counter=0; counter<certnum; counter++) {
+    cert = sk_X509_value(ca, counter);
+    if (certnum == 1) display_cert(cert, "CA Chain", "wct_chain", -1);
+    else display_cert(cert, "CA Chain", "wct_chain", counter);
+    fprintf(cgiOut, "<p></p>\n");
+    X509_free(cert);
+  }
 }

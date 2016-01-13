@@ -364,10 +364,12 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-    fprintf(cgiOut, "value=\"%s\" />\n", certstore_files[tempcounter]->d_name);
-    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
+
+    fprintf(cgiOut, "<form action=\"certrenew.cgi\" method=\"post\">\n");
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-renew\" ");
+    fprintf(cgiOut, "value=\"");
+    PEM_write_bio_X509(outbio, cert);
+    fprintf(cgiOut, "\">\n");
     fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"Renew\" />\n");
     fprintf(cgiOut, "</form>\n");
     fprintf(cgiOut, "</th>\n");
@@ -490,7 +492,8 @@ int cgiMain() {
 /* ---------------------------------------------------------------------------*
  * end the html output                                                        *
  * ---------------------------------------------------------------------------*/
-
   pagefoot();
+
+  BIO_free(outbio);
   return(0);
 }

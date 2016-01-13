@@ -18,6 +18,11 @@
 #include <openssl/err.h>
 #include "webcert.h"
 
+/* ---------------------------------------------------------- *
+ * key_validate() does a basic check for a Key's PEM format   *
+ * ---------------------------------------------------------- */
+void key_validate(char *);
+
 int cgiMain() {
 
    char			format[4]           = "";
@@ -37,8 +42,6 @@ int cgiMain() {
    FILE 		*exportfile         = NULL;
    int			bytes               = 0;
    char 		title[41]           = "Download Certificate";
-   char                 beginline[81]       = "";
-   char                 endline[81]         = "";
    char 		privkeystr[KEYLEN]  = "";
    char 		privkeytst[KEYLEN]  = "";
    char			p12pass[P12PASSLEN] = "";
@@ -278,42 +281,8 @@ int cgiMain() {
      /* -------------------------------------------------------------------- *
       * check if a key was pasted with the BEGIN and END                     *
       * lines, assuming the key data in between is intact                    *
-      *                                                                      *
-      * The following line variations are expected:                          *
-      *                                                                      *
-      * -----BEGIN RSA PRIVATE KEY-----                                      *
-      * -----BEGIN DSA PRIVATE KEY-----                                      *
-      * -----BEGIN PRIVATE KEY-----                                          *
       * -------------------------------------------------------------------- */
-
-      if (! strchr(privkeystr, '\n'))
-         int_error("Error invalid key format, received garbage line.");
-
-      strcpy(privkeytst, privkeystr);
-      strcpy(endline, (strrchr(privkeytst, '\n') +1));
-
-      /* should there be extra newlines at the end, we remove it here */
-      if(strlen(endline) == 0 && strlen(privkeytst) > 0) {
-         if (strstr(privkeytst, "-----END RSA PRIVATE KEY-----") != NULL)
-           strtok(strstr(privkeytst, "-----END RSA PRIVATE KEY-----"), "\n");
-         if (strstr(privkeytst, "-----END DSA PRIVATE KEY-----") != NULL)
-           strtok(strstr(privkeytst, "-----END DSA PRIVATE KEY-----"), "\n");
-         if (strstr(privkeytst, "-----END PRIVATE KEY-----") != NULL)
-           strtok(strstr(privkeytst, "-----END PRIVATE KEY-----"), "\n");
-      }
-      strncpy(endline, (strrchr(privkeytst, '\n') +1), sizeof(endline));
-      strncpy(beginline, privkeytst, (strchr(privkeytst, '\n') - privkeytst));
-
-      /* check for the acceptable line variations */
-      if(! ( (strcmp(beginline, "-----BEGIN RSA PRIVATE KEY-----") == 0 &&
-            strcmp(endline, "-----END RSA PRIVATE KEY-----") == 0)
-            ||
-           (strcmp(beginline, "-----BEGIN DSA PRIVATE KEY-----") == 0 &&
-            strcmp(endline, "-----END DSA PRIVATE KEY-----") == 0)
-            ||
-           (strcmp(beginline, "-----BEGIN PRIVATE KEY-----") == 0 &&
-            strcmp(endline, "-----END PRIVATE KEY-----") == 0) ) )
-         int_error("Error invalid request format, no BEGIN/END lines");
+      key_validate(privkeystr);
 
      /* -------------------------------------------------------------------- *
       * input seems OK, write the key to a temporary mem BIO and load it     *

@@ -7,7 +7,7 @@ HTMDIR=/srv/www/std-root/fm4dd.com/sw/webcert
 CGIDIR=/srv/www/std-root/fm4dd.com/sw/webcert/cgi-bin
 EXPORTDIR=${CGIDIR}/../export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi certrenew.cgi
 
 ALLJS=webcert.js
 
@@ -32,14 +32,14 @@ buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o
 genrequest.cgi: genrequest.o pagehead.o pagefoot.o handle_error.o
 	$(CC) handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
 
-certsign.cgi: pagehead.o pagefoot.o handle_error.o serial.o certsign.o
-	$(CC) pagehead.o pagefoot.o handle_error.o serial.o certsign.o -o certsign.cgi ${LIBS}
+certsign.cgi: webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o
+	$(CC) webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o -o certsign.cgi ${LIBS}
 
 certrequest.cgi: certrequest.o
 	$(CC) certrequest.o pagehead.o pagefoot.o -o certrequest.cgi ${LIBS}
 
-certverify.cgi: certverify.o
-	$(CC) certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
+certverify.cgi: webcert.o certverify.o
+	$(CC) webcert.o certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
 
 help.cgi: help.o
 	$(CC) help.o pagehead.o pagefoot.o handle_error.o -o help.cgi ${LIBS}
@@ -56,11 +56,14 @@ certstore.cgi: certstore.o
 certsearch.cgi: certsearch.o
 	$(CC) certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
 
-certexport.cgi: certexport.o
-	$(CC) certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
+certexport.cgi: webcert.o certexport.o
+	$(CC) webcert.o certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
 
 certvalidate.cgi: webcert.o certvalidate.o
 	$(CC) webcert.o certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi ${LIBS}
 
 p12convert.cgi: webcert.o p12convert.o
 	$(CC) webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}
+
+certrenew.cgi: webcert.o certrenew.o
+	$(CC) webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}
