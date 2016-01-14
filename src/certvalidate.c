@@ -558,7 +558,7 @@ int cgiMain() {
       }
 
       /* we read the file content into the cab_form buffer */
-      if (! (cgiFormFileRead(file, cab_form, REQLEN, &veri_fsize) == cgiFormSuccess)) {
+      if (! (cgiFormFileRead(file, cab_form, CALISTLEN, &veri_fsize) == cgiFormSuccess)) {
         snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded certificate bundle file %s", cab_name);
         int_error(error_str);
       }

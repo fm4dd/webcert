@@ -6,7 +6,7 @@
  *               put the PKCS12 file into the "export" directory and provide  *
  *               a download link to the PKCS12 file. We don't keep this file  *
  *               stored for long, and delete any file older than 1 hour by    *
- *               cron, additionally each call of this cgi checks expiration.  *
+ *               cron.                                                        *
  * -------------------------------------------------------------------------- */
 #include <stdio.h>
 #include <unistd.h>
@@ -19,14 +19,6 @@
 #include <openssl/pkcs12.h>
 #include <openssl/err.h>
 #include "webcert.h"
-
-/* ---------------------------------------------------------- *
- * X509_load_ca_file() loads a CA file into a mem BIO using   *
- * (BIO_read_filename(), PEM_X509_INFO_read_bio() puts them   *
- * in a stack, which is then to be added to a store or CTX.   *
- * ---------------------------------------------------------- */
-STACK_OF(X509_INFO) *X509_load_ca_file(int *cert_counter,
-                      struct stat *fstat, const char *file);
 
 /* ---------------------------------------------------------- *
  * This function is taken from openssl/crypto/asn1/t_x509.c.  *
@@ -153,6 +145,8 @@ int cgiMain() {
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th colspan=\"3\">\n");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cmd\" value=\"create\" />\n");
+    fprintf(cgiOut, "<input type=\"reset\" value=\"Clear All\" />\n");
+    fprintf(cgiOut, "&nbsp;");
     fprintf(cgiOut, "<input type=\"submit\" value=\"Generate\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -163,7 +157,7 @@ int cgiMain() {
     fprintf(cgiOut, "<h3>Analyze and display the content of a PKCS12 file</h3>\n");
     fprintf(cgiOut, "<hr />\n");
     fprintf(cgiOut, "<p>\n");
-    fprintf(cgiOut, "Take a PKCS12 file and display whats is inside.\n");
+    fprintf(cgiOut, "Take a PKCS12 file and display what is inside.\n");
     fprintf(cgiOut, "</p>\n");
 
     fprintf(cgiOut, "<form enctype=\"multipart/form-data\" action=\"p12convert.cgi\" method=\"post\">\n");
@@ -179,7 +173,7 @@ int cgiMain() {
     fprintf(cgiOut, "Step 1\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
-    fprintf(cgiOut, "Upload Your PKCS12 file (typically .p12 extension)");
+    fprintf(cgiOut, "Upload Your PKCS12 file (.pfx or .p12 extensions)");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "<td id=\"lf\">\n");
     fprintf(cgiOut, "<input type=\"file\" name=\"p12file\" style=\"background:#ccc; width: 100%%\" />\n");
@@ -207,6 +201,8 @@ int cgiMain() {
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th colspan=\"3\">\n");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cmd\" value=\"analyze\" />\n");
+    fprintf(cgiOut, "<input type=\"reset\" value=\"Clear All\" />\n");
+    fprintf(cgiOut, "&nbsp;");
     fprintf(cgiOut, "<input type=\"submit\" value=\"Analyze\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -348,11 +344,10 @@ int cgiMain() {
        * Get the PKCS12 part-3: get the signing certs file name     *
        * This is optional, so no error if it doesn't exist          *
        * ---------------------------------------------------------- */
-      STACK_OF(X509) *ca_chain = sk_X509_new_null();
-        X509 *cacert;
-      char   calist_name[1024] = "";
-      ret = cgiFormFileName("calist", key_name, sizeof(calist_name));
+      STACK_OF(X509) *ca_chain = NULL;
+      char calist_name[1024] = "";
 
+      ret = cgiFormFileName("calist", key_name, sizeof(calist_name));
       if (ret == cgiFormSuccess) {
         /* ---------------------------------------------------------- *
          * Get the PKCS12 part-3: get the signing certs file size     *
@@ -384,24 +379,37 @@ int cgiMain() {
         } 
 
         /* ---------------------------------------------------------- *
-         * Get the PKCS12 part-3: load the CA's in the STACK_OF(X509) *
+         * Get the PKCS12 part-3: load the CA's into a STACK_OF(X509) *
          * ---------------------------------------------------------- */
-        BIO *calistbio  = NULL;
-        calistbio = BIO_new_mem_buf(ca_form, -1);
+        STACK_OF(X509_INFO) *list = sk_X509_INFO_new_null();
+        BIO *cabio  = NULL;
+        cabio = BIO_new_mem_buf(ca_form, -1);
 
-        int ca_chain_count = 0;
-        /* while certs load the CA certificate */
-        if (! (cacert = PEM_read_bio_X509(calistbio,NULL,NULL,NULL)))
-        // X509_load_ca_file(
-        sk_X509_push(ca_chain, cacert);
-        ca_chain_count++;
-        // end list
-
-        if (ca_chain_count == 0) {
-          snprintf(error_str, sizeof(error_str), "Error reading any CA certs of %s into memory", calist_name);
+        /* load the buffer data in a STACK_OF(X509_INFO) struct */
+        if (! (list = PEM_X509_INFO_read_bio(cabio, NULL, NULL, NULL))) {
+          snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded CA list file %s", calist_name);
           int_error(error_str);
         }
-        BIO_free(calistbio);
+        BIO_free(cabio);
+
+        /* check if we got no or only usable CA certificates */
+        int ca_count = sk_X509_INFO_num(list);
+        if (ca_count == 0) {
+          snprintf(error_str, sizeof(error_str), "No Signing certificates found in CA list file %s", calist_name);
+          int_error(error_str);
+        }
+
+        /* convert STACK_OF(X509_INFO) to STACK_OF(X509), see  */
+        /* also add_certs_from_file() in openssl/apps/crl2p7.c */
+        ca_chain = sk_X509_new_null();
+        int i;
+
+        for (i = 0; list && i < sk_X509_INFO_num(list); i++) {
+          X509_INFO *stack_item = sk_X509_INFO_value(list, i);
+          ret = sk_X509_push(ca_chain, stack_item->x509);
+        }
+        // freeing the stack below results in a crash
+        //sk_X509_INFO_pop_free(list, X509_INFO_free);
       } // end if CA list file was provided
 
       /* ---------------------------------------------------------- *
@@ -418,21 +426,25 @@ int cgiMain() {
        * NID_pbe_WithSHA1And3_Key_TripleDES_CBC                     *
        * ---------------------------------------------------------- */
       PKCS12 *p12;
+      int iter = PKCS12_DEFAULT_ITER;
+      int maciter = PKCS12_DEFAULT_ITER;
+
       if ((p12 = PKCS12_new()) == NULL)
         int_error("Error creating PKCS12 structure.\n");
 
-      p12 = PKCS12_create( p12pass,     // certbundle access password
+          snprintf(error_str, sizeof(error_str), "Error building PKCS12 structure with ca list %d", sk_X509_num(ca_chain));
+      if(! (p12 = PKCS12_create( p12pass,     // certbundle access password
                            cert_name,   // friendly certname
                            priv_key,    // the certificate private key
                            cert,        // the main certificate
                            ca_chain,    // stack of CA cert chain
                            0,           // int nid_key (default 3DES)
                            0,           // int nid_cert (40bitRC2)
-                           0,           // int iter (default 2048)
-                           0,           // int mac_iter (default 1)
-                           0 );         // int keytype (default no flag)
-   if (p12 == NULL)
-      int_error("Error generating the PKCS12 structure.\n");
+                           iter,        // int iter (default 2048)
+                           maciter,     // int maciter (default 1)
+                           0 ))) {      // int keytype (default no flag)
+          int_error("Error creating PKCS12 structure.\n");
+        }
 
       /* ---------------------------------------------------------- *
        * Create the PKCS12 temporary .p12 filename, based on time   *
@@ -611,9 +623,21 @@ int cgiMain() {
 
         fprintf(cgiOut, "<tr>\n");
         fprintf(cgiOut, "<th width=\"75px\">MAC Iteration:</th>\n");
-        fprintf(cgiOut, "<td>%ld (Default: 1)</td>\n",
+        fprintf(cgiOut, "<td>%ld (Compatibility: 1, OpenSSL Default: 2048, WIndows 7 Default: 2000)</td>\n",
                         p12->mac->iter ? ASN1_INTEGER_get(p12->mac->iter) : 1);
         fprintf(cgiOut, "</tr>\n");
+
+       //OBJ_obj2txt(buf, 1024, p12->mac->dinfo->algor->parameter->type, 0);
+       // fprintf(cgiOut, "<tr>\n");
+       // fprintf(cgiOut, "<th width=\"75px\">MAC Digest:</th>\n");
+       //BIO *outbio;
+       //outbio = BIO_new(BIO_s_file());
+       //outbio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
+       //M_ASN1_OCTET_STRING_print(bio, p12->mac->salt);
+       //M_ASN1_OCTET_STRING_print(outbio, p12->mac->dinfo->digest);
+       //BIO_free(bio);
+       // fprintf(cgiOut, "<td>%s</td>\n", buf);
+       // fprintf(cgiOut, "</tr>\n");
       }
 
       fprintf(cgiOut, "<tr>\n");

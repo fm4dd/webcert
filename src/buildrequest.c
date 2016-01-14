@@ -268,6 +268,8 @@ int cgiMain() {
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th colspan=\"4\">");
+   fprintf(cgiOut, "<input type=\"reset\" value=\"Clear All\" />\n");
+   fprintf(cgiOut, "&nbsp;");
    fprintf(cgiOut, "<input type=\"submit\" value=\"Generate\" />");
 
    fprintf(cgiOut, "</th>");

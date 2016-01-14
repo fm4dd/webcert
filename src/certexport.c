@@ -302,6 +302,9 @@ int cgiMain() {
      }
 
      /* values of zero use the openssl default values */
+     int iter = PKCS12_DEFAULT_ITER;
+     int maciter = PKCS12_DEFAULT_ITER;
+
      pkcs12bundle = PKCS12_create( p12pass,     // certbundle access password
                                    certnamestr, // friendly certname
                                    cert_privkey,// the certificate private key
@@ -309,8 +312,8 @@ int cgiMain() {
                                    cacertstack, // stack of CA cert chain
                                    0,           // int nid_key (default 3DES)
                                    0,           // int nid_cert (40bitRC2)
-                                   0,           // int iter (default 2048)
-                                   0,           // int mac_iter (default 1)
+                                   iter,        // int iter (default 2048)
+                                   maciter,     // int mac_iter (default 1)
                                    0            // int keytype (default no flag)
                                  );
      if ( pkcs12bundle == NULL)
