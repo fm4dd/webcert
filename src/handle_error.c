@@ -11,6 +11,7 @@
 
 void handle_error(const char *file, int lineno, const char *msg) {
    void ERR_load_crypto_strings(void);
+   void ERR_load_BIO_strings(void);
    void ERR_free_strings(void);
 
    static char title[] = "System Error Information";

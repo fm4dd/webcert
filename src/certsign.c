@@ -62,6 +62,7 @@ int cgiMain() {
  * -------------------------------------------------------------------------- */
    OpenSSL_add_all_algorithms();
    ERR_load_crypto_strings();
+   ERR_load_BIO_strings();
 
 /* -------------------------------------------------------------------------- *
  * check if a certificate was handed to certsign.cgi                          *

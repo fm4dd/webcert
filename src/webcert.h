@@ -16,7 +16,7 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "mypassword"
+#define PASS            "webca-secret"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
@@ -54,6 +54,10 @@
 #define POLICY_TEMPL	"../policy-template.htm" /* mandatory */
 /****** html code template for adding code or scripts into the footer *********/
 #define FOOTER_TEMPL	"../footer-template.htm" /* optional */
+
+/****** Define WebCert's default signing algorithm for certs and CSRs *********/
+#define DEF_SIGN_ALG_RSA    EVP_sha256()
+#define DEF_SIGN_ALG_DSA    EVP_dss1()
 
 #define REQLEN	       32768 /* Max length of a certificate request in bytes.*/
                              /* Often not bigger then 817 bytes with a 1024  */

@@ -29,8 +29,8 @@ clean:
 buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o
 	$(CC) buildrequest.o pagehead.o pagefoot.o -o buildrequest.cgi ${LIBS}
 
-genrequest.cgi: genrequest.o pagehead.o pagefoot.o handle_error.o
-	$(CC) handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
+genrequest.cgi: webcert.o genrequest.o pagehead.o pagefoot.o handle_error.o
+	$(CC) webcert.o handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
 
 certsign.cgi: webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o
 	$(CC) webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o -o certsign.cgi ${LIBS}

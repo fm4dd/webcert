@@ -303,7 +303,7 @@ body a:visited {
     background: #FFFFFF;
     text-align: left;
     margin: auto;
-    width: 580px;
+    width: 540px;
     overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
 

@@ -46,6 +46,7 @@ int cgiMain() {
  * ---------------------------------------------------------- */
    OpenSSL_add_all_algorithms();
    ERR_load_crypto_strings();
+   ERR_load_BIO_strings();
 
   /* ---------------------------------------------------------- *
    * If called w/o arguments, display the data gathering form.  *

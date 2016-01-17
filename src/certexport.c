@@ -43,7 +43,6 @@ int cgiMain() {
    int			bytes               = 0;
    char 		title[41]           = "Download Certificate";
    char 		privkeystr[KEYLEN]  = "";
-   char 		privkeytst[KEYLEN]  = "";
    char			p12pass[P12PASSLEN] = "";
    char			cainc[4]            = "";
 
@@ -223,6 +222,7 @@ int cgiMain() {
  * -------------------------------------------------------------------------- */
    OpenSSL_add_all_algorithms();
    ERR_load_crypto_strings();
+   ERR_load_BIO_strings();
 
 /* -------------------------------------------------------------------------- *
  * read the certstore certificate and define a BIO output stream              *
@@ -287,7 +287,7 @@ int cgiMain() {
      /* -------------------------------------------------------------------- *
       * input seems OK, write the key to a temporary mem BIO and load it     *
       * -------------------------------------------------------------------- */
-      inbio = BIO_new_mem_buf(privkeytst, -1);
+      inbio = BIO_new_mem_buf(privkeystr, -1);
       if (! (cert_privkey = PEM_read_bio_PrivateKey( inbio, NULL, NULL, NULL)))
         int_error("Error loading certificate private key content");
 
