@@ -4,6 +4,8 @@
  * author:      03/04/2004 Frank4DD                                           *
  * ---------------------------------------------------------------------------*/
 
+#include <openssl/pem.h>
+#include <openssl/x509v3.h>
 #include "openssl/asn1.h"
 #include "openssl/bn.h"
 
@@ -79,13 +81,33 @@
 
 #define int_error(msg)  handle_error(__FILE__, __LINE__, msg)
 
+/* ---------------------------------------------------------- *
+ * Shared function declarations                               *
+ * ---------------------------------------------------------- */
 void pagehead(char *title);
 void pagefoot();
 void handle_error(const char *file, int lineno, const char *msg);
-//ASN1_INTEGER *x509_load_serial(char *CAfile, char *serialfile, int create);
+
 BIGNUM *load_serial(char *serialfile, int create, ASN1_INTEGER **retai);
 int save_serial(char *serialfile, char *suffix, BIGNUM *serial, ASN1_INTEGER **retai);
 
-#define EXPIRE_SECS     (60*60*24*DAYS_VALID)
+/* ---------------------------------------------------------- *
+ * This function adds missing OID's to the internal structure *
+ * ---------------------------------------------------------- */
+void add_missing_ev_oids();
+
+/* ---------------------------------------------------------- *
+ * display_xxx() generates xxx detail output in a HTML table. *
+ * ---------------------------------------------------------- */
+void display_cert(X509 *cert, char ct_type[], char chain_type[], int level);
+void display_signing(X509_REQ *);
+void display_csr(X509_REQ *);
+void display_key(EVP_PKEY *);
+
+/* ---------------------------------------------------------- *
+ * xxx_validate() does a basic check of xxx PEM format input  *
+ * ---------------------------------------------------------- */
+void key_validate(char *);
+void csr_validate(char *);
 
 /****************************** end webcert.h *********************************/

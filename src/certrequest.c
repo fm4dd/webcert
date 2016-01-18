@@ -2,20 +2,17 @@
  * file:         certrequest.c                                                *
  * purpose:      cut & paste form for certificate request                     *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
 #include "webcert.h"
 
 int cgiMain() {
-
    static char title[] = "Paste a Certificate Request";
 
 /* -------------------------------------------------------------------------- *
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
-
    pagehead(title);
 
 /* -------------------------------------------------------------------------- *

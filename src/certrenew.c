@@ -4,7 +4,6 @@
  * compile:     gcc -I/usr/local/ssl/include -L/usr/local/ssl/lib             *
  * certrenew.c -o certrenew.cgi -lcgic -lssl -lcrypto                         *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -14,25 +13,7 @@
 #include <openssl/x509v3.h>
 #include "webcert.h"
 
-/* ---------------------------------------------------------- *
- * This function adds missing OID's to the internal structure *
- * ---------------------------------------------------------- */
-void add_missing_ev_oids();
-
-/* ---------------------------------------------------------- *
- * display_cert() shows certificate details in a HTML table.  *
- * ---------------------------------------------------------- */
-void display_cert(X509 *cert, char ct_type[], char chain_type[], int level);
-void display_signing(X509_REQ *);
-void display_csr(X509_REQ *);
-
-/* ---------------------------------------------------------- *
- * key_validate() does a basic check of the Key's PEM format  *
- * ---------------------------------------------------------- */
-void key_validate(char *);
-
 int cgiMain() {
-
    BIO *outbio = NULL;
    X509 *cert  = NULL;
    char formreq[REQLEN] = "";
@@ -156,9 +137,44 @@ int cgiMain() {
       int_error("Can't convert certificate and key intoa new CSR equest.");
 
     /* ---------------------------------------------------------- *
-     * Add the following extensions to the CSR:                   *
-     * SAN, Key sUsage, Extended Key Usage                        *
+     * Add the following types of existing cert extensions to the *
+     * CSR: SAN, Basic Constraints, Key Usage, Extended Key Usage *
      * -----------------------------------------------------------*/
+    STACK_OF(X509_EXTENSION) *ext_list = NULL;
+    X509_CINF *cert_inf = cert->cert_info;
+
+    /* if there are any cert exts */
+    if ((ext_list = cert_inf->extensions) != NULL) {
+      STACK_OF(X509_EXTENSION) *csr_list = NULL;
+      int copy_ext[4] = { NID_subject_alt_name, NID_key_usage,
+                          NID_basic_constraints, NID_ext_key_usage };
+      int i;
+
+      /* cycle through all cert exts */
+      for (i = 0; i < sk_X509_EXTENSION_num(ext_list); i++) {
+        X509_EXTENSION *ext = sk_X509_EXTENSION_value(ext_list, i);
+        ASN1_OBJECT *obj = X509_EXTENSION_get_object(ext);
+
+        /* Check if ext is supposed to be copied */
+        int j = 0;
+        while(j < 4) {
+          if (copy_ext[j] == OBJ_obj2nid(obj)) {
+            if (X509v3_add_ext(&csr_list, ext, -1) == NULL) int_error("Error adding csr ext");
+            break;
+          }
+          j++;
+        } //end while  
+      } // end cycle through extensions
+      /* ---------------------------------------------------------- *
+       * add the new CSR extension list to the CSR                  * 
+       * ---------------------------------------------------------- */
+      if (csr_list) X509_REQ_add_extensions(certreq, csr_list); 
+      /* ---------------------------------------------------------- *
+       * Because we added data to the CSR, we re-do the signature   *
+       * ---------------------------------------------------------- */
+      if (!X509_REQ_sign(certreq,pkey,EVP_sha256()))
+         int_error("Error signing X509_REQ structure with SHA256.");
+    }
 
     /* ---------------------------------------------------------- *
      * display the CSR data, and link to the certsign CGI         *

@@ -2,20 +2,17 @@
  * file:         buildrequest.c                                               *
  * purpose:      use a web form to build a certificate request from scratch   *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
 #include "webcert.h"
 
 int cgiMain() {
-
    static char title[] = "Build a Certificate Request";
 
 /* -------------------------------------------------------------------------- *
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
-
    pagehead(title);
 
 /* -------------------------------------------------------------------------- *

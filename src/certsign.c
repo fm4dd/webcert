@@ -2,7 +2,6 @@
  * file:	certsign.cgi                                                  *
  * purpose:	sign the certificate request                                  *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -12,11 +11,6 @@
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include "webcert.h"
-
-/* ---------------------------------------------------------- *
- * csr_validate() does a basic check for the CSR's PEM format *
- * ---------------------------------------------------------- */
-void csr_validate(char *);
 
 char * mkdatestr(char *, char *);
 

@@ -3,7 +3,6 @@
  * purpose:      display the certificate from file                            *
  * hint:         call it with ?cfilename=cacert to display the root CA cert   *
  * -------------------------------------------------------------------------- */
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
@@ -43,7 +42,6 @@ int cgiMain() {
  * from the calling URL or else sensitive files could be read and we have a   *
  * huge security problem. We scan and must reject all occurrences of '..' '/' *
  * ---------------------------------------------------------------------------*/
-
    if ( strstr(certfilestr, "..") ||
         strchr(certfilestr, '/')  ||
         (! strstr(certfilestr, ".pem")) )
@@ -52,7 +50,6 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * check if should display the CA cert, or open the requested filename        *
  * ---------------------------------------------------------------------------*/
-
    if (strcmp(certfilestr, "cacert.pem") == 0) {
 
       if (! (certfile = fopen(CACERT, "r")))
@@ -68,7 +65,6 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * decode the certificate and define BIO output stream                        *
  * ---------------------------------------------------------------------------*/
-
    outbio = BIO_new(BIO_s_file());
    BIO_set_fp(outbio, cgiOut, BIO_NOCLOSE);
 
@@ -78,7 +74,6 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * strip off the file format extension from the file name                     *
  * ---------------------------------------------------------------------------*/
-
    strncpy(certnamestr, certfilestr, sizeof(certnamestr));
    strtok(certnamestr, ".");
 

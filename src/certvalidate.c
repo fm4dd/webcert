@@ -2,7 +2,6 @@
  * file:         certvalidate.c                                               *
  * purpose:      validate a certificate against a root certificate chains     *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
@@ -54,8 +53,6 @@ STACK_OF(X509_INFO) *X509_load_ca_file(int *cert_counter,
  * ---------------------------------------------------------- */
 X509_STORE_CTX  *verify_mem_store(STACK_OF(X509_INFO) *st);
 
-//static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx);
-
 /* ---------------------------------------------------------- * 
  * For a remote server cert validation we need a TCP socket.  * 
  * create_socket() creates the socket & TCP-connect to server * 
@@ -66,16 +63,6 @@ int create_socket(char url_str[]);
  * This function is taken from openssl/crypto/asn1/t_x509.c.  *
  * ---------------------------------------------------------- */
 int X509_signature_dump(BIO *bp, const ASN1_STRING *sig, int indent);
-
-/* ---------------------------------------------------------- *
- * This function adds missing OID's to the internal structure *
- * ---------------------------------------------------------- */
-void add_missing_ev_oids();
-
-/* ---------------------------------------------------------- *
- * display_cert() shows certificate details in a HTML table.  *
- * ---------------------------------------------------------- */
-void display_cert(X509 *ct, char ct_type[], char chain_type[], int level);
 
 /* ---------------------------------------------------------- *
  * Global variable definition                                 *

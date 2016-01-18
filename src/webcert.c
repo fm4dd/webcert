@@ -2,7 +2,6 @@
  * file:         webcert.c                                                    *
  * purpose:      Shared functions across multiple CGI                         *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>

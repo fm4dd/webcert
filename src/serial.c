@@ -33,7 +33,6 @@ int rand_serial(BIGNUM *b, ASN1_INTEGER *ai) {
 
 
 BIGNUM *load_serial(char *serialfile, int create, ASN1_INTEGER **retai) {
-
   BIO *in=NULL;
   BIGNUM *ret=NULL;
   char buf[1024];

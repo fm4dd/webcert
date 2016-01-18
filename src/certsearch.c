@@ -3,7 +3,6 @@
  * purpose:      display a selection of local certificates                    *
                  certsearch.cgi?search=[dn|exp|ena|ser] rev not implemented   * 
  * -------------------------------------------------------------------------- */
-
 /* defines needed for strptime() function */
 #define _XOPEN_SOURCE
 #define __USE_XOPEN

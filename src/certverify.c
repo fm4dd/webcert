@@ -4,7 +4,6 @@
  * compile:     gcc -I/usr/local/ssl/include -L/usr/local/ssl/lib             *
  * certverify.c -o certverify.cgi -lcgic -lssl -lcrypto                       *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -37,17 +36,6 @@ SMIMECapability.7 = SEQWRAP,OID:aes-128-cbc
 SMIMECapability.8 = SEQWRAP,OID:aes-128-ecb
 SMIMECapability.9 = SEQUENCE:rsa_enc
 */
-
-/* ---------------------------------------------------------- *
- * csr_validate() does a basic check for the CSR's PEM format *
- * ---------------------------------------------------------- */
-void csr_validate(char *);
-
-/* ---------------------------------------------------------- *
- * display_csr() shows the CRS details in a HTML table.       *
- * ---------------------------------------------------------- */
-void display_signing(X509_REQ *);
-void display_csr(X509_REQ *);
 
 int cgiMain() {
    BIO 			    *inbio   = NULL;

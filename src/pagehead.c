@@ -2,14 +2,12 @@
  * file:         pagehead.c                                                   *
  * purpose:      provides a standard page header across all cgi's             *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
 #include "webcert.h"
 
 void pagehead(char* title) {
-
    cgiHeaderContentType("text/html; charset=UTF-8");
    fprintf(cgiOut, "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
    fprintf(cgiOut, "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">\n");

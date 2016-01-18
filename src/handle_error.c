@@ -2,7 +2,6 @@
  * file:	 handle_error.c                                               *
  * purpose:      provides a standard error page for all cgi's                 *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>

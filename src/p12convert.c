@@ -26,17 +26,10 @@
 int X509_signature_dump(BIO *bp, const ASN1_STRING *sig, int indent);
 
 /* ---------------------------------------------------------- *
- * This function adds missing OID's to the internal structure *
- * ---------------------------------------------------------- */
-void add_missing_ev_oids();
-
-/* ---------------------------------------------------------- *
  * display_cert() shows certificate details in a HTML table.  *
  * ---------------------------------------------------------- */
-void display_cert(X509 *cert, char ct_type[], char chain_type[], int level);
 void display_p12(PKCS12 *p12, char *pass);
 void display_stack(STACK_OF(X509) *ca);
-void display_key(EVP_PKEY *pkey);
 
 int cgiMain() {
 

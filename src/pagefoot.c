@@ -2,7 +2,6 @@
  * file:         pagefoot.c                                                   *
  * purpose:      provides a standard page footer across all cgi's             *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
@@ -21,7 +20,6 @@ void pagefoot() {
   }
 
   fprintf(cgiOut, "</div>\n");
-
   fprintf(cgiOut, "<div id=\"sidecontent\">\n");
 
   if ((fp = fopen(SIDEBAR_TEMPL, "r"))) {
@@ -33,7 +31,6 @@ void pagefoot() {
   }
 
   fprintf(cgiOut, "</div>\n");
-
   fprintf(cgiOut, "<div id=\"footer\">\n");
   fprintf(cgiOut, "<span class=\"left\">&copy; %s by <a href=\"http://fm4dd.com/\">Frank4DD</a> - licensed under GPL.</span>\n", SW_VERSION);
   fprintf(cgiOut, "<span class=\"right\">");

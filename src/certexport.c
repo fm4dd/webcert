@@ -7,7 +7,6 @@
  *               key along with a passphrase for protection.                  *
  * hint:         call it with ?cfilename=<xxx.pem>&format=[pem|der|p12]       *
  * -------------------------------------------------------------------------- */
-
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -18,13 +17,7 @@
 #include <openssl/err.h>
 #include "webcert.h"
 
-/* ---------------------------------------------------------- *
- * key_validate() does a basic check for a Key's PEM format   *
- * ---------------------------------------------------------- */
-void key_validate(char *);
-
 int cgiMain() {
-
    char			format[4]           = "";
    X509			*cert               = NULL;
    X509			*cacert             = NULL;

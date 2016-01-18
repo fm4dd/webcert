@@ -37,13 +37,6 @@ char * get_dns(char *ip) {
   else return "unknown";
 }
 
-/* ---------------------------------------------------------- *
- * display_cert() shows certificate details in a HTML table.  *
- * ---------------------------------------------------------- */
-void display_cert(X509 *cert, char ct_type[], char chain_type[], int level);
-void display_signing(X509_REQ *);
-void display_csr(X509_REQ *);
-
 int cgiMain() {
    X509_REQ 	*webrequest 	 = NULL;
    EVP_PKEY	*pkey		 = NULL;

@@ -2,13 +2,11 @@
  * file:         help.c                                                       *
  * purpose:      display webcert help in help.txt file                        *
  * ---------------------------------------------------------------------------*/
-
 #include <stdio.h>
 #include <cgic.h>
 #include "webcert.h"
 
 int cgiMain() {
-
   int ret;
   FILE *fp;
   static char title[] = "Help and additional Information";
@@ -19,13 +17,11 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  * start the html output                                                      *
  * ---------------------------------------------------------------------------*/
-
    pagehead(title);
 
 /* -------------------------------------------------------------------------- *
  * start the form output                                                      *
  * ---------------------------------------------------------------------------*/
-
    for(;;) {
       ret = getc(fp);
       if(ret == EOF) break;
