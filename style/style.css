@@ -185,6 +185,10 @@ body a:visited {
     color: #ff0000;
 }
 
+#content th.cnt {
+    width: 32px;
+}
+
 #content input {
     vertical-align:middle;
 }
@@ -290,6 +294,7 @@ body a:visited {
 #content td.desc {
     background: #AFAFAF;
     color: #000080;
+    width: 180px;
 }
 
 #content div.showpem {
@@ -313,7 +318,7 @@ body a:visited {
     background: #FFFFFF;
     text-align: left;
     margin: auto; 
-    width: 650px;
+    width: 560px;
     overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
 

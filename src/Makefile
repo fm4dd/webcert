@@ -26,8 +26,8 @@ install:
 clean:
 	rm -f *.o *.cgi
 
-buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o
-	$(CC) buildrequest.o pagehead.o pagefoot.o -o buildrequest.cgi ${LIBS}
+buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o webcert.o
+	$(CC) webcert.o buildrequest.o pagehead.o pagefoot.o handle_error.o -o buildrequest.cgi ${LIBS}
 
 genrequest.cgi: webcert.o genrequest.o pagehead.o pagefoot.o handle_error.o
 	$(CC) webcert.o handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}

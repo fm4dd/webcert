@@ -253,7 +253,7 @@ int cgiMain() {
 
     /* Search for Subject String */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"20\" rowspan=\"2\">\n");
+    fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"dn\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type\">\n");
@@ -288,7 +288,7 @@ int cgiMain() {
 
     /* Search for Expiration Date */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"exp\" name=\"search\" checked=\"checked\" />");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type\">\n");
@@ -322,7 +322,7 @@ int cgiMain() {
 
     /* Search for Enabled Date */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"ena\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type\">\n");
@@ -356,7 +356,7 @@ int cgiMain() {
 
     /* Search for Revocation Date */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"rev\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type\">\n");
@@ -390,7 +390,7 @@ int cgiMain() {
 
     /* Search for Serial Number */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th rowspan=\"2\">\n");
+    fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"ser\" name=\"search\" />");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type\">\n");

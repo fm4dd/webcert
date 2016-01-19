@@ -20,16 +20,14 @@ int cgiMain() {
  * ---------------------------------------------------------------------------*/
 
    fprintf(cgiOut, "<form action=\"genrequest.cgi\" method=\"post\" accept-charset=\"utf-8\">");
+
    fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=\"4\">");
-   fprintf(cgiOut, "To generate a certificate request, please fill out ");
-   fprintf(cgiOut, "the fields below:");
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "<th colspan=\"4\">Certificate Structure Data</th>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>C</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">C</th>");
    fprintf(cgiOut, "<td class=\"type\">Country</td>");
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"c\" size=\"20\" value=\"\" />");
@@ -39,7 +37,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>ST</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">ST</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "State or Province</td>");
    fprintf(cgiOut, "<td>");
@@ -50,7 +48,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>L</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">L</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Location, City</td>");
    fprintf(cgiOut, "<td>");
@@ -61,7 +59,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>O</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">O</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Organisation, Company</td>");
    fprintf(cgiOut, "<td>");
@@ -72,7 +70,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>OU</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">OU</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Dept or Subdivision</td>");
    fprintf(cgiOut, "<td>");
@@ -83,7 +81,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>eA</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">eA</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "E-Mail Address</td>");
    fprintf(cgiOut, "<td>");
@@ -94,7 +92,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>CN</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">CN</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "System Name *</td>");
    fprintf(cgiOut, "<td>");
@@ -105,8 +103,19 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th colspan=\"4\">&nbsp;</th>");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "</table>\n");
+   fprintf(cgiOut, "* Mandatory field CN: Can be set with a DNS name, IP address, serial number, or any other identifier.\n");
+   fprintf(cgiOut, "<p></p>\n");
+
+   keycreate_input();
+   fprintf(cgiOut, "<p></p>\n");
+
+   fprintf(cgiOut, "<table>\n");
+   fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th colspan=\"4\">");
-   fprintf(cgiOut, "Optional: For serving multiple domains or IP's, set additional Host- or IP values:");
+   fprintf(cgiOut, "Optional: Request Certificate Extension Data");
    fprintf(cgiOut, "</th>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -178,7 +187,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>GN</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">GN</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Given Name</td>");
    fprintf(cgiOut, "<td>");
@@ -189,7 +198,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>SN</th>");
+   fprintf(cgiOut, "<th class=\"cnt\">SN</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "Surname</td>");
    fprintf(cgiOut, "<td>");
@@ -200,79 +209,16 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=\"4\">");
-   fprintf(cgiOut, "Select the algorithm and strength of the public/private key pair:");
-   fprintf(cgiOut, "</th>");
-   fprintf(cgiOut, "</tr>\n");
-
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" checked=\"checked\" name=\"keytype\" value=\"rsa\" onclick=\"switchGrey('rsa_rb', 'rsa', 'dsa', 'ecc');\" /></th>\n");
-   fprintf(cgiOut, "<td class=\"type\">");
-   fprintf(cgiOut, "Generate RSA key pair</td>\n");
-
-   fprintf(cgiOut, "<td id=\"rsa\">");
-   fprintf(cgiOut, "<select name=\"rsastrength\">\n");
-   fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
-   fprintf(cgiOut, "<option value=\"1024\">Key Strength: 1024 bit (Fair)</option>\n");
-   fprintf(cgiOut, "<option value=\"2048\" selected=\"selected\">Key Strength: 2048 bit (Good)</option>\n");
-   fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
-   fprintf(cgiOut, "</option>\n</select>");
-   fprintf(cgiOut, "</td>\n");
-
-   fprintf(cgiOut, "<td class=\"desc\">");
-   fprintf(cgiOut, "select RSA key size here</td>");
-   fprintf(cgiOut, "</tr>\n");
-
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"radio\" id=\"dsa_rb\" name=\"keytype\" value=\"dsa\" onclick=\"switchGrey('dsa_rb', 'dsa', 'rsa', 'ecc');\" /></th>\n");
-   fprintf(cgiOut, "<td class=\"type\">");
-   fprintf(cgiOut, "Generate DSA key pair</td>\n");
-
-   fprintf(cgiOut, "<td id=\"dsa\" style=\"background-color: #CFCFCF;\">");
-   fprintf(cgiOut, "<select name=\"dsastrength\">\n");
-   fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
-   fprintf(cgiOut, "<option value=\"1024\">Key Strength: 1024 bit (Fair)</option>\n");
-   fprintf(cgiOut, "<option value=\"2048\" selected=\"selected\">Key Strength: 2048 bit (Good)</option>\n");
-   fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
-   fprintf(cgiOut, "</option>\n</select>");
-   fprintf(cgiOut, "</td>\n");
-
-   fprintf(cgiOut, "<td class=\"desc\">");
-   fprintf(cgiOut, "select DSA key size here</td>");
-   fprintf(cgiOut, "</tr>\n");
-
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "<input type=\"radio\" id=\"ecc_rb\" name=\"keytype\" value=\"ecc\" onclick=\"switchGrey('ecc_rb', 'ecc', 'rsa', 'dsa');\" /></th>\n");
-   fprintf(cgiOut, "<td class=\"type\">");
-   fprintf(cgiOut, "Generate ECC key pair</td>\n");
-
-   fprintf(cgiOut, "<td id=\"ecc\" style=\"background-color: #CFCFCF;\">");
-   fprintf(cgiOut, "<select name=\"eccstrength\">\n");
-   fprintf(cgiOut, "<option value=\"secp224r1\">Key Type: secp224r1 (OK)</option>\n");
-   fprintf(cgiOut, "<option value=\"secp256k1\" selected=\"selected\">Key Type: secp256k1 (Good)</option>\n");
-   fprintf(cgiOut, "<option value=\"secp384r1\">Key Type: secp384r1 (Better)</option>\n");
-   fprintf(cgiOut, "<option value=\"secp521r1\">Key Type: secp521r1 (Best)");
-   fprintf(cgiOut, "</option>\n</select>");
-   fprintf(cgiOut, "</td>\n");
-
-   fprintf(cgiOut, "<td class=\"desc\">");
-   fprintf(cgiOut, "select ECC key size here</td>");
-   fprintf(cgiOut, "</tr>\n");
-
-
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=\"4\">");
-   fprintf(cgiOut, "<input type=\"reset\" value=\"Clear All\" />\n");
-   fprintf(cgiOut, "&nbsp;");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Generate\" />");
-
-   fprintf(cgiOut, "</th>");
+   fprintf(cgiOut, "<th colspan=\"4\">&nbsp;</th>");
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "</table>\n");
-   fprintf(cgiOut, "* Mandatory field: Can be set with a DNS name, IP address, serial number, or any other identifier.\n");
+   fprintf(cgiOut, "<p></p>\n");
+
+   fprintf(cgiOut, "<table>\n");
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th class=\"cnt\"><input type=\"submit\" value=\"Generate\" /></th>");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "</table>\n");
    fprintf(cgiOut, "</form>");
 
 /* -------------------------------------------------------------------------- *

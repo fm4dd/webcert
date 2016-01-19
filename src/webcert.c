@@ -196,7 +196,7 @@ void display_csr(X509_REQ *csr) {
   STACK_OF(X509_EXTENSION) *ext_list = NULL;
   if ((ext_list = X509_REQ_get_extensions(csr)) != NULL) {
     fprintf(cgiOut, "<tr>");
-    fprintf(cgiOut, "<th>Extensions:</th>\n");
+    fprintf(cgiOut, "<th class=\"cnt\">Extensions:</th>\n");
     if (sk_X509_EXTENSION_num(ext_list) <= 0)
       fprintf(cgiOut, "<td>No extensions available");
     else {
@@ -241,7 +241,7 @@ void display_csr(X509_REQ *csr) {
      int_error("Error getting public key from X509_REQ structure.");
 
   fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th>Public Key:</th>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">Public Key:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   if (pkey) {
     EC_KEY *myecc = NULL;
@@ -287,7 +287,7 @@ void display_csr(X509_REQ *csr) {
   OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Signature:</th>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">Signature:</th>\n");
   if (strstr(sig_type_str, "Md5") || strstr(sig_type_str, "md5"))
     fprintf(cgiOut, "<td bgcolor=\"#cf0f0f\">");
   else fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
@@ -304,7 +304,7 @@ void display_csr(X509_REQ *csr) {
 
   /* display the CSR in PEM format */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>CSR Data:</th>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">CSR Data:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('reqpem');\">\n");
   fprintf(cgiOut, "Expand/Hide Request data in PEM format</a>");
@@ -514,7 +514,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Serial:");
+  fprintf(cgiOut, "<th class=\"cnt\">Serial:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert serial here */
@@ -524,7 +524,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Issuer:");
+  fprintf(cgiOut, "<th class=\"cnt\">Issuer:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert issuer here */
@@ -533,7 +533,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Thumbprint:");
+  fprintf(cgiOut, "<th class=\"cnt\">Thumbprint:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the thumbprint here */
@@ -544,7 +544,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Validity:");
+  fprintf(cgiOut, "<th class=\"cnt\">Validity:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the start and end date here */
@@ -558,7 +558,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Extensions:");
+  fprintf(cgiOut, "<th class=\"cnt\">Extensions:");
   fprintf(cgiOut, "</th>\n");
   if (sk_X509_EXTENSION_num(ext_list) <= 0)
     fprintf(cgiOut, "<td>No extensions available");
@@ -598,7 +598,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Public Key:");
+  fprintf(cgiOut, "<th class=\"cnt\">Public Key:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
@@ -635,7 +635,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Signature:");
+  fprintf(cgiOut, "<th class=\"cnt\">Signature:");
   fprintf(cgiOut, "</th>\n");
   if (strstr(sig_type_str, "Md5") || strstr(sig_type_str, "md5"))
     fprintf(cgiOut, "<td bgcolor=\"#cf0f0f\">");
@@ -652,16 +652,29 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
+  /* display the cert content in PEM format here */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Cert Data: ");
-  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">Cert Data:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certpem_%s%d');\">\n", chain_type, level);
   fprintf(cgiOut, "Expand or Hide Certificate PEM Data</a>\n");
-  /* display the cert content in PEM format here */
   fprintf(cgiOut, "<div class=\"showpem\" id=\"certpem_%s%d\" style=\"display: none\">\n",chain_type, level);
   fprintf(cgiOut, "<pre>");
   PEM_write_bio_X509(bio, ct);
+  fprintf(cgiOut, "</pre></div>\n");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  /* display the cert content in TEXT format here */
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">Cert Text:</th>\n");
+  fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">\n");
+  fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certtext_%s%d');\">\n", chain_type, level);
+  fprintf(cgiOut, "Expand/Hide certificate data in Text format</a>\n");
+  fprintf(cgiOut, "<div class=\"showtxt\" id=\"certtext_%s%d\" style=\"display: none\">\n", chain_type, level);
+  fprintf(cgiOut, "<pre>\n");
+  if (! (X509_print_ex_fp(cgiOut, ct, XN_FLAG_RFC2253&(~ASN1_STRFLGS_ESC_MSB), X509_FLAG_COMPAT)))
+     int_error("Error printing certificate text information");
   fprintf(cgiOut, "</pre></div>\n");
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
@@ -781,7 +794,7 @@ void display_signing(X509_REQ *csr) {
 
   /* Add Key Usage */
   fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "<th class=\"cnt\">");
   fprintf(cgiOut, "<input type=\"checkbox\" name=\"keyusage\" checked id=\"key_cb\" onclick=\"switchGrey('key_cb', 'key_td', 'none', 'none');\" />");
   fprintf(cgiOut, "</th>\n");
 
@@ -809,7 +822,7 @@ void display_signing(X509_REQ *csr) {
 
   /* Add extended key usage */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "<th class=\"cnt\">");
   fprintf(cgiOut, "<input type=\"checkbox\" name=\"extkeyusage\" id=\"exkey_cb\" onclick=\"switchGrey('exkey_cb', 'exkey_td', 'none', 'none');\" />");
   fprintf(cgiOut, "</th>\n");
 
@@ -832,7 +845,7 @@ void display_signing(X509_REQ *csr) {
 
   /* Set validity from now */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "<th class=\"cnt\">");
   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"days_cb\" value=vd checked onclick=\"switchGrey('days_cb', 'days_td', 'date_td', 'none');\" />");
   fprintf(cgiOut, "</th>\n");
 
@@ -848,7 +861,7 @@ void display_signing(X509_REQ *csr) {
 
   /* Set validity by date */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>");
+  fprintf(cgiOut, "<th class=\"cnt\">");
   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td', 'none')\" />");
   fprintf(cgiOut, "</th>\n");
 
@@ -880,4 +893,77 @@ void display_signing(X509_REQ *csr) {
   fprintf(cgiOut, "</table>\n");
   fprintf(cgiOut, "</form>\n");
   BIO_free(bio);
+}
+
+/* ---------------------------------------------------------- *
+ * keycreate_input() provides a HMTL table selcting a new key *
+ * ---------------------------------------------------------- */
+void keycreate_input() {
+   fprintf(cgiOut, "<table>");
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th colspan=\"4\">Create a New Certificate Key</th>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th class=\"cnt\">");
+   fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" checked=\"checked\" name=\"keytype\" value=\"rsa\" onclick=\"switchGrey('rsa_rb', 'rsa', 'dsa', 'ecc');\" /></th>\n");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "Generate RSA key pair</td>\n");
+
+   fprintf(cgiOut, "<td id=\"rsa\">");
+   fprintf(cgiOut, "<select name=\"rsastrength\">\n");
+   fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
+   fprintf(cgiOut, "<option value=\"1024\">Key Strength: 1024 bit (Fair)</option>\n");
+   fprintf(cgiOut, "<option value=\"2048\" selected=\"selected\">Key Strength: 2048 bit (Good)</option>\n");
+   fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
+   fprintf(cgiOut, "</option>\n</select>");
+   fprintf(cgiOut, "</td>\n");
+
+   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "select RSA key size here</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th class=\"cnt\">");
+   fprintf(cgiOut, "<input type=\"radio\" id=\"dsa_rb\" name=\"keytype\" value=\"dsa\" onclick=\"switchGrey('dsa_rb', 'dsa', 'rsa', 'ecc');\" /></th>\n");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "Generate DSA key pair</td>\n");
+
+   fprintf(cgiOut, "<td id=\"dsa\" style=\"background-color: #CFCFCF;\">");
+   fprintf(cgiOut, "<select name=\"dsastrength\">\n");
+   fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
+   fprintf(cgiOut, "<option value=\"1024\">Key Strength: 1024 bit (Fair)</option>\n");
+   fprintf(cgiOut, "<option value=\"2048\" selected=\"selected\">Key Strength: 2048 bit (Good)</option>\n");
+   fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
+   fprintf(cgiOut, "</option>\n</select>");
+   fprintf(cgiOut, "</td>\n");
+
+   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "select DSA key size here</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th class=\"cnt\">");
+   fprintf(cgiOut, "<input type=\"radio\" id=\"ecc_rb\" name=\"keytype\" value=\"ecc\" onclick=\"switchGrey('ecc_rb', 'ecc', 'rsa', 'dsa');\" /></th>\n");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "Generate ECC key pair</td>\n");
+
+   fprintf(cgiOut, "<td id=\"ecc\" style=\"background-color: #CFCFCF;\">");
+   fprintf(cgiOut, "<select name=\"eccstrength\">\n");
+   fprintf(cgiOut, "<option value=\"secp224r1\">Key Type: secp224r1 (OK)</option>\n");
+   fprintf(cgiOut, "<option value=\"secp256k1\" selected=\"selected\">Key Type: secp256k1 (Good)</option>\n");
+   fprintf(cgiOut, "<option value=\"secp384r1\">Key Type: secp384r1 (Better)</option>\n");
+   fprintf(cgiOut, "<option value=\"secp521r1\">Key Type: secp521r1 (Best)");
+   fprintf(cgiOut, "</option>\n</select>");
+   fprintf(cgiOut, "</td>\n");
+
+   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "select ECC key size here</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th colspan=\"4\">");
+   fprintf(cgiOut, "&nbsp</th>");
+   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "</table>\n");
 }

@@ -18,7 +18,7 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "webca-secret"
+#define PASS            "mypassword"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
@@ -109,5 +109,7 @@ void display_key(EVP_PKEY *);
  * ---------------------------------------------------------- */
 void key_validate(char *);
 void csr_validate(char *);
+
+void keycreate_input();
 
 /****************************** end webcert.h *********************************/

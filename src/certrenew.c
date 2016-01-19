@@ -93,6 +93,10 @@ int cgiMain() {
      fprintf(cgiOut, "</th>\n");
      fprintf(cgiOut, "</tr>\n");
      fprintf(cgiOut, "</table>\n");
+
+     fprintf(cgiOut, "<p></p>\n");
+     keycreate_input();
+
      fprintf(cgiOut, "</form>");
 
      pagefoot();
@@ -172,8 +176,8 @@ int cgiMain() {
       /* ---------------------------------------------------------- *
        * Because we added data to the CSR, we re-do the signature   *
        * ---------------------------------------------------------- */
-      if (!X509_REQ_sign(certreq,pkey,EVP_sha256()))
-         int_error("Error signing X509_REQ structure with SHA256.");
+      if (!X509_REQ_sign(certreq,pkey,digest))
+         int_error("Error signing X509_REQ structure with digest.");
     }
 
     /* ---------------------------------------------------------- *
