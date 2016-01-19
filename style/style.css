@@ -298,9 +298,7 @@ body a:visited {
 }
 
 #content div.showpem {
-    background: #FFFFFF;
-    padding: 5px 5px 5px 5px;
-    margin: auto;
+    text-align: center;
 }
 
 #content div.showext {
@@ -312,7 +310,7 @@ body a:visited {
     overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
 
-#content div.showtxt {
+#content div.showtxt, div.showpem {
     /* t r b l */
     padding: 5px 5px 5px 5px;
     background: #FFFFFF;
