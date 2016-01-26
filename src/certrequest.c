@@ -56,7 +56,7 @@ int cgiMain() {
    fprintf(cgiOut, "Upload Your CSR file (PEM format)");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"file\" name=\"csr-file\" value=\"\" style=\"background:#ccc; width: 100%%\" />");
+   fprintf(cgiOut, "<input type=\"file\" name=\"csr-file\" />");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "<tr>\n");

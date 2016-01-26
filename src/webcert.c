@@ -316,11 +316,25 @@ void display_csr(X509_REQ *csr) {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
-  fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th colspan=\"2\">");
-  fprintf(cgiOut, "&nbsp;");
-  fprintf(cgiOut, "</th>");
+  /* display the CSR in TEXT format */
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">CSR Text:</th>\n");
+  fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">\n");
+  fprintf(cgiOut, "<a href=\"javascript:elementHideShow('reqtext');\">\n");
+  fprintf(cgiOut, "Expand/Hide Request data in Text format</a>\n");
+  fprintf(cgiOut, "<div class=\"showtxt\" id=\"reqtext\" style=\"display: none\">\n");
+  fprintf(cgiOut, "<pre>\n");
+  if (! (X509_REQ_print_ex(bio, csr, XN_FLAG_RFC2253&(~ASN1_STRFLGS_ESC_MSB), X509_FLAG_COMPAT)))
+     int_error("Error printing certificate request text information");
+  fprintf(cgiOut, "</pre></div>\n");
+  fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">&nbsp;");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "</tr>\n");
+
   fprintf(cgiOut, "</table>\n");
   BIO_free(bio);
 }
@@ -826,11 +840,11 @@ void display_signing(X509_REQ *csr) {
   fprintf(cgiOut, "<input type=\"checkbox\" name=\"extkeyusage\" id=\"exkey_cb\" onclick=\"switchGrey('exkey_cb', 'exkey_td', 'none', 'none');\" />");
   fprintf(cgiOut, "</th>\n");
 
-  fprintf(cgiOut, "<td class=type>");
+  fprintf(cgiOut, "<td class=\"type\">");
   fprintf(cgiOut, "Extended Key Usage:");
   fprintf(cgiOut, "</td>\n");
 
-  fprintf(cgiOut, "<td id=\"exkey_td\" style=\"background-color: #CFCFCF;\">\n");
+  fprintf(cgiOut, "<td class=\"type\" id=\"exkey_td\">\n");
   fprintf(cgiOut, "<select name=\"extkeytype\">");
   fprintf(cgiOut, "<option value=\"tlsws\" selected=\"selected\">");
   fprintf(cgiOut, "TLS Web server authentication</option>");
@@ -865,10 +879,10 @@ void display_signing(X509_REQ *csr) {
   fprintf(cgiOut, "<input type=radio name=\"valid\" id=\"date_cb\" value=se onclick=\"switchGrey('date_cb', 'date_td', 'days_td', 'none')\" />");
   fprintf(cgiOut, "</th>\n");
 
-  fprintf(cgiOut, "<td class=type>");
+  fprintf(cgiOut, "<td class=\"type\">");
   fprintf(cgiOut, "Set Validity (by Date):");
   fprintf(cgiOut, "</td>\n");
-  fprintf(cgiOut, "<td id=\"date_td\" style=\"background-color: #CFCFCF;\">");
+  fprintf(cgiOut, "<td class=\"type\" id=\"date_td\">");
   fprintf(cgiOut, "<input type=text name=\"startdate\" size=15 value=%s>", startdate);
   fprintf(cgiOut, " Start Date ");
   fprintf(cgiOut, "<input type=text name=\"starttime\" size=10 value=%s>", starttime);
@@ -907,8 +921,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" checked=\"checked\" name=\"keytype\" value=\"rsa\" onclick=\"switchGrey('rsa_rb', 'rsa', 'dsa', 'ecc');\" /></th>\n");
-   fprintf(cgiOut, "<td class=\"type\">");
-   fprintf(cgiOut, "Generate RSA key pair</td>\n");
+   fprintf(cgiOut, "<td class=\"type130\">Generate RSA key pair</td>\n");
 
    fprintf(cgiOut, "<td id=\"rsa\">");
    fprintf(cgiOut, "<select name=\"rsastrength\">\n");
@@ -919,17 +932,15 @@ void keycreate_input() {
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
 
-   fprintf(cgiOut, "<td class=\"desc\">");
-   fprintf(cgiOut, "select RSA key size here</td>");
+   fprintf(cgiOut, "<td class=\"desc\">select RSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"dsa_rb\" name=\"keytype\" value=\"dsa\" onclick=\"switchGrey('dsa_rb', 'dsa', 'rsa', 'ecc');\" /></th>\n");
-   fprintf(cgiOut, "<td class=\"type\">");
-   fprintf(cgiOut, "Generate DSA key pair</td>\n");
+   fprintf(cgiOut, "<td class=\"type130\">Generate DSA key pair</td>\n");
 
-   fprintf(cgiOut, "<td id=\"dsa\" style=\"background-color: #CFCFCF;\">");
+   fprintf(cgiOut, "<td id=\"dsa\">");
    fprintf(cgiOut, "<select name=\"dsastrength\">\n");
    fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
    fprintf(cgiOut, "<option value=\"1024\">Key Strength: 1024 bit (Fair)</option>\n");
@@ -938,17 +949,15 @@ void keycreate_input() {
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
 
-   fprintf(cgiOut, "<td class=\"desc\">");
-   fprintf(cgiOut, "select DSA key size here</td>");
+   fprintf(cgiOut, "<td class=\"desc\">select DSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"ecc_rb\" name=\"keytype\" value=\"ecc\" onclick=\"switchGrey('ecc_rb', 'ecc', 'rsa', 'dsa');\" /></th>\n");
-   fprintf(cgiOut, "<td class=\"type\">");
-   fprintf(cgiOut, "Generate ECC key pair</td>\n");
+   fprintf(cgiOut, "<td class=\"type130\">Generate ECC key pair</td>\n");
 
-   fprintf(cgiOut, "<td id=\"ecc\" style=\"background-color: #CFCFCF;\">");
+   fprintf(cgiOut, "<td id=\"ecc\">");
    fprintf(cgiOut, "<select name=\"eccstrength\">\n");
    fprintf(cgiOut, "<option value=\"secp224r1\">Key Type: secp224r1 (OK)</option>\n");
    fprintf(cgiOut, "<option value=\"secp256k1\" selected=\"selected\">Key Type: secp256k1 (Good)</option>\n");
@@ -957,13 +966,9 @@ void keycreate_input() {
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
 
-   fprintf(cgiOut, "<td class=\"desc\">");
-   fprintf(cgiOut, "select ECC key size here</td>");
+   fprintf(cgiOut, "<td class=\"desc\">select ECC key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
-   fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=\"4\">");
-   fprintf(cgiOut, "&nbsp</th>");
-   fprintf(cgiOut, "</tr>\n");
+   fprintf(cgiOut, "<tr><th colspan=\"4\">&nbsp</th></tr>\n");
    fprintf(cgiOut, "</table>\n");
 }

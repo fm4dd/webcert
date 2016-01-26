@@ -78,7 +78,7 @@ int cgiMain() {
     fprintf(cgiOut, "Upload Your certificate (PEM format)");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"certfile\" style=\"background:#ccc; width: 100%%\" />\n");
+    fprintf(cgiOut, "<input type=\"file\" name=\"certfile\" />\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -96,7 +96,7 @@ int cgiMain() {
     fprintf(cgiOut, "Upload Your certificate private key (PEM format)");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"keyfile\" style=\"background:#ccc; width: 100%%\" />\n");
+    fprintf(cgiOut, "<input type=\"file\" name=\"keyfile\" >\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -114,7 +114,7 @@ int cgiMain() {
     fprintf(cgiOut, "Upload the signing CA file (PEM format)");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"calist\" style=\"background: #ccc; width: 100%%\" />\n");
+    fprintf(cgiOut, "<input type=\"file\" name=\"calist\" />\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -170,7 +170,7 @@ int cgiMain() {
     fprintf(cgiOut, "Upload Your PKCS12 file (.pfx or .p12 extensions)");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"p12file\" style=\"background:#ccc; width: 100%%\" />\n");
+    fprintf(cgiOut, "<input type=\"file\" name=\"p12file\" />\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 

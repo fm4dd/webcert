@@ -186,11 +186,20 @@ body a:visited {
 }
 
 #content th.cnt {
-    width: 32px;
+    width: 35px;
 }
 
 #content input {
     vertical-align:middle;
+}
+
+#content input[type="file"] {
+    width: 100%;
+    background-color: #ccc;
+}
+
+#content input[type="radio"] {
+    margin: 4px;
 }
 
 #content input.p12pass, input.url {
@@ -198,7 +207,6 @@ body a:visited {
     color: #004477;
     width: 98%;
 }
-
 
 #content input.getcert {
     width: 70px;
@@ -276,7 +284,12 @@ body a:visited {
 #content td.type {
     background: #CFCFCF;
     font-weight: bold;
-    width: 150px;
+}
+
+#content td.type130 {
+    background: #CFCFCF;
+    font-weight: bold;
+    width: 130px;
 }
 
 #content td.type180 {
@@ -289,6 +302,10 @@ body a:visited {
     background: #CFCFCF;
     font-weight: bold;
     width: 250px;
+}
+
+#content td.desc640 {
+    width: 640px;
 }
 
 #content td.desc {
