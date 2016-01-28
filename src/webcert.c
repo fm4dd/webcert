@@ -895,6 +895,22 @@ void display_signing(X509_REQ *csr) {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
+  fprintf(cgiOut, "<tr>");
+  fprintf(cgiOut, "<th class=\"cnt\">");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td class=\"type\">CA Signing Algorithm:</td>\n");
+
+  fprintf(cgiOut, "<td id=\"sigalg\">");
+  fprintf(cgiOut, "<select name=\"sigalg\">\n");
+  fprintf(cgiOut, "<option value=\"SHA-224\">Strength: SHA-224 bit (Fair)</option>\n");
+  fprintf(cgiOut, "<option value=\"SHA-256\" selected=\"selected\">Strength: SHA-256 bit (Good)</option>\n");
+  fprintf(cgiOut, "<option value=\"SHA-384\">Strength: SHA-384 bit (Better)</option>\n");
+  fprintf(cgiOut, "<option value=\"SHA-512\">Strength: SHA-512 bit (Best)");
+  fprintf(cgiOut, "</option>\n</select>");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+
   fprintf(cgiOut, "<tr><th colspan=\"3\">");
   fprintf(cgiOut, "<input type=\"button\" name=\"Forget it!\" value=");
   fprintf(cgiOut, "\"  Go Back  \" onclick=");
@@ -915,14 +931,13 @@ void display_signing(X509_REQ *csr) {
 void keycreate_input() {
    fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th colspan=\"4\">Create a New Certificate Key</th>");
+   fprintf(cgiOut, "<th colspan=\"4\">Create a New Certificate Key - Choose Key Type and Strength:</th>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" checked=\"checked\" name=\"keytype\" value=\"rsa\" onclick=\"switchGrey('rsa_rb', 'rsa', 'dsa', 'ecc');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type130\">Generate RSA key pair</td>\n");
-
    fprintf(cgiOut, "<td id=\"rsa\">");
    fprintf(cgiOut, "<select name=\"rsastrength\">\n");
    fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
@@ -931,7 +946,6 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-
    fprintf(cgiOut, "<td class=\"desc\">select RSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -939,7 +953,6 @@ void keycreate_input() {
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"dsa_rb\" name=\"keytype\" value=\"dsa\" onclick=\"switchGrey('dsa_rb', 'dsa', 'rsa', 'ecc');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type130\">Generate DSA key pair</td>\n");
-
    fprintf(cgiOut, "<td id=\"dsa\">");
    fprintf(cgiOut, "<select name=\"dsastrength\">\n");
    fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
@@ -948,7 +961,6 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-
    fprintf(cgiOut, "<td class=\"desc\">select DSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -956,7 +968,6 @@ void keycreate_input() {
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"ecc_rb\" name=\"keytype\" value=\"ecc\" onclick=\"switchGrey('ecc_rb', 'ecc', 'rsa', 'dsa');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type130\">Generate ECC key pair</td>\n");
-
    fprintf(cgiOut, "<td id=\"ecc\">");
    fprintf(cgiOut, "<select name=\"eccstrength\">\n");
    fprintf(cgiOut, "<option value=\"secp224r1\">Key Type: secp224r1 (OK)</option>\n");
@@ -965,8 +976,26 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"secp521r1\">Key Type: secp521r1 (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-
    fprintf(cgiOut, "<td class=\"desc\">select ECC key size here</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th colspan=\"4\">Select CSR Signature Algorithm:</th>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<th class=\"cnt\">");
+   fprintf(cgiOut, "</th>\n");
+   fprintf(cgiOut, "<td class=\"type\">CSR Signing Algorithm:</td>\n");
+   fprintf(cgiOut, "<td id=\"sigalg\">");
+   fprintf(cgiOut, "<select name=\"sigalg\">\n");
+   fprintf(cgiOut, "<option value=\"SHA-224\">Strength: SHA-224 bit (Fair)</option>\n");
+   fprintf(cgiOut, "<option value=\"SHA-256\" selected=\"selected\">Strength: SHA-256 bit (Good)</option>\n");
+   fprintf(cgiOut, "<option value=\"SHA-384\">Strength: SHA-384 bit (Better)</option>\n");
+   fprintf(cgiOut, "<option value=\"SHA-512\">Strength: SHA-512 bit (Best)");
+   fprintf(cgiOut, "</option>\n</select>");
+   fprintf(cgiOut, "</td>\n");
+   fprintf(cgiOut, "<td class=\"desc\">select CSR signing algorithm here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr><th colspan=\"4\">&nbsp</th></tr>\n");

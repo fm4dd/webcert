@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------------------- *
  * file:	genrequest.cgi                                                *
- * purpose:	takes the input from buildrequest.cgi or certrenew.cgi, and   *
- *              generates and displays the CSR, plus public/private key pair  *
+ * purpose:	takes the input from buildrequest.cgi. It generates and       *
+ *              displays the CSR after creating a public/private key pair     *
  * ---------------------------------------------------------------------------*/
 #include <stdio.h>
 #include <string.h>
@@ -44,7 +44,7 @@ int cgiMain() {
    DSA 		*mydsa		 = NULL;
    RSA 		*myrsa		 = NULL;
    EC_KEY       *myecc           = NULL;
-   //const EC_GROUP *eccgrp        = NULL;
+   EVP_MD        const *digest   = NULL;
 
    BIO 		*outbio		 = NULL;
    STACK_OF(X509_EXTENSION) 
@@ -71,6 +71,7 @@ int cgiMain() {
    int	 	rsastrength	 = 0;
    int	 	dsastrength	 = 0;
    char	 	eccstrength[255] ="";
+   char         sigalgstr[41]    = "SHA-256";
 
    static char 	title[] = "Generate the Certificate Request";
 
@@ -157,6 +158,9 @@ int cgiMain() {
    }
    else
       int_error("Error: Wrong keytype - choose either RSA, DSA or ECC.");
+
+   if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
+      int_error("Error getting the signature algorithm from buildrequestbuildrequest.cgi form");
 
 /* ------------------------------------------------------------------------- *
  * Generate the certificate request from scratch                             *
@@ -259,23 +263,23 @@ int cgiMain() {
       //   int_error("Error adding extensions to the X509_REQ structure.");
    }
 
+/* -------------------------------------------------------------------------- *
+ *  Set the digest algorithm for signing                                      *
+ * if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_DSA)                       *
+ *   digest = EVP_dss1(); we used to sign ecc keys, switched to SHA variants  *
+ * ---------------------------------------------------------------------------*/
+   if(strcmp(sigalgstr, "SHA-224") == 0) digest = EVP_sha224();
+   else if(strcmp(sigalgstr, "SHA-256") == 0) digest = EVP_sha256();
+   else if(strcmp(sigalgstr, "SHA-384") == 0) digest = EVP_sha384();
+   else if(strcmp(sigalgstr, "SHA-512") == 0) digest = EVP_sha512();
+   else int_error("Error received unknown sigalg string");
+
+
 /* ------------------------------------------------------------------------- *
- * Sign the certificate request: sha256 for RSA keys, dss for DSA keys          *
+ * Sign the certificate request                                              *
  * ------------------------------------------------------------------------- */
-   if(strcmp(keytype, "rsa") == 0) {
-      if (!X509_REQ_sign(webrequest,pkey,EVP_sha256()))
-         int_error("Error signing X509_REQ structure with SHA256.");
-   }
-   else if(strcmp(keytype, "dsa") == 0) {
-      if (!X509_REQ_sign(webrequest,pkey,EVP_dss()))
-         int_error("Error DSS signing X509_REQ structure.");
-   }
-
-   else if(strcmp(keytype, "ecc") == 0) {
-      if (!X509_REQ_sign(webrequest,pkey,EVP_ecdsa()))
-         int_error("Error ECC signing X509_REQ structure.");
-   }
-
+   if (!X509_REQ_sign(webrequest, pkey, digest))
+      int_error("Error signing X509_REQ structure with SHA256.");
 
 /* ------------------------------------------------------------------------- *
  *  and sort out the content plus start the html output                      *

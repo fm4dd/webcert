@@ -43,6 +43,7 @@ int cgiMain() {
    char       enddate[11] = "";
    char        endtime[9] = "";
    char	 validdaystr[255] = "";
+   char	    sigalgstr[41] = "SHA-256";
    char	      *typelist[] = { "sv","cl","em","os","ca" };
    int	         type_res = 0;
    char	   extkeytype[81] = "";
@@ -50,41 +51,44 @@ int cgiMain() {
    long	       valid_secs = 0;
    time_t             now = 0;
 
-/* -------------------------------------------------------------------------- *
- * These function calls are essential to make many PEM + other openssl        *
- * functions work.                                                            *
- * -------------------------------------------------------------------------- */
+/* ---------------------------------------------------------- *
+ * These function calls are essential to make many PEM +      *
+ * other openssl functions work.                              *
+ * ---------------------------------------------------------- */
    OpenSSL_add_all_algorithms();
    ERR_load_crypto_strings();
    ERR_load_BIO_strings();
 
-/* -------------------------------------------------------------------------- *
- * check if a certificate was handed to certsign.cgi                          *
- * or if someone just tried to call us directly without a request             *
- * -------------------------------------------------------------------------- */
+/* ---------------------------------------------------------- *
+ * check if a certificate was handed to certsign.cgi or if    *
+ * someone just tried to call us directly without a request   *
+ * ---------------------------------------------------------- */
    if (cgiFormString("sign-request", formreq, REQLEN) != cgiFormSuccess )
-      int_error("Error getting CSR data from certverify.cgi form");
+      int_error("Error getting CSR data from genrequest/certverify.cgi form");
 
    if (cgiFormRadio("valid", validlist, 2, &valid_res, 0) == cgiFormNotFound )
-      int_error("Error getting the date range type from previous form");
+      int_error("Error getting the date range type from genrequest/certverify.cgi forms");
 
    if (strcmp(validlist[valid_res], "vd") == 0) {
       if(cgiFormString("daysvalid", validdaystr, DAYS_VALID) != cgiFormSuccess)
-        int_error("Error getting expiration from certverify.cgi form");
- 
+        int_error("Error getting expiration from genrequest/certverify.cgi form");
+
+   if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
+      int_error("Error getting the signature algorithm from genrequest/certverify.cgi forms");
+
 /* -------------------------------------------------------------------------- *
  * What happens if a negative value is given as the expiration date?          *
  * The certificate is generated with a expiration before it becomes valid.    *
  * We do a check here to prevent that.                                        *
  * -------------------------------------------------------------------------- */
-      /* convert the number string to data type long, max is 10 digits */
-      valid_days = strtoul(validdaystr, NULL, 10);
-      if (valid_days <= 0)
-         int_error("Error invalid (i.e. negative or zero) value for expiration date.");
+   /* convert the number string to data type long, max is 10 digits */
+   valid_days = strtoul(validdaystr, NULL, 10);
+   if (valid_days <= 0)
+      int_error("Error invalid (i.e. negative or zero) value for expiration date.");
 
-      /* convert days into (long) seconds */
-      valid_secs = valid_days*60*60*24;
-      now = time(NULL);
+   /* convert days into (long) seconds */
+   valid_secs = valid_days*60*60*24;
+   now = time(NULL);
 /* -------------------------------------------------------------------------- *
  * year 2038 32bit Unix time integer overflow:                                *
  * What happens if a very large value is given as the expiration date?        *
@@ -126,25 +130,25 @@ int cgiMain() {
        }
     }
 
-/* -------------------------------------------------------------------------- *
- * check if a CSR was pasted or if someone just sends garbage                 *
- * -------------------------------------------------------------------------- */
+/* ---------------------------------------------------------- *
+ * check if a CSR was pasted or if someone just sends garbage *
+ * ---------------------------------------------------------- */
    csr_validate(formreq);
 
-/* -------------------------------------------------------------------------- *
- * input seems OK, write the request to a temporary BIO buffer                *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * input seems OK, write the request to a temporary BIO buffer*
+ * -----------------------------------------------------------*/
   inbio = BIO_new_mem_buf(formreq, -1);
 
-/* -------------------------------------------------------------------------- *
- * Try to read the PEM request with openssl lib functions                     *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * Try to read the PEM request with openssl lib functions     *
+ * ---------------------------------------------------------- */
    if (! (certreq = PEM_read_bio_X509_REQ(inbio, NULL, NULL, NULL)))
       int_error("Error can't read request content with PEM function");
 
-/* -------------------------------------------------------------------------- *
- * Certificate request public key verification                                * 
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Certificate request public key verification                 * 
+ * ------------------------------------------------------------*/
    req_pubkey = EVP_PKEY_new();
    if ( (certreq->req_info == NULL) ||
         (certreq->req_info->pubkey == NULL) ||
@@ -158,9 +162,9 @@ int cgiMain() {
    if (X509_REQ_verify(certreq,req_pubkey) != 1)
       int_error("Error verifying signature on request");
 
-/* -------------------------------------------------------------------------- *
- * Load CA Certificate from file for signer info                              *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Load CA Certificate from file for signer info               *
+ * ------------------------------------------------------------*/
    if (! (fp=fopen(CACERT, "r")))
       int_error("Error reading CA cert file");
    if(! (cacert = PEM_read_X509(fp,NULL,NULL,NULL)))
@@ -460,22 +464,25 @@ int cgiMain() {
    }
 
 /* -------------------------------------------------------------------------- *
+ *  Set the digest algorithm for signing                                      *
+ * if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_DSA)                       *
+ *   digest = EVP_dss1(); we used to sign ecc keys, switched to SHA variants  *
+ * ---------------------------------------------------------------------------*/
+   if(strcmp(sigalgstr, "SHA-224") == 0) digest = EVP_sha224();
+   else if(strcmp(sigalgstr, "SHA-256") == 0) digest = EVP_sha256();
+   else if(strcmp(sigalgstr, "SHA-384") == 0) digest = EVP_sha384();
+   else if(strcmp(sigalgstr, "SHA-512") == 0) digest = EVP_sha512();
+   else int_error("Error received unknown sigalg string");
+
+/* -------------------------------------------------------------------------- *
  * Sign the new certificate with CA private key                               *
  * ---------------------------------------------------------------------------*/
-
-   if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_DSA)
-      digest = EVP_dss1();
-   else if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_RSA)
-      digest = EVP_sha256();
-   else
-      int_error("Error checking CA private key for valid digest");
    if (! X509_sign(newcert, ca_privkey, digest))
       int_error("Error signing the new certificate");
 
 /* -------------------------------------------------------------------------- *
  *  print the certificate                                                     *
  * ---------------------------------------------------------------------------*/
-
    snprintf(certfile, sizeof(certfile), "%s.pem", BN_bn2hex(bserial));
 
    outbio = BIO_new(BIO_s_file());
@@ -483,54 +490,17 @@ int cgiMain() {
 
    pagehead(title);
 
-   fprintf(cgiOut, "<table>");
-   fprintf(cgiOut, "<tr>\n");
-   fprintf(cgiOut, "<th>\n");
-   fprintf(cgiOut, "Your new certificate %s is displayed below:", certfile);
-   fprintf(cgiOut, "</th></tr>\n");
-   fprintf(cgiOut, "<tr>\n");
-   fprintf(cgiOut, "<td class=\"getcert\">\n");
-   fprintf(cgiOut, "<div class=\"showpem\">");
-   fprintf(cgiOut, "<pre>\n");
-
-   if (! PEM_write_bio_X509(outbio, newcert))
-      int_error("Error printing the signed certificate");
-
-   fprintf(cgiOut, "</pre>\n");
-   fprintf(cgiOut, "</div>\n");
-   fprintf(cgiOut, "</td></tr>\n");
-   fprintf(cgiOut, "<tr>\n");
-   fprintf(cgiOut, "<th>");
-   fprintf(cgiOut, "&nbsp;");
-   fprintf(cgiOut, "</th>\n");
-   fprintf(cgiOut, "</tr>\n");
-   fprintf(cgiOut, "</table>\n");
-
+   display_cert(newcert, "Server/System/Application", "wct_chain", -1);
    fprintf(cgiOut, "<p></p>\n");
+
+
    fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
 
+   // Print View
    fprintf(cgiOut, "<th>\n");
-   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Show PEM\" />\n");
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-   fprintf(cgiOut, "value=\"%s\" />\n", certfile);
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"pem\" />\n");
-   fprintf(cgiOut, "</form>\n");
-   fprintf(cgiOut, "</th>\n");
-
-   fprintf(cgiOut, "<th>\n");
-   fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Show Text\" />\n");
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-   fprintf(cgiOut, "value=\"%s\" />\n", certfile);
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
-   fprintf(cgiOut, "</form>\n");
-   fprintf(cgiOut, "</th>\n");
-
-   // filler 1 separating view from export
-   fprintf(cgiOut, "<th width=\"100\">");
-   fprintf(cgiOut, "&nbsp;");
+   fprintf(cgiOut, "<input type=\"button\" value=\"Print Page\" ");
+   fprintf(cgiOut, "onclick=\"print(); return false;\" />");
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "<th>\n");
@@ -566,7 +536,6 @@ int cgiMain() {
 /* -------------------------------------------------------------------------- *
  *  write a certificate backup to local disk, named after its serial number   *
  * ---------------------------------------------------------------------------*/
-
    snprintf(certfilestr, sizeof(certfilestr), "%s/%s.pem", CACERTSTORE,
                                                           BN_bn2hex(bserial));
    if (! (fp=fopen(certfilestr, "w")))

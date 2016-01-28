@@ -47,8 +47,8 @@ help.cgi: help.o
 capolicy.cgi: capolicy.o
 	$(CC) capolicy.o pagehead.o pagefoot.o handle_error.o -o capolicy.cgi ${LIBS}
 
-getcert.cgi: getcert.o
-	$(CC) getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
+getcert.cgi: webcert.o getcert.o
+	$(CC) webcert.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
 
 certstore.cgi: certstore.o
 	$(CC) certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
