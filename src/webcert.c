@@ -953,7 +953,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"dsa_rb\" name=\"keytype\" value=\"dsa\" onclick=\"switchGrey('dsa_rb', 'dsa', 'rsa', 'ecc');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type130\">Generate DSA key pair</td>\n");
-   fprintf(cgiOut, "<td id=\"dsa\">");
+   fprintf(cgiOut, "<td class=\"type\" id=\"dsa\">");
    fprintf(cgiOut, "<select name=\"dsastrength\">\n");
    fprintf(cgiOut, "<option value=\"512\">Key Strength: 512 bit (Poor)</option>\n");
    fprintf(cgiOut, "<option value=\"1024\">Key Strength: 1024 bit (Fair)</option>\n");
@@ -968,7 +968,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<th class=\"cnt\">");
    fprintf(cgiOut, "<input type=\"radio\" id=\"ecc_rb\" name=\"keytype\" value=\"ecc\" onclick=\"switchGrey('ecc_rb', 'ecc', 'rsa', 'dsa');\" /></th>\n");
    fprintf(cgiOut, "<td class=\"type130\">Generate ECC key pair</td>\n");
-   fprintf(cgiOut, "<td id=\"ecc\">");
+   fprintf(cgiOut, "<td class=\"type\" id=\"ecc\">");
    fprintf(cgiOut, "<select name=\"eccstrength\">\n");
    fprintf(cgiOut, "<option value=\"secp224r1\">Key Type: secp224r1 (OK)</option>\n");
    fprintf(cgiOut, "<option value=\"secp256k1\" selected=\"selected\">Key Type: secp256k1 (Good)</option>\n");

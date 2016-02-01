@@ -666,7 +666,7 @@ void display_p12(PKCS12 *p12, char *pass) {
 
   /* level -1 switch of the level display in the cert table header */
   if (cert != NULL) {
-    display_cert(cert, "Server/System/Application", "wct_chain", -1);
+    display_cert(cert, "Server/System/Application", "app_cert", -1);
     fprintf(cgiOut, "<p></p>\n");
   }
   else {
@@ -699,7 +699,7 @@ void display_stack(STACK_OF(X509) *ca) {
 
   for(counter=0; counter<certnum; counter++) {
     cert = sk_X509_value(ca, counter);
-    if (certnum == 1) display_cert(cert, "CA Chain", "wct_chain", -1);
+    if (certnum == 1) display_cert(cert, "Root CA", "ca_cert", -1);
     else display_cert(cert, "CA Chain", "wct_chain", counter);
     fprintf(cgiOut, "<p></p>\n");
     X509_free(cert);

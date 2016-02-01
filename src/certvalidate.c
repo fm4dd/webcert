@@ -71,6 +71,7 @@ BIO              *certbio = NULL;
 BIO               *outbio = NULL;
 BIO                *cabio = NULL;
 X509                *cert = NULL;
+STACK_OF(X509) *rem_chain = NULL;
 char      error_str[4096] = "";
 char *file_prefix;
 
@@ -346,7 +347,6 @@ int cgiMain() {
    * Do a validation and display the verification results here. *
    * -----------------------------------------------------------*/
   else {
-    STACK_OF(X509) *rem_chain = NULL;
     SSL_CTX          *ssl_ctx = NULL;
     SSL                  *ssl = NULL;
     int       rem_chain_count = 0;
@@ -828,10 +828,10 @@ X509_STORE_CTX  *verify_mem_store(STACK_OF(X509_INFO) *st) {
 
   /* ---------------------------------------------------------- *
    * Initialize the ctx structure for a verification operation: *
-   * Set the trusted cert store, the unvalidated cert, and any  *
-   * potential certs that could be needed (here we set it NULL) *
+   * Set the trusted cert store, the unvalidated cert, and, if  *
+   * if we got them, the intermediate stack from a SSL connect. *
    * ---------------------------------------------------------- */
-  X509_STORE_CTX_init(ctx, store, cert, NULL);
+  X509_STORE_CTX_init(ctx, store, cert, rem_chain);
 
   return ctx;
 }
