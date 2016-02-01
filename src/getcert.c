@@ -173,6 +173,17 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "</table>\n");
+
+   // If we show the Root CA cert, we also provide the retired Root CA certs (hardcoded)
+   if (strcmp(certfilestr, "cacert.pem") == 0) {
+      fprintf(cgiOut, "<p></p>\n");
+      fprintf(cgiOut, "<h3>Retired WebCert Root CA certificates:</h3>\n");
+      fprintf(cgiOut, "<hr />\n");
+      fprintf(cgiOut, "<p><strong>2007-12-07</strong> 1024 bit RSA WebCert Root CA certificate with SHA-1 signature: ");
+      fprintf(cgiOut, "<a href=\"../export/webcert-20071207_1021.pem\">webcert-20071207_1021.pem</a></p>\n");
+      fprintf(cgiOut, "<p><strong>2004-12-18</strong> 1024 bit RSA WebCert Root CA certificate with MD5 signature: ");
+      fprintf(cgiOut, "<a href=\"../export/webcert-20041218_0138.pem\">webcert-20041218_0138.pem</a></p>\n");
+   }
    pagefoot();
    BIO_free(outbio);
    return(0);
