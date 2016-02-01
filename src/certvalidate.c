@@ -31,6 +31,7 @@
 #define MOZI_PREFIX "mozilla-bundle-"
 #define VERI_PREFIX "verisign-bundle-"
 #define UBUN_PREFIX "ubuntu-bundle-"
+#define WBCT_PREFIX "webcert-bundle-"
 
 /* ---------------------------------------------------------- *
  * get_latest_ca_bundle() checks for the most recent file     *
@@ -135,9 +136,11 @@ int cgiMain() {
     sk_X509_INFO_pop_free(list, X509_INFO_free);
   }
 
-  //list=sk_X509_INFO_new_null();
-  list = X509_load_ca_file(&wbct_counter, &wbct_stat, CACERT);
-  sk_X509_INFO_pop_free(list, X509_INFO_free);
+  file_prefix = WBCT_PREFIX;
+  if(get_latest_ca_bundle(cafilestr) > 0) {
+    list = X509_load_ca_file(&wbct_counter, &wbct_stat, cafilestr);
+    sk_X509_INFO_pop_free(list, X509_INFO_free);
+  }
 
   /* ---------------------------------------------------------- *
    * If called w/o arguments, display the data gathering form.  *
@@ -212,10 +215,10 @@ int cgiMain() {
     if (wcca_counter) {
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th class=\"cnt\">\n");
-      fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"mz\" checked=\"checked\" />\n");
+      fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"mz\" />\n");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">");
-      fprintf(cgiOut, "<b>WebCert internal CA certificates</b> - %d certificates, %ld Bytes, last update %s</td>\n",
+      fprintf(cgiOut, "<b>Mozilla Root certificate list</b> - %d certificates, %ld Bytes, last update %s</td>\n",
                       wcca_counter, wcca_stat.st_size, ctime(&wcca_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
@@ -225,17 +228,17 @@ int cgiMain() {
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"vs\" />\n");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">\n");
-      fprintf(cgiOut, "<b>Verisign Root certificate bundle</b> - %d certificates, %ld Bytes, last update %s</td>\n",
+      fprintf(cgiOut, "<b>Verisign Root certificate list</b> - %d certificates, %ld Bytes, last update %s</td>\n",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
     if (ubun_counter) {
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<th class=\"cnt\">");
-      fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"os\" />");
+      fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"os\" checked=\"checked\" />");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">");
-      fprintf(cgiOut, "<b>Ubuntu Root certificates</b> - %d certificates, %ld Bytes, last update %s</td>\n",
+      fprintf(cgiOut, "<b>Ubuntu Root certificate list</b> - %d certificates, %ld Bytes, last update %s</td>\n",
                       ubun_counter, ubun_stat.st_size, ctime(&ubun_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
@@ -245,7 +248,7 @@ int cgiMain() {
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"wc\" />");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">");
-      fprintf(cgiOut, "<b>WebCert's own Root certificate</b> - %d certificates, %ld Bytes, last update %s</td>\n",
+      fprintf(cgiOut, "<b>WebCert's Root certificate list</b> - %d certificates, %ld Bytes, last update %s</td>\n",
                       wbct_counter, wbct_stat.st_size, ctime(&wbct_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
@@ -263,13 +266,12 @@ int cgiMain() {
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<td class=\"desc\" colspan=\"3\">");
     fprintf(cgiOut, "Here we select the list of CA certificates we would like to validate against. ");
-    fprintf(cgiOut, "Three bundles are prepared: ");
+    fprintf(cgiOut, "The following bundles are prepared: ");
     fprintf(cgiOut, "<ul>");
-    fprintf(cgiOut, "<li>WebCert's internal CA certificate list is manually upated with ");
-    fprintf(cgiOut, "CA certificates from major commercial Vendors.</li> ");
-    fprintf(cgiOut, "<li> The Verisign Root certificate list is downloaded and converted  ");
-    fprintf(cgiOut, "weekly from Verisign.</li>");
-    fprintf(cgiOut, "<li> The WebCert Root certificate is WebCerts own single CA file, ");
+    fprintf(cgiOut, "<li>Mozilla Root certificate list, downloaded from http://curl.haxx.se/ca/cacert.pem.</li> ");
+    fprintf(cgiOut, "<li>Verisign Root certificate list, downloaded and converted weekly from Verisign.</li>");
+    fprintf(cgiOut, "<li>Ubuntu Root certificate list, converted from the local OS files.</li>");
+    fprintf(cgiOut, "<li> The WebCert Root certificate list contains WebCerts own CA files, ");
     fprintf(cgiOut, "validating certificates for this CA only.</li>");
     fprintf(cgiOut, "</ul>");
     fprintf(cgiOut, "Alternatively, you can upload your own, local CA certificate file or file bundle (Apache-style) in PEM format.");
