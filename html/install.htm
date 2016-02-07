@@ -177,9 +177,9 @@ cp images/webcert-icon.gif images/webcert-logo.gif images/cert.gif /var/www/html
 cp doc/help.txt doc/capolicy.txt /var/www/html/webcert/cgi-bin
 cd src &amp;&amp; make install
 make[1]: Entering directory `/tmp/webcert-v1.7.3/src'
-strip buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi
-cp buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi /var/www/html/webcert/cgi-bin
-buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi installed in /var/www/html/webcert/cgi-bin.
+strip buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi
+cp buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi /var/www/html/webcert/cgi-bin
+buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi installed in /var/www/html/webcert/cgi-bin.
 Checking for new export dir needed by certexport.cgi:
 ...OK. /var/www/html/webcert/cgi-bin/../export exists.
 make[1]: Leaving directory `/tmp/webcert-v1.7.3/src'</code></pre>
@@ -207,7 +207,6 @@ After the compilation and installation, the file structure should look like this
    /var/www/html/webcert/cgi-bin:
    total 600
    -rwxr-xr-x 1 root root 42752 Feb 28 10:34 buildrequest.cgi
-   -rwxr-xr-x 1 root root 34572 Feb 28 10:34 capolicy.cgi
    -rwxr-xr-x 1 root root 46944 Feb 28 10:34 certexport.cgi
    -rwxr-xr-x 1 root root 72936 Feb 28 10:34 certrenew.cgi
    -rwxr-xr-x 1 root root 34560 Feb 28 10:34 certrequest.cgi
@@ -218,8 +217,8 @@ After the compilation and installation, the file structure should look like this
    -rwxr-xr-x 1 root root 46960 Feb 28 10:34 certverify.cgi
    -rwxr-xr-x 1 root root 51160 Feb 28 10:34 genrequest.cgi
    -rwxr-xr-x 1 root root 42784 Feb 28 10:34 getcert.cgi
-   -rwxr-xr-x 1 root root 34608 Feb 28 10:34 help.cgi
    -rwxr-xr-x 1 root root 85384 Feb 28 10:34 p12convert.cgi
+   -rwxr-xr-x 1 root root 39592 Feb 28 10:34 showhtml.cgi
 
    /var/www/html/webcert/images:
    total 472
@@ -235,6 +234,8 @@ After the compilation and installation, the file structure should look like this
    -rw-r--r-- 1 root root  8178 Feb 28 10:58 new-certificate-key-and_extensions-icon.png
    -rw-r--r-- 1 root root 50005 Feb 28 10:58 new-certificate-key-and_extensions.png
    -rw-r--r-- 1 root root  3069 Feb 28 10:58 openssl_button.gif
+   -rw-r--r-- 1 root root  8414 Feb 28 10:58 webcert-certificate-p12convert-icon.png
+   -rw-r--r-- 1 root root 12046 Feb 28 10:58 webcert-certificate-rootca-icon.png
    -rw-r--r-- 1 root root 16028 Feb 28 10:58 webcert-certificate-search-icon.png
    -rw-r--r-- 1 root root 36021 Feb 28 10:58 webcert-certificate-search.png
    -rw-r--r-- 1 root root 12734 Feb 28 10:58 webcert-certificate-store-icon.png

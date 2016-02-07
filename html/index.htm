@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title> WebCert - Redirect to application</title>
-  <!--#include virtual="/site-headermeta-template.htm" -->
+  <!--#include virtual="/site-headermeta.htm" -->
 <meta name="Title" content="WebCert - Main Entry Page" />
 <meta name="Description" content="WebCert Digital Certificate Management" />
 <meta name="Keywords" content="SSL, HTTPS, TLS, certificate, x509" />
 <meta name="Classification" content="IT Security" />
-<meta http-equiv="Refresh" content="3; URL=cgi-bin/buildrequest.cgi" />
+<meta http-equiv="Refresh" content="3; URL=cgi-bin/showhtml.cgi?templ=index" />
 </head>
 
 <body>
@@ -16,15 +16,15 @@
     <h1>WebCert</h1>
     <h2>Web-based Digital Certificate Management</h2>
   </div>
-  <!--#include virtual="/site-navigation-template.htm" -->
+  <!--#include virtual="/site-navigation.htm" -->
 
   <div id="content">
 <p style="text-align: center">
-<img src="images/cert.gif" alt="WebCert Application" />
+<img src="images/cert.gif" alt="WebCert Application" height="515" width="682"/>
 </p>
 <p>
-Forward to the application start in
-<a href="cgi-bin/buildrequest.cgi">cgi-bin/buildrequest.cgi</a>
+Forward to the application
+<a href="cgi-bin/showhtml.cgi?templ=index">index</a>
 </p>
   </div>
   <div id="sidecontent">
@@ -33,14 +33,14 @@ Forward to the application start in
  <br />
     <h4>Topics</h4>
     <ul>
-      <li><a href="cgi-bin/buildrequest.cgi">Start WebCert</a></li>
+      <li><a href="cgi-bin/showhtml.cgi?templ=index">Start WebCert</a></li>
       <li><a href="about.htm">About WebCert</a></li>
       <li><a href="install.htm">Installation</a></li>
       <li><a href="changelog.htm">Changelog</a></li>
-      <li><a href="cgi-bin/help.cgi">WebCert help</a></li>
+      <li><a href="cgi-bin/showhtml.cgi?templ=help">WebCert help</a></li>
     </ul>
   </div>
-  <!--#include virtual="/site-footerdata-template.htm" -->
+  <!--#include virtual="/site-footerdata.htm" -->
 </div>
 </body>
 </html>

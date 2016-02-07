@@ -50,6 +50,8 @@
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
+/*********** html code template for populating the index  *********************/
+#define INDEX_TEMPL	"../index-template.htm" /* mandatory */
 /*********** html code template for populating the help data  *****************/
 #define HELP_TEMPL	"../help-template.htm" /* mandatory */
 /*********** html code template for populating the policy text  ***************/

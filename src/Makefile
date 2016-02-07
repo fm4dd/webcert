@@ -7,7 +7,7 @@ HTMDIR=/srv/www/std-root/fm4dd.com/sw/webcert
 CGIDIR=/srv/www/std-root/fm4dd.com/sw/webcert/cgi-bin
 EXPORTDIR=${CGIDIR}/../export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi help.cgi capolicy.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi certrenew.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi certrenew.cgi
 
 ALLJS=webcert.js
 
@@ -41,11 +41,8 @@ certrequest.cgi: certrequest.o
 certverify.cgi: webcert.o certverify.o
 	$(CC) webcert.o certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
 
-help.cgi: help.o
-	$(CC) help.o pagehead.o pagefoot.o handle_error.o -o help.cgi ${LIBS}
-
-capolicy.cgi: capolicy.o
-	$(CC) capolicy.o pagehead.o pagefoot.o handle_error.o -o capolicy.cgi ${LIBS}
+showhtml.cgi: showhtml.o
+	$(CC) showhtml.o pagehead.o pagefoot.o handle_error.o -o showhtml.cgi ${LIBS}
 
 getcert.cgi: webcert.o getcert.o
 	$(CC) webcert.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}

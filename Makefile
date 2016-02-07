@@ -22,7 +22,7 @@ EXPORTDIR=${BASEDIR}/webcert/export
 ALLHTM=html/*.htm
 ALLSTL=style/style.css
 ALLIMG=images/*.gif
-ALLCGI=src/buildrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/help.cgi src/capolicy.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/p12convert.cgi src/certrenew.cgi
+ALLCGI=src/buildrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/showhtml.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/p12convert.cgi src/certrenew.cgi
 ALLSCR=scripts/*.sh
 
 all: 
