@@ -158,7 +158,7 @@ int cgiMain() {
     fprintf(cgiOut, "<table>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th colspan=\"3\">");
-    fprintf(cgiOut, "Required: The certificate for PKCS12 conversion");
+    fprintf(cgiOut, "Required: The PKCS12 file for analysis");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
 
