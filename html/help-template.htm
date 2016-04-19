@@ -7,9 +7,9 @@ identified with a .csr extension), you can skip to 2.
 <div class="pic"><img src="../images/new-certificate-data-entry-icon.png" alt="new certificate data entry" /></div>
 <p>
 In order to generate a new certificate, we need to create
-a certificate request. The request will carry the name and
-possibly other details of its future owner.
-Using <b>Create Request</b> from the top menu bar will call
+a certificate signing request (CSR). The request will carry 
+the name and possibly other details of its future owner.
+Using <b>Create CSR</b> from the top menu bar will call
  buildrequest.cgi, and the necessary form will be displayed.
 At a minimum, the Common Name (CN) of the future certificate
 must be provided there. You can also select the key type
@@ -24,7 +24,7 @@ generated for you by a smart network or firewall device
 (i.e. Cisco, Netscreen), you already got a key pair
 that stays in the system. Here you simply cut and paste
 the certificate request into the certrequest.cgi form
-using the <b>Paste Request</b> menu item, and generate the certificate.
+using the <b>Verify CSR</b> menu item, and generate the certificate.
 Once done, simply import the certificate into your device.
 </p>
 <p>
@@ -81,7 +81,7 @@ set to precisely define the time period.
 <p>
 <b>Important:</b> If Webcert was used to create the certificate
 request together with the key, we need to save the private key
-which is displayed ionly here. For security reasons, no other
+which is displayed only here. For security reasons, no other
 copy is kept on the server. Simply copy&amp;paste the displayed PEM
 key data into a local text file.
 </p>
@@ -94,6 +94,7 @@ singing it with WebCerts root CA certificate. If the process is
 successful, you'll get a certificate displayed that looks like
 this:
 </p>
+<p>
 <pre>-----BEGIN CERTIFICATE-----
 MIID7DCCA1WgAwIBAgIBDjANBgkqhkiG9w0BAQQFADCBmTELMAkGA1UEBhMCVVMx
 CzAJBgNVBAgTAkNBMRUwEwYDVQQHEwxSZWR3b29kIENpdHkxFTATBgNVBAoTDE9y
@@ -117,6 +118,7 @@ CSqGSIb3DQEBBAUAA4GBAD2f9Lb+KJ3kqvKhyb7k+uLpvIvl13qxY+HyAF/DPqYx
 EXa3CYdy8IR8ulj703vLtPbZcKjXvtjyr/reGBgD8REKNK6bHcjBAjUa61vlg9dW
 pdsIsSEWBjqO93o2LAnJaZSXJ/axmLtErEh4tfUG0IlU2Ol38avGBtdZbGLYYYSc
 -----END CERTIFICATE-----</pre>
+</p>
 <div class="pic"><img src="../images/new-certificate-generated-icon.png" alt="new certificate generated" /></div>
 <p>
 Now you can cut and paste it via an editor such as Windows Notepad
@@ -125,8 +127,8 @@ the <b>Export</b> functions to download the certificate as a file.
 <br />
 A detailed description for generating a S/Mime certificate to
 enable e-mail encryption is here:
-<a href="http://www.frank4dd.com/howto/openssl/webcert-smime-howto.htm">
-http://www.frank4dd.com/howto/openssl/webcert-smime-howto.htm</a>
+<a href="http://fm4dd.com/howto/openssl/webcert-smime-howto.htm">
+http://fm4dd.com/howto/openssl/webcert-smime-howto.htm</a>
 </p>
 <h3>5. Certificate Export</h3>
 <hr />
@@ -165,10 +167,10 @@ WebCert conveniently displays the certificate subject, along with
  the remaining time each certificate is valid.
 </p>
 <p>
-The <b>ViewPEM</b> button displays the certificate in PEM format,
-convenient for importing it into various certificate stores.
-The <b>ViewTXT</b> button shows the certificate data in human-readable
-ASCII text format.
+The <b>Detail</b> button displays the certificate data including its PEM
+ format, convenient for importing it into various certificate stores.
+The <b>Renew</b> button creates a new CSR from the existing certificate 
+data for simple renewal.
 </p>
 <h3>8. Certificate Search</h3>
 <hr />
@@ -186,14 +188,14 @@ are about to expire, and let us renew them before they become invalid.
 <div class="pic"><img src="../images/webcert-certificate-validation-icon.png" alt="webcert certificate validation" /></div>
 <p>
 The <b>Verify Certs</b> menu option is a powerful way to identify
-isues around certificates. A crucial part of using certificates
-lies in the validation of the chain of "signing" certificates.
+issues around certificates. A crucial part of using certificates
+lies in the validation through a chain of "signing" certificates.
 With this function, the chain can be constructed and verified,
 similar to the way applications, such as a web browser would do.
 This works with all certificates, not just the ones created with
 WebCert.
 </p>
-<p>This function can upload local certificates, or it can connect
+<p>This function can upload local certificate files, or it can connect
 directly to a remote SSL server and extract the certificate data
 from there. It is very convenient to verify if a servers SSL setup
 is correct.
@@ -258,9 +260,9 @@ the critical date.
 <h3>11. Links</h3>
 <hr />
 <ul>
-<li>How to <a href="http://www.frank4dd.com/howto/openssl/webcert-smime-howto.htm">
+<li>How to <a href="http://fm4dd.com/openssl/webcert-smime-howto.htm">
 generate S/MIME e-mail encryption certificates with WebCert</a></li>
 </ul>
 <p>
-last update 1/11/2013			@2003-2013 Frank4DD
+last update 1/11/2016			@2003-2016 Frank4DD
 </p>
