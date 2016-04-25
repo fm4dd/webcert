@@ -161,6 +161,7 @@ body a:visited {
 }
 
 #content table.led {
+    width: 15px;
     border-spacing: 0;
     border: none;
 }

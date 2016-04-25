@@ -369,7 +369,7 @@ int cgiMain() {
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-renew\" ");
     fprintf(cgiOut, "value=\"");
     PEM_write_bio_X509(outbio, cert);
-    fprintf(cgiOut, "\">\n");
+    fprintf(cgiOut, "\" />\n");
     fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"Renew\" />\n");
     fprintf(cgiOut, "</form>\n");
     fprintf(cgiOut, "</th>\n");
