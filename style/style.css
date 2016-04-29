@@ -123,8 +123,8 @@ body a:visited {
 }
 
 #content h3 {
-    color: #815500;
-    font-size: 1.3em;
+    font-size: 14pt;
+    font-weight: normal;
     margin: 0;
     padding: 10px 5px 0 0;
     text-align: left;
@@ -132,8 +132,8 @@ body a:visited {
 }
 
 #content h4 {
-    color: #815500;
-    font-size: 1.1em;
+    font-size: 12pt;
+    font-weight: normal;
     margin: 0;
     padding: 0 0 0 10px;
     font-weight: normal;
