@@ -30,6 +30,7 @@ int X509_signature_dump(BIO *bp, const ASN1_STRING *sig, int indent);
  * ---------------------------------------------------------- */
 void display_p12(PKCS12 *p12, char *pass);
 void display_stack(STACK_OF(X509) *ca);
+void display_bags(STACK_OF(PKCS12_SAFEBAG) *bags, int i);
 
 int cgiMain() {
 
@@ -617,21 +618,44 @@ int cgiMain() {
 
         fprintf(cgiOut, "<tr>\n");
         fprintf(cgiOut, "<th width=\"75px\">MAC Iteration:</th>\n");
-        fprintf(cgiOut, "<td>%ld (Compatibility: 1, OpenSSL Default: 2048, WIndows 7 Default: 2000)</td>\n",
+        fprintf(cgiOut, "<td>%ld (Compatibility: 1, OpenSSL Default: 2048, Windows 7 Default: 2000)</td>\n",
                         p12->mac->iter ? ASN1_INTEGER_get(p12->mac->iter) : 1);
         fprintf(cgiOut, "</tr>\n");
 
-       //OBJ_obj2txt(buf, 1024, p12->mac->dinfo->algor->parameter->type, 0);
-       // fprintf(cgiOut, "<tr>\n");
-       // fprintf(cgiOut, "<th width=\"75px\">MAC Digest:</th>\n");
-       //BIO *outbio;
-       //outbio = BIO_new(BIO_s_file());
-       //outbio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
-       //M_ASN1_OCTET_STRING_print(bio, p12->mac->salt);
-       //M_ASN1_OCTET_STRING_print(outbio, p12->mac->dinfo->digest);
-       //BIO_free(bio);
-       // fprintf(cgiOut, "<td>%s</td>\n", buf);
-       // fprintf(cgiOut, "</tr>\n");
+        STACK_OF(PKCS7) *asafes = NULL;
+        STACK_OF(PKCS12_SAFEBAG) *bags;
+        int i, bagnid;
+        PKCS7 *p7;
+
+        asafes = PKCS12_unpack_authsafes(p12);
+        for (i = 0; i < sk_PKCS7_num(asafes); i++) {
+          p7 = sk_PKCS7_value (asafes, i);
+          bagnid = OBJ_obj2nid (p7->type);
+
+          // check if the p7 bag is NOT encrypted
+          if (bagnid == NID_pkcs7_data) {
+            fprintf(cgiOut, "<tr>\n");
+            fprintf(cgiOut, "<th width=\"75px\">PKCS7 - #%d</th>\n", i);
+            fprintf(cgiOut, "<td>Content: PKCS7 Data</td>\n");
+            fprintf(cgiOut, "</tr>\n");
+            bags = PKCS12_unpack_p7data(p7);
+          } // end if(bagnid == NID_pkcs7_data)
+
+          // check if the p7 bag is encrypted
+          if (bagnid == NID_pkcs7_encrypted) {
+            fprintf(cgiOut, "<tr>\n");
+            fprintf(cgiOut, "<th width=\"75px\">PKCS7  - #%d</th>\n", i);
+            fprintf(cgiOut, "<td>Content: PKCS7 Encrypted Data ");
+            OBJ_obj2txt(buf, 1024, p7->d.encrypted->enc_data->algorithm->algorithm, 0);
+            fprintf(cgiOut, "%s</td>\n", buf);
+            fprintf(cgiOut, "</tr>\n");
+            bags = PKCS12_unpack_p7encdata(p7,p12pass,strlen(p12pass));
+          } // end if(bagnid == NID_pkcs7_encrypted)
+
+        display_bags(bags, i);
+        sk_PKCS12_SAFEBAG_pop_free (bags, PKCS12_SAFEBAG_free);
+        } // end for loop
+        if (asafes) sk_PKCS7_pop_free (asafes, PKCS7_free);
       }
 
       fprintf(cgiOut, "<tr>\n");
@@ -689,6 +713,40 @@ void display_p12(PKCS12 *p12, char *pass) {
     fprintf(cgiOut, "<p>This PKCS12 file carries no signing certificate chain.</p>\n");
   }
 }
+/* ---------------------------------------------------------- *
+ *  Function display_bag extracts and displays PKCS7 bag info *
+ * ---------------------------------------------------------- */
+void display_bags(STACK_OF(PKCS12_SAFEBAG) *bags, int j) {
+  int k;
+  for (k=0; k < sk_PKCS12_SAFEBAG_num (bags); k++) {
+    PKCS12_SAFEBAG *bag = sk_PKCS12_SAFEBAG_value (bags, k);
+    fprintf(cgiOut, "<tr>\n");
+    switch (M_PKCS12_bag_type(bag)) {
+      case NID_keyBag:
+        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<td>Key Bag</td>\n");
+        // TODO: print bag attributes, see openssl/apps/pkcs12.c
+        //print_attribs (out, bag->attrib, "Bag Attributes");
+      break;
+      case NID_pkcs8ShroudedKeyBag:
+        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        // TODO: print bag algorithm and attributes, see openssl/apps/pkcs12.c
+        //fprintf(cgiOut, "<td>Shrouded Key Bag %s, Attributes: </td>\n", bag->value.shkeybag->algor);
+        fprintf(cgiOut, "<td>PKCS8 Shrouded Key Bag</td>\n");
+      break;
+      case NID_certBag:
+        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<td>Certificate Bag</td>\n");
+      break;
+      case NID_safeContentsBag:
+        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<td>Safe Contents Bag</td>\n");
+      break;
+    }
+    fprintf(cgiOut, "</tr>\n");
+  }
+}
+
 /* ---------------------------------------------------------- *
  * Function display_stack shows all certs of a STACK_OF(X509) *
  * ---------------------------------------------------------- */

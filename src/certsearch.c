@@ -245,13 +245,9 @@ int cgiMain() {
     pagehead(title);
     fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"get\">");
     fprintf(cgiOut, "<table>");
-    fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th colspan=\"5\">");
-    fprintf(cgiOut, "Select one of the following search criteria");
-    fprintf(cgiOut, "</th>");
-    fprintf(cgiOut, "</tr>\n");
 
     /* Search for Subject String */
+    fprintf(cgiOut, "<tr><th colspan=\"5\">Search by Name</th></tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"dn\" name=\"search\" />");
@@ -287,6 +283,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Expiration Date */
+    fprintf(cgiOut, "<tr><th colspan=\"5\">Search by Expiration Date</th></tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"exp\" name=\"search\" checked=\"checked\" />");
@@ -321,6 +318,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Enabled Date */
+    fprintf(cgiOut, "<tr><th colspan=\"5\">Search by Creation Date</th></tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"ena\" name=\"search\" />");
@@ -355,6 +353,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Revocation Date */
+    fprintf(cgiOut, "<tr><th colspan=\"5\">Search by Revocation Date</th></tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"rev\" name=\"search\" />");
@@ -389,6 +388,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     /* Search for Serial Number */
+    fprintf(cgiOut, "<tr><th colspan=\"5\">Search by Serial Number</th></tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<th class=\"cnt\" rowspan=\"2\">\n");
     fprintf(cgiOut, "<input type=\"radio\" value=\"ser\" name=\"search\" />");
