@@ -83,13 +83,13 @@ int cgiMain() {
   STACK_OF(X509_INFO) *list = NULL;
   int            cert_fsize = 0;
   int            veri_fsize = 0;
-  int          wcca_counter = 0;
+  int          mozi_counter = 0;
   int          veri_counter = 0;
   int          ubun_counter = 0;
   int          wbct_counter = 0;
   char          **form_data = NULL;  /* string array for query data */
   char cafilestr[CB_STRLEN] = "";
-  struct stat wcca_stat; 
+  struct stat mozi_stat; 
   struct stat veri_stat; 
   struct stat ubun_stat; 
   struct stat wbct_stat; 
@@ -126,7 +126,7 @@ int cgiMain() {
 
   file_prefix = MOZI_PREFIX;
   if(get_latest_ca_bundle(cafilestr) > 0) {
-    list = X509_load_ca_file(&wcca_counter, &wcca_stat, cafilestr);
+    list = X509_load_ca_file(&mozi_counter, &mozi_stat, cafilestr);
     sk_X509_INFO_pop_free(list, X509_INFO_free);
   }
 
@@ -167,17 +167,17 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
   
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th class=\"cnt\">\n");
+    fprintf(cgiOut, "<th width=\"50px\">\n");
     fprintf(cgiOut, "<input type=\"radio\" id=\"lf_rb\" name=\"crt_type\" value=\"lf\" checked=\"checked\" onclick=\"switchGrey('lf_rb', 'lf', 'ru', 'none');\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type180\">Upload Your certificate (PEM format)</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
+    fprintf(cgiOut, "<td width=\"400px\">\n");
     fprintf(cgiOut, "<input type=\"file\" name=\"requestfile\" />\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th class=\"cnt\">\n");
+    fprintf(cgiOut, "<th width=\"50px\">\n");
     fprintf(cgiOut, "<input type=\"radio\" id=\"ru_rb\" name=\"crt_type\" value=\"ru\" onclick=\"switchGrey('ru_rb', 'ru', 'lf', 'none');\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type180\">Remote certificate check - type URL</td>\n");
@@ -212,19 +212,19 @@ int cgiMain() {
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
   
-    if (wcca_counter) {
+    if (mozi_counter) {
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th class=\"cnt\">\n");
+      fprintf(cgiOut, "<th width=\"50px\">\n");
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"mz\" />\n");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">");
       fprintf(cgiOut, "<b>Mozilla Root certificate list</b> - %d certificates, %ld Bytes, last update %s</td>\n",
-                      wcca_counter, wcca_stat.st_size, ctime(&wcca_stat.st_mtime));
+                      mozi_counter, mozi_stat.st_size, ctime(&mozi_stat.st_mtime));
       fprintf(cgiOut, "</tr>\n");
     }
     if (veri_counter) {
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th class=\"cnt\">\n");
+      fprintf(cgiOut, "<th width=\"50px\">\n");
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"vs\" />\n");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">\n");
@@ -234,7 +234,7 @@ int cgiMain() {
     }
     if (ubun_counter) {
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th class=\"cnt\">");
+      fprintf(cgiOut, "<th width=\"50px\">");
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"os\" checked=\"checked\" />");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">");
@@ -244,7 +244,7 @@ int cgiMain() {
     }
     if (wbct_counter) {
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th class=\"cnt\">");
+      fprintf(cgiOut, "<th width=\"50px\">");
       fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"wc\" />");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td class=\"desc640\" colspan=\"2\">");
@@ -254,11 +254,11 @@ int cgiMain() {
     }
   
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "<th width=\"50px\">");
     fprintf(cgiOut, "<input type=\"radio\" name=\"cab_type\" value=\"pc\" id=\"pc_cb\" onclick=\"switchGrey('pc_cb', 'pc_td', 'none', 'none');\"/>");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type180\">Your CA certificate(s) - PEM format:</td>\n");
-    fprintf(cgiOut, "<td class=\"type\" id=\"pc_td\">");
+    fprintf(cgiOut, "<td class=\"type\" id=\"pc_td\" width=\"400px\">");
     fprintf(cgiOut, "<input type=\"file\" name=\"cabundlefile\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -289,7 +289,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
  
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th class=\"cnt\">\n");
+    fprintf(cgiOut, "<th width=\"50px\">\n");
     fprintf(cgiOut, "<select name=\"depth\">");
     fprintf(cgiOut, "<option value=\"0\">0</option>");
     fprintf(cgiOut, "<option value=\"1\">1</option>");
@@ -315,7 +315,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
   
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th class=\"cnt\">\n");
+    fprintf(cgiOut, "<th width=\"50px\">\n");
     fprintf(cgiOut, "<input type=\"checkbox\" name=\"X509_V_FLAG_X509_STRICT\" id=\"strict_cb\" onclick=\"switchGrey('strict_cb', 'strict_td', 'none', 'none');\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type\" id=\"strict_td\">\n");
@@ -603,7 +603,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"75px\">Date:");
+    fprintf(cgiOut, "<th class=\"cnt75\">Date:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     fprintf(cgiOut, "%s", ctime(&now));
@@ -611,7 +611,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"75px\">Target:");
+    fprintf(cgiOut, "<th class=\"cnt75\">Target:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     if(strcmp(crt_type, "lf") == 0) fprintf(cgiOut, "%s", req_name);
@@ -620,7 +620,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>Result:");
+    fprintf(cgiOut, "<th class=\"cnt75\">Result:");
     fprintf(cgiOut, "</th>\n");
     if(ret == 0)  fprintf(cgiOut, "<td class=\"failure\">Failure");
     if(ret == 1)  fprintf(cgiOut, "<td class=\"success\">Success");
@@ -628,7 +628,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>Reason:");
+    fprintf(cgiOut, "<th class=\"cnt75\">Reason:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     fprintf(cgiOut, "%s", X509_verify_cert_error_string(vrfy_ctx->error));
@@ -636,7 +636,7 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>Depth:");
+    fprintf(cgiOut, "<th class=\"cnt75\">Depth:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     fprintf(cgiOut, "Maximum Verification Depth: %d ", X509_VERIFY_PARAM_get_depth(param));
@@ -649,7 +649,7 @@ int cgiMain() {
 
     if(cgiFormCheckboxSingle("X509_V_FLAG_X509_STRICT") == cgiFormSuccess) {
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th>Flags:");
+      fprintf(cgiOut, "<th class=\"cnt75\">Flags:");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td>");
       fprintf(cgiOut, "<b>X509_V_FLAG_X509_STRICT</b> - disable workarounds, verify strictly per X509 rules.");
@@ -659,7 +659,7 @@ int cgiMain() {
 
     if(strcmp(crt_type, "ru") == 0) {
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th>Chain:");
+      fprintf(cgiOut, "<th class=\"cnt75\">Chain:");
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "<td>");
       if(rem_chain_count > 1) {
@@ -674,7 +674,7 @@ int cgiMain() {
     }
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th width=\"75px\">CA Bundle:");
+    fprintf(cgiOut, "<th class=\"cnt75\">CA Bundle:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     /* display the CA file bundle type here */

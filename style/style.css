@@ -187,7 +187,15 @@ body a:visited {
 }
 
 #content th.cnt {
+    white-space: nowrap;
+    text-align: center;
     width: 35px;
+}
+
+#content th.cnt75 {
+    white-space: nowrap;
+    text-align: center;
+    width: 75px;
 }
 
 #content input {
@@ -312,7 +320,12 @@ body a:visited {
 #content td.desc {
     background: #AFAFAF;
     color: #000080;
+}
+
+#content td.desc180 {
     width: 180px;
+    background: #AFAFAF;
+    color: #000080;
 }
 
 #content div.showpem {

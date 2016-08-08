@@ -185,7 +185,7 @@ void display_csr(X509_REQ *csr) {
     OBJ_obj2txt(buf, 80, e->object, 0);
 
     fprintf(cgiOut, "<tr>");
-    fprintf(cgiOut, "<th width=\"75px\">%s</th\n>", buf);
+    fprintf(cgiOut, "<th class=\"cnt75\">%s</th\n>", buf);
     fprintf(cgiOut, "<td>");
     ASN1_STRING_print_ex(bio, e->value, ASN1_STRFLGS_UTF8_CONVERT);
     fprintf(cgiOut, "</td>");
@@ -356,7 +356,7 @@ void display_key(EVP_PKEY *pkey) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th width=\"75px\">Private Key:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Private Key:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
@@ -395,7 +395,7 @@ void display_key(EVP_PKEY *pkey) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th width=\"75px\">Public Key:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Public Key:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
@@ -509,7 +509,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th width=\"75px\">Version:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Version:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert subject here */
@@ -518,7 +518,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th width=\"75px\">Subject:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Subject:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert subject here */
@@ -528,7 +528,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Serial:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Serial:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert serial here */
@@ -538,7 +538,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Issuer:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Issuer:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the cert issuer here */
@@ -547,7 +547,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Thumbprint:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Thumbprint:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the thumbprint here */
@@ -558,7 +558,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Validity:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Validity:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>");
   /* display the start and end date here */
@@ -572,7 +572,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Extensions:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Extensions:");
   fprintf(cgiOut, "</th>\n");
   if (sk_X509_EXTENSION_num(ext_list) <= 0)
     fprintf(cgiOut, "<td>No extensions available");
@@ -612,7 +612,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Public Key:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Public Key:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
@@ -649,7 +649,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Signature:");
+  fprintf(cgiOut, "<th class=\"cnt75\">Signature:");
   fprintf(cgiOut, "</th>\n");
   if (strstr(sig_type_str, "Md5") || strstr(sig_type_str, "md5"))
     fprintf(cgiOut, "<td bgcolor=\"#cf0f0f\">");
@@ -668,7 +668,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
 
   /* display the cert content in PEM format here */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Cert Data:</th>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Cert Data:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certpem_%s%d');\">\n", chain_type, level);
   fprintf(cgiOut, "Expand or Hide Certificate PEM Data</a>\n");
@@ -681,7 +681,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
 
   /* display the cert content in TEXT format here */
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th class=\"cnt\">Cert Text:</th>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Cert Text:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">\n");
   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certtext_%s%d');\">\n", chain_type, level);
   fprintf(cgiOut, "Expand/Hide certificate data in Text format</a>\n");
@@ -946,7 +946,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-   fprintf(cgiOut, "<td class=\"desc\">select RSA key size here</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">select RSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
@@ -961,7 +961,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"4096\">Key Strength: 4096 bit (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-   fprintf(cgiOut, "<td class=\"desc\">select DSA key size here</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">select DSA key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
@@ -976,7 +976,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"secp521r1\">Key Type: secp521r1 (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-   fprintf(cgiOut, "<td class=\"desc\">select ECC key size here</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">select ECC key size here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
@@ -995,7 +995,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<option value=\"SHA-512\">Strength: SHA-512 bit (Best)");
    fprintf(cgiOut, "</option>\n</select>");
    fprintf(cgiOut, "</td>\n");
-   fprintf(cgiOut, "<td class=\"desc\">select CSR signing algorithm here</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">select CSR signing algorithm here</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr><th colspan=\"4\">&nbsp</th></tr>\n");

@@ -32,7 +32,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"c\" size=\"20\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">US, GB, DE, etc</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">US, GB, DE, etc</td>");
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
@@ -41,7 +41,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"st\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "CA, NV, etc</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -51,7 +51,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"l\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Rocklin, Los Angeles, etc</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -61,7 +61,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"o\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Frank4DD, ACME Corp, etc</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -71,7 +71,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"ou\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Support, Sales, etc</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -81,7 +81,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"email\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "you@somewhere.com</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -91,7 +91,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"cn\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "i.e. www.fm4dd.com</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -122,7 +122,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"datasan1\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Subject Alternative Name 1</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -137,7 +137,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"datasan2\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Subject Alternative Name 2</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -152,7 +152,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"datasan3\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Subject Alternative Name 3</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -167,7 +167,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"datasan4\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Subject Alternative Name 4</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -184,7 +184,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"gn\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "First Name, i.e. John, Paul</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -195,7 +195,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td>");
    fprintf(cgiOut, "<input type=\"text\" name=\"sn\" size=\"40\" value=\"\" />");
    fprintf(cgiOut, "</td>");
-   fprintf(cgiOut, "<td class=\"desc\">");
+   fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Last Name, i.e. Doe, Miller</td>");
    fprintf(cgiOut, "</tr>\n");
 
@@ -207,7 +207,7 @@ int cgiMain() {
 
    fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th class=\"cnt\"><input type=\"submit\" value=\"Generate\" /></th>");
+   fprintf(cgiOut, "<th><input type=\"submit\" value=\"Generate\" /></th>");
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "</table>\n");
    fprintf(cgiOut, "</form>");

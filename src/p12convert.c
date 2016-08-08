@@ -72,14 +72,14 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "Step 1\n");
+    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "Step 1");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Upload Your certificate (PEM format)");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"certfile\" />\n");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"file\" name=\"certfile\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -90,14 +90,14 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "Step 2\n");
+    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "Step 2");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Upload Your certificate private key (PEM format)");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"keyfile\" >\n");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"file\" name=\"keyfile\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -108,14 +108,14 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "Step 3\n");
+    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "Step 3");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Upload the signing CA file (PEM format)");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"calist\" />\n");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"file\" name=\"calist\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -126,14 +126,14 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th style=\"width: 50px;\">\n");
-    fprintf(cgiOut, "Step 4\n");
+    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "Step 4");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Passphrase can be up to 40 chars");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" class=\"p12pass\"/>\n");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" class=\"p12pass\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -164,14 +164,14 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>\n");
-    fprintf(cgiOut, "Step 1\n");
-    fprintf(cgiOut, "</th>\n");
+    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "Step 1");
+    fprintf(cgiOut, "</th class=\"cnt\">\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Upload Your PKCS12 file (.pfx or .p12 extensions)");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"p12file\" />\n");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"file\" name=\"p12file\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -182,14 +182,14 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
 
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th style=\"width: 50px;\">\n");
-    fprintf(cgiOut, "Step 2\n");
+    fprintf(cgiOut, "<th class=\"cnt\">");
+    fprintf(cgiOut, "Step 2");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type250\">");
     fprintf(cgiOut, "Passphrase can be up to 40 chars");
     fprintf(cgiOut, "</td>\n");
-    fprintf(cgiOut, "<td id=\"lf\">\n");
-    fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" class=\"p12pass\"/>\n");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"password\" name=\"p12pass\" class=\"p12pass\" />");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -484,7 +484,7 @@ int cgiMain() {
       fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th width=\"75px\">");
+      fprintf(cgiOut, "<th  class=\"cnt75\">");
       fprintf(cgiOut, "PKCS12 URL:</th>");
       fprintf(cgiOut, "<td>");
       fprintf(cgiOut, "<a href=\"http://%s%s/tmp/%s\">",
@@ -590,13 +590,13 @@ int cgiMain() {
       fprintf(cgiOut, "</tr>\n");
 
       fprintf(cgiOut, "<tr>\n");
-      fprintf(cgiOut, "<th width=\"75px\">File Size:</th>\n");
+      fprintf(cgiOut, "<th class=\"cnt75\">File Size:</th>\n");
       fprintf(cgiOut, "<td>%d Bytes</td>\n", p12_fsize);
       fprintf(cgiOut, "</tr>\n");
 
       if (p12->version) {
         fprintf(cgiOut, "<tr>\n");
-        fprintf(cgiOut, "<th width=\"75px\">Version:</th>\n");
+        fprintf(cgiOut, "<th class=\"cnt75\">Version:</th>\n");
         fprintf(cgiOut, "<td>%ld (3 == PKCS#12 v1.1)</td>\n",
                         ASN1_INTEGER_get(p12->version));
         fprintf(cgiOut, "</tr>\n");
@@ -605,19 +605,19 @@ int cgiMain() {
       /* P12 using password integrity mode? */
       if (p12->mac) {
         fprintf(cgiOut, "<tr>\n");
-        fprintf(cgiOut, "<th width=\"75px\">Auth Mode:</th>\n");
+        fprintf(cgiOut, "<th  class=\"cnt75\">Auth Mode:</th>\n");
         fprintf(cgiOut, "<td>Password</td>\n");
         fprintf(cgiOut, "</tr>\n");
 
         fprintf(cgiOut, "<tr>\n");
-        fprintf(cgiOut, "<th width=\"75px\">MAC Algorithm:</th>\n");
+        fprintf(cgiOut, "<th class=\"cnt75\">MAC Algorithm:</th>\n");
         char buf[1024];
         OBJ_obj2txt(buf, 1024, p12->mac->dinfo->algor->algorithm, 0);
         fprintf(cgiOut, "<td>%s</td>\n", buf);
         fprintf(cgiOut, "</tr>\n");
 
         fprintf(cgiOut, "<tr>\n");
-        fprintf(cgiOut, "<th width=\"75px\">MAC Iteration:</th>\n");
+        fprintf(cgiOut, "<th class=\"cnt75\">MAC Iteration:</th>\n");
         fprintf(cgiOut, "<td>%ld (Compatibility: 1, OpenSSL Default: 2048, Windows 7 Default: 2000)</td>\n",
                         p12->mac->iter ? ASN1_INTEGER_get(p12->mac->iter) : 1);
         fprintf(cgiOut, "</tr>\n");
@@ -635,7 +635,7 @@ int cgiMain() {
           // check if the p7 bag is NOT encrypted
           if (bagnid == NID_pkcs7_data) {
             fprintf(cgiOut, "<tr>\n");
-            fprintf(cgiOut, "<th width=\"75px\">PKCS7 - #%d</th>\n", i);
+            fprintf(cgiOut, "<th class=\"cnt75\">PKCS7 - #%d</th>\n", i);
             fprintf(cgiOut, "<td>Content: PKCS7 Data</td>\n");
             fprintf(cgiOut, "</tr>\n");
             bags = PKCS12_unpack_p7data(p7);
@@ -644,7 +644,7 @@ int cgiMain() {
           // check if the p7 bag is encrypted
           if (bagnid == NID_pkcs7_encrypted) {
             fprintf(cgiOut, "<tr>\n");
-            fprintf(cgiOut, "<th width=\"75px\">PKCS7  - #%d</th>\n", i);
+            fprintf(cgiOut, "<th class=\"cnt75\">PKCS7  - #%d</th>\n", i);
             fprintf(cgiOut, "<td>Content: PKCS7 Encrypted Data ");
             OBJ_obj2txt(buf, 1024, p7->d.encrypted->enc_data->algorithm->algorithm, 0);
             fprintf(cgiOut, "%s</td>\n", buf);
@@ -723,23 +723,23 @@ void display_bags(STACK_OF(PKCS12_SAFEBAG) *bags, int j) {
     fprintf(cgiOut, "<tr>\n");
     switch (M_PKCS12_bag_type(bag)) {
       case NID_keyBag:
-        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<th class=\"cnt75\">Bag - #%d</th>\n", k);
         fprintf(cgiOut, "<td>Key Bag</td>\n");
         // TODO: print bag attributes, see openssl/apps/pkcs12.c
         //print_attribs (out, bag->attrib, "Bag Attributes");
       break;
       case NID_pkcs8ShroudedKeyBag:
-        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<th class=\"cnt75\">Bag - #%d</th>\n", k);
         // TODO: print bag algorithm and attributes, see openssl/apps/pkcs12.c
         //fprintf(cgiOut, "<td>Shrouded Key Bag %s, Attributes: </td>\n", bag->value.shkeybag->algor);
         fprintf(cgiOut, "<td>PKCS8 Shrouded Key Bag</td>\n");
       break;
       case NID_certBag:
-        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<th class=\"cnt75\">Bag - #%d</th>\n", k);
         fprintf(cgiOut, "<td>Certificate Bag</td>\n");
       break;
       case NID_safeContentsBag:
-        fprintf(cgiOut, "<th width=\"75px\">Bag - #%d</th>\n", k);
+        fprintf(cgiOut, "<th class=\"cnt75\">Bag - #%d</th>\n", k);
         fprintf(cgiOut, "<td>Safe Contents Bag</td>\n");
       break;
     }
