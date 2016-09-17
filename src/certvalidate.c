@@ -816,7 +816,7 @@ X509_STORE_CTX  *verify_mem_store(STACK_OF(X509_INFO) *st) {
   /* ---------------------------------------------------------- *
    * Complain if there is no cert                               *
    * ---------------------------------------------------------- */
-  if (! cert_count > 0)
+  if (! (cert_count > 0))
     BIO_printf(outbio, "Error no certs on stack.\n");
 
   /* ---------------------------------------------------------- *

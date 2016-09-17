@@ -37,7 +37,7 @@
 <div class="pic"><a href="certsearch.cgi"><img src="../images/webcert-certificate-search-icon.png" alt="webcert certificate search" /></a></div>
 </td>
 <td style="border: 0px;">
-<a href="certsearch.cgi" style="text-decoration:none;color:#000;"><h3>Search Certs</h3></a>
+<a href="certsearch.cgi" style="text-decoration:none;color:#000;"><h3>Search Cert</h3></a>
 <hr />
 <p>
 A selection of filters can be used to extract specific certficates from the certificate store, searching by subject field, serial number, validation or expiration date. For example, this helps to identify certificates that are about to expire.</p>
@@ -49,7 +49,7 @@ A selection of filters can be used to extract specific certficates from the cert
 <div class="pic"><a href="certvalidate.cgi"><img src="../images/webcert-certificate-validation-icon.png" alt="webcert certificate validation" /></a></div>
 </td>
 <td style="border: 0px;">
-<a href="certvalidate.cgi" style="text-decoration:none;color:#000;"><h3>Verify Certs</h3></a>
+<a href="certvalidate.cgi" style="text-decoration:none;color:#000;"><h3>Verify Cert</h3></a>
 <hr />
 <p>Verifies a certificate uploaded from the local PC, or a certificate configured on a remote, networked server against a list of root certificates. If successful, it displays all certificates belonging to the chain of trust.</p>
 <hr />
@@ -66,10 +66,21 @@ A selection of filters can be used to extract specific certficates from the cert
 </tr>
 <tr>
 <td style="border: 0px;">
+<div class="pic"><a href="keycompare.cgi"><img src="../images/webcert-certificate-keycompare-icon.png" alt="webcert certificate key comparison" /></a></div>
+</td>
+<td style="border: 0px;">
+<a href="keycompare.cgi" style="text-decoration:none;color:#000;"><h3>Key Check</h3></a>
+<hr />
+<p>In real-world situations; file copy, rename and transfer can create situations were it becomes unclear if a private key is the correct equivalent to a specific certificate, or certificate siging request (CSR). This online check function determines if a given private key file matches the certificate or CSR public key.</p>
+<hr />
+</td>
+</tr>
+<tr>
+<td style="border: 0px;">
 <div class="pic"><a href="getcert.cgi?cfilename=cacert.pem"><img src="../images/webcert-certificate-rootca-icon.png" alt="webcert root CA certificates" /></a></div>
 </td>
 <td style="border: 0px;">
-<div class="pic"><a href="getcert.cgi?cfilename=cacert.pem" style="text-decoration:none;color:#000;"><h3>Root CA Cert</h3></a>
+<div class="pic"><a href="getcert.cgi?cfilename=cacert.pem" style="text-decoration:none;color:#000;"><h3>CA Cert</h3></a>
 <hr />
 <p>Display the root CA certificates for Webcert that were used to sign all issued certificates. It may be necessary to download and import it as a trusted Root CA in order to validate WebCert-generated certificates.</p>
 <hr />

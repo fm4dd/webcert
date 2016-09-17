@@ -5,9 +5,9 @@ AR=ar
 
 HTMDIR=/srv/www/std-root/fm4dd.com/sw/webcert
 CGIDIR=/srv/www/std-root/fm4dd.com/sw/webcert/cgi-bin
-EXPORTDIR=${CGIDIR}/../export
+EXPORTDIR=/srv/www/std-root/fm4dd.com/sw/webcert/export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi certrenew.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi keycompare.cgi certrenew.cgi
 
 ALLJS=webcert.js
 
@@ -16,8 +16,17 @@ all: ${ALLCGI}
 install: 
 	strip ${ALLCGI}
 	cp ${ALLJS} ${HTMDIR}
-	cp ${ALLCGI} ${CGIDIR}
-	@echo ${ALLCGI} installed in ${CGIDIR}.
+	@echo "Checking for cgi dir ${CGIDIR}:"; \
+	if test -d ${CGIDIR}; then \
+		echo "...OK. ${CGIDIR} exists."; \
+		cp ${ALLCGI} ${CGIDIR}; \
+                chmod 755 ${CGIDIR}/*; \
+		echo "${ALLCGI} installed in ${CGIDIR}."; \
+	else \
+		echo "Please do: mkdir ${CGIDIR}."; \
+		echo "It should be writeable for the installer."; \
+	fi \
+
 	@echo "Checking for new export dir needed by certexport.cgi:"; \
 	if test -d ${EXPORTDIR}; then echo "...OK. ${EXPORTDIR} exists."; \
 	else echo "Please do: mkdir ${EXPORTDIR}."; \
@@ -61,6 +70,9 @@ certvalidate.cgi: webcert.o certvalidate.o
 
 p12convert.cgi: webcert.o p12convert.o
 	$(CC) webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}
+
+keycompare.cgi: webcert.o keycompare.o
+	$(CC) webcert.o keycompare.o pagehead.o pagefoot.o handle_error.o -o keycompare.cgi ${LIBS}
 
 certrenew.cgi: webcert.o certrenew.o
 	$(CC) webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}

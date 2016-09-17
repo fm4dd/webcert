@@ -71,6 +71,7 @@ void key_validate(char * form) {
     * The following line variations are expected:                          *
     * -----BEGIN RSA PRIVATE KEY-----                                      *
     * -----BEGIN DSA PRIVATE KEY-----                                      *
+    * -----BEGIN EC PRIVATE KEY-----                                       *
     * -----BEGIN PRIVATE KEY-----                                          *
     * -------------------------------------------------------------------- */
 
@@ -85,6 +86,8 @@ void key_validate(char * form) {
          strtok(strstr(reqtest, "-----END RSA PRIVATE KEY-----"), "\n");
        if (strstr(reqtest, "-----END DSA PRIVATE KEY-----") != NULL)
          strtok(strstr(reqtest, "-----END DSA PRIVATE KEY-----"), "\n");
+       if (strstr(reqtest, "-----END EC PRIVATE KEY-----") != NULL)
+         strtok(strstr(reqtest, "-----END EC PRIVATE KEY-----"), "\n");
        if (strstr(reqtest, "-----END PRIVATE KEY-----") != NULL)
          strtok(strstr(reqtest, "-----END PRIVATE KEY-----"), "\n");
     }
@@ -98,9 +101,12 @@ void key_validate(char * form) {
          (strcmp(beginline, "-----BEGIN DSA PRIVATE KEY-----") == 0 &&
           strcmp(endline, "-----END DSA PRIVATE KEY-----") == 0)
           ||
+         (strcmp(beginline, "-----BEGIN EC PRIVATE KEY-----") == 0 &&
+          strcmp(endline, "-----END EC PRIVATE KEY-----") == 0)
+          ||
          (strcmp(beginline, "-----BEGIN PRIVATE KEY-----") == 0 &&
           strcmp(endline, "-----END PRIVATE KEY-----") == 0) ) )
-       int_error("Error invalid request format, no BEGIN/END lines");
+       int_error("Error invalid key format, no BEGIN/END lines found.");
 }
 
 /* ---------------------------------------------------------- *

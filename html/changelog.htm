@@ -26,15 +26,13 @@
       <li>The certificate renewal function called from Certstore easily allows to re-sign existing cert data.</li>
       <li>All signing algorithms are now standardized on SHA-2, the strength is now selectable for CSR and certs.</li>
       <li>The cert display function now universally shows the new enhanced display format.</li>
+      <li>Upgraded Root CA to 4096 bit RSA with SHA-512 signature, retiring the old 2007 Root CA certificate.</li>
     </ul>
     <h4>Bug fixes:</h4>
     <ul>
       <li>Certs with very long extension data caused a display window overlap in the verification screen</li>
       <li>Web server headers now enforce that cert file download links prompt for download</li>
       <li>DSA signature algorithm evp_dss is obsolete</li>
-    </ul>
-    <h4>Known Bugs:</h4>
-    <ul>
       <li>Certificate verification tool does not always include server-side intermediate certs in validation</li>
     </ul>
     <h3>2015-01-18 new version 1.7.7 released</h3>

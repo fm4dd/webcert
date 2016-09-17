@@ -34,10 +34,11 @@ void pagehead(char* title) {
    fprintf(cgiOut, "<li><a href=\"buildrequest.cgi\" class=\"selected\"><span>Create CSR</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"certrequest.cgi\"><span>Verify CSR</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"certstore.cgi\"><span>List Certs</span></a></li>\n");
-   fprintf(cgiOut, "<li><a href=\"certsearch.cgi\"><span>Search Certs</span></a></li>\n");
-   fprintf(cgiOut, "<li><a href=\"certvalidate.cgi\"><span>Verify Certs</span></a></li>\n");
+   fprintf(cgiOut, "<li><a href=\"certsearch.cgi\"><span>Search Cert</span></a></li>\n");
+   fprintf(cgiOut, "<li><a href=\"certvalidate.cgi\"><span>Verify Cert</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"p12convert.cgi\"><span>P12 Convert</span></a></li>\n");
-   fprintf(cgiOut, "<li><a href=\"getcert.cgi?cfilename=cacert.pem\"><span>Root CA Cert</span></a></li>\n");
+   fprintf(cgiOut, "<li><a href=\"keycompare.cgi\"><span>Key Check</span></a></li>\n");
+   fprintf(cgiOut, "<li><a href=\"getcert.cgi?cfilename=cacert.pem\"><span>CA Cert</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"showhtml.cgi?templ=help\"><span>Help</span></a></li>\n");
    fprintf(cgiOut, "<li><a href=\"showhtml.cgi?templ=policy\"><span>About</span></a></li>\n");
    fprintf(cgiOut, "</ul>\n");
