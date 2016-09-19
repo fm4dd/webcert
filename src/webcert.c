@@ -485,8 +485,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   long cert_version;
   int i;
 
-  BIO *bio;
-  bio = BIO_new(BIO_s_file());
+  BIO *bio = BIO_new(BIO_s_file());
   bio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
   /* ---------------------------------------------------------- *
    * extract and print various certificate information          *
@@ -688,9 +687,13 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "</tr>\n");
 
   /* display the cert content in PEM format here */
+  BIO *test = BIO_new(BIO_s_mem());
+  PEM_write_bio_X509(test, ct);
+  long PEM_size = BIO_get_mem_data(test, NULL);
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th class=\"cnt75\">Cert Data:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
+  fprintf(cgiOut, "Length: %ld Bytes ", PEM_size);
   fprintf(cgiOut, "<a href=\"javascript:elementHideShow('certpem_%s%d');\">\n", chain_type, level);
   fprintf(cgiOut, "Expand or Hide Certificate PEM Data</a>\n");
   fprintf(cgiOut, "<div class=\"showpem\" id=\"certpem_%s%d\" style=\"display: none\">\n",chain_type, level);
