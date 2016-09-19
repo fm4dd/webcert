@@ -17,19 +17,14 @@ char * mkdatestr(char *, char *);
 int check_ext_presence(X509_EXTENSION *test_ext, X509 *cert);
 
 int cgiMain() {
-
    BIGNUM       *bserial;
    ASN1_INTEGER	*aserial = NULL;
    EVP_PKEY     *ca_privkey, *req_pubkey;
    EVP_MD        const *digest = NULL;
    X509          *newcert, *cacert;
-   X509_REQ      *certreq;
    X509_NAME     *name;
    X509V3_CTX    ctx;
    FILE          *fp;
-   BIO           *inbio, *outbio, *savbio;
-   static char 	 title[]  = "Signed Certificate";
-   char   formreq[REQLEN] = "";
    char	  certfile[81]    = "";
    char	  email_head[255] = "email:";
    char	  email_name[248] = "";
@@ -63,8 +58,13 @@ int cgiMain() {
  * check if a certificate was handed to certsign.cgi or if    *
  * someone just tried to call us directly without a request   *
  * ---------------------------------------------------------- */
-   if (cgiFormString("sign-request", formreq, REQLEN) != cgiFormSuccess )
+   X509_REQ *certreq = NULL;
+   char formreq[REQLEN] = "";
+
+   if (cgiFormString("csrdata", formreq, REQLEN) != cgiFormSuccess)
       int_error("Error getting CSR data from genrequest/certverify.cgi form");
+
+   certreq = cgi_load_csrform(formreq);
 
    if (cgiFormRadio("valid", validlist, 2, &valid_res, 0) == cgiFormNotFound )
       int_error("Error getting the date range type from genrequest/certverify.cgi forms");
@@ -129,22 +129,6 @@ int cgiMain() {
            int_error("Error getting extended key usage type from previous form");
        }
     }
-
-/* ---------------------------------------------------------- *
- * check if a CSR was pasted or if someone just sends garbage *
- * ---------------------------------------------------------- */
-   csr_validate(formreq);
-
-/* ---------------------------------------------------------- *
- * input seems OK, write the request to a temporary BIO buffer*
- * -----------------------------------------------------------*/
-  inbio = BIO_new_mem_buf(formreq, -1);
-
-/* ---------------------------------------------------------- *
- * Try to read the PEM request with openssl lib functions     *
- * ---------------------------------------------------------- */
-   if (! (certreq = PEM_read_bio_X509_REQ(inbio, NULL, NULL, NULL)))
-      int_error("Error can't read request content with PEM function");
 
 /* ----------------------------------------------------------- *
  * Certificate request public key verification                 * 
@@ -485,14 +469,14 @@ int cgiMain() {
  * ---------------------------------------------------------------------------*/
    snprintf(certfile, sizeof(certfile), "%s.pem", BN_bn2hex(bserial));
 
-   outbio = BIO_new(BIO_s_file());
+   BIO *outbio = BIO_new(BIO_s_file());
    BIO_set_fp(outbio, cgiOut, BIO_NOCLOSE);
 
+   static char title[]  = "Signed Certificate";
    pagehead(title);
 
    display_cert(newcert, "Server/System/Application", "wct_chain", -1);
    fprintf(cgiOut, "<p></p>\n");
-
 
    fprintf(cgiOut, "<table>");
    fprintf(cgiOut, "<tr>\n");
@@ -541,7 +525,7 @@ int cgiMain() {
    if (! (fp=fopen(certfilestr, "w")))
      fprintf(cgiOut, "<p>Error open cert file %s for writing.<p>", certfilestr);
    else {
-     savbio = BIO_new(BIO_s_file());
+     BIO *savbio = BIO_new(BIO_s_file());
      BIO_set_fp(savbio, fp, BIO_NOCLOSE);
      if (! PEM_write_bio_X509(savbio, newcert))
         fprintf(cgiOut, "Error writing the signed cert file %s.<p>",
@@ -551,7 +535,6 @@ int cgiMain() {
    }
 
    pagefoot();
-   BIO_free(inbio);
    return(0);
 }
 

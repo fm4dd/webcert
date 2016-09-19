@@ -68,12 +68,10 @@ int X509_signature_dump(BIO *bp, const ASN1_STRING *sig, int indent);
 /* ---------------------------------------------------------- *
  * Global variable definition                                 *
  * ---------------------------------------------------------- */
-BIO              *certbio = NULL;
 BIO               *outbio = NULL;
 BIO                *cabio = NULL;
 X509                *cert = NULL;
 STACK_OF(X509) *rem_chain = NULL;
-char      error_str[4096] = "";
 char *file_prefix;
 
 int cgiMain() {
@@ -107,9 +105,8 @@ int cgiMain() {
   time(&now);
 
   /* ---------------------------------------------------------- *
-   * Create the Input/Output BIO's.                             *
+   * Create the Output BIO                                      *
    * ---------------------------------------------------------- */
-  certbio = BIO_new(BIO_s_file());
   outbio  = BIO_new(BIO_s_file());
   outbio  = BIO_new_fp(cgiOut, BIO_NOCLOSE);
 
@@ -172,7 +169,7 @@ int cgiMain() {
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td class=\"type180\">Upload Your certificate (PEM format)</td>\n");
     fprintf(cgiOut, "<td width=\"400px\">\n");
-    fprintf(cgiOut, "<input type=\"file\" name=\"requestfile\" />\n");
+    fprintf(cgiOut, "<input type=\"file\" name=\"certfile\" />\n");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -355,7 +352,7 @@ int cgiMain() {
     static char       title[] = "Certificate Validation Report";
     char          crt_type[3] = "";
     char          cab_type[3] = "";
-    char       req_name[1024] = "";
+    char      file_name[1024] = "";
     char        url_str[1024] = "";
     int                 depth = 0;
 
@@ -363,8 +360,7 @@ int cgiMain() {
    * check the CGI form data: first check for the given cert    *
    * -----------------------------------------------------------*/
     /* check if we got the crt_type submitted */
-    if (cgiFormString("crt_type", crt_type, sizeof(crt_type))
-                                                     != cgiFormSuccess )
+    if (cgiFormString("crt_type", crt_type, sizeof(crt_type)) != cgiFormSuccess)
       int_error("Error retrieving the forms cert request type.");
 
     /* check if the cert was a local uploaded file (lf), or if  *
@@ -374,48 +370,26 @@ int cgiMain() {
       int_error(error_str);
     }
 
-   /* check if we received a depth value. If not we set it to 8 */
-   if(cgiFormInteger("depth", &depth, 8) == cgiFormSuccess)
-     if(depth <0 || depth >15) {
-       snprintf(error_str, sizeof(error_str), "Depth parameter outside valid range: %d.", depth);
-       int_error(error_str);
-     }
+    /* check if we received a depth value. If not we set it to 8 */
+    if(cgiFormInteger("depth", &depth, 8) != cgiFormSuccess)
+      int_error("Error retrieving the forms validation depth parameter.");
 
-    /* get the uploaded certificate data and put it into the certbio */
-    if (strcmp(crt_type, "lf") == 0) {
-      char     req_form[REQLEN] = "";
+    if(depth <0 || depth >15) {
+      snprintf(error_str, sizeof(error_str), "Depth parameter outside valid range: %d.", depth);
+      int_error(error_str);
+    }
 
-      ret = cgiFormFileName("requestfile", req_name, sizeof(req_name));
+    /* get the certificate data from a local file */
+    if(strcmp(crt_type, "lf") == 0) {
+      ret = cgiFormFileName("certfile", file_name, sizeof(file_name));
       if (ret !=cgiFormSuccess) {
         snprintf(error_str, sizeof(error_str), "Could not get the certificate filename, return code %d", ret);
         int_error(error_str);
       }
-
-      cgiFormFileSize("requestfile", &cert_fsize);
-
-      /* we open the file to get a file handle */
-      if (cgiFormFileOpen("requestfile", &file) != cgiFormSuccess) {
-        snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", req_name);
-        int_error(error_str);
-      }
-
-      /* we read the file content into the req_form buffer */
-      if (! (cgiFormFileRead(file, req_form, REQLEN, &cert_fsize) == cgiFormSuccess)) {
-        snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded certificate file %s", req_name);
-        int_error(error_str);
-      }
-
-      /* Create the memory BIO for the certificate to verify */
-      certbio = BIO_new_mem_buf(req_form, -1);
-
-      /* Try to read the cert buffer into the X509 structure */
-      if (! (cert = PEM_read_bio_X509(certbio, NULL, 0, NULL))) {
-        snprintf(error_str, sizeof(error_str), "Error reading cert structure of %s into memory", req_name);
-        int_error(error_str);
-      }
+      else cert = cgi_load_certfile(file_name);
     }
 
-    if (strcmp(crt_type, "ru") == 0) {
+    if(strcmp(crt_type, "ru") == 0) {
       const SSL_METHOD *method;
       int server;
 
@@ -433,7 +407,7 @@ int cgiMain() {
       method = SSLv23_client_method();
 
       /* Try to create a new SSL context */
-      if ( (ssl_ctx = SSL_CTX_new(method)) == NULL)
+      if((ssl_ctx = SSL_CTX_new(method)) == NULL)
         int_error("Unable to create a new SSL context structure.");
 
       /* Disabling SSLv2 will leave v3 and TSLv1 for negotiation */
@@ -449,17 +423,15 @@ int cgiMain() {
       SSL_set_fd(ssl, server);
 
       /* Try to SSL-connect here, returns 1 for success */
-      if ( SSL_connect(ssl) != 1 ) {
-        snprintf(error_str, sizeof(error_str), 
-                 "Error could not make a SSL connection to %s.", url_str);
+      if(SSL_connect(ssl) != 1) {
+        snprintf(error_str, sizeof(error_str), "Error could not make a SSL connection to %s.", url_str);
         int_error(error_str);
       }
 
       /* Get the remote certificate into the X509 structure */
       cert = SSL_get_peer_certificate(ssl);
-      if (cert == NULL) {
-        snprintf(error_str, sizeof(error_str), 
-                 "Error could not get a certificate from %s.", url_str);
+      if(cert == NULL) {
+        snprintf(error_str, sizeof(error_str), "Error could not get a certificate from %s.", url_str);
         int_error(error_str);
       }
 
@@ -472,15 +444,16 @@ int cgiMain() {
       int tmp;
 
       /* Create the memory BIO for the certificate to verify */
-      certbio = BIO_new(BIO_s_mem());
+      BIO *certbio = BIO_new(BIO_s_mem());
 
       PEM_write_bio_X509(certbio, cert);
-      while ((BIO_read(certbio, &tmp, 1)) >0) {
+      while((BIO_read(certbio, &tmp, 1)) >0) {
         cert_fsize++;
       }
 
       /* Free the SSL structures we don't need anymore */
       close(server);
+      BIO_free(certbio);
       //SSL_free(ssl);
       //SSL_CTX_free(ssl_ctx);
     }
@@ -492,56 +465,55 @@ int cgiMain() {
     char       cab_name[1024] = "";
 
     /* check if we got the cab_type submitted */
-    if (cgiFormString("cab_type", cab_type, sizeof(cab_type))
-                                                     != cgiFormSuccess )
+    if(cgiFormString("cab_type", cab_type, sizeof(cab_type)) != cgiFormSuccess )
       int_error("Error retrieving the forms CA bundle type.");
 
     /* check if the bundle type is either mz, vs, wc or pc */
-    if ((strcmp(cab_type, "mz") != 0) && (strcmp(cab_type, "vs") != 0)
+    if((strcmp(cab_type, "mz") != 0) && (strcmp(cab_type, "vs") != 0)
      && (strcmp(cab_type, "wc") != 0) && (strcmp(cab_type, "pc") != 0)
      && (strcmp(cab_type, "os") != 0)) {
       snprintf(error_str, sizeof(error_str), "Unknown parameter for the CA bundle type: %s.", cab_type);
       int_error(error_str);
     }
 
-    if (strcmp(cab_type, "mz") == 0) {
+    if(strcmp(cab_type, "mz") == 0) {
       file_prefix = MOZI_PREFIX;
       if(get_latest_ca_bundle(cafilestr) > 0) {
         list = X509_load_ca_file(&veri_counter, &veri_stat, cafilestr);
       }
     }
 
-    if (strcmp(cab_type, "vs") == 0) {
+    if(strcmp(cab_type, "vs") == 0) {
       file_prefix = VERI_PREFIX;
       if(get_latest_ca_bundle(cafilestr) > 0) {
         list = X509_load_ca_file(&veri_counter, &veri_stat, cafilestr);
       }
     }
 
-    if (strcmp(cab_type, "os") == 0) {
+    if(strcmp(cab_type, "os") == 0) {
       file_prefix = UBUN_PREFIX;
       if(get_latest_ca_bundle(cafilestr) > 0) {
         list = X509_load_ca_file(&veri_counter, &veri_stat, cafilestr);
       }
     }
 
-    if (strcmp(cab_type, "wc") == 0)
+    if(strcmp(cab_type, "wc") == 0)
       list = X509_load_ca_file(&veri_counter, &veri_stat, CACERT);
 
     /* if we got type pc, we need to process the user-submitted file */
-    if (strcmp(cab_type, "pc") == 0) {
-      if (cgiFormFileName("cabundlefile", cab_name, sizeof(cab_name))
+    if(strcmp(cab_type, "pc") == 0) {
+      if(cgiFormFileName("cabundlefile", cab_name, sizeof(cab_name))
                                                        !=cgiFormSuccess)
         int_error("Could not retrieve the forms CA bundle filename\n");
 
       /* we open the file to get a file handle */
-      if (cgiFormFileOpen("cabundlefile", &file) != cgiFormSuccess) {
+      if(cgiFormFileOpen("cabundlefile", &file) != cgiFormSuccess) {
         snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", cab_name);
         int_error(error_str);
       }
 
       /* we read the file content into the cab_form buffer */
-      if (! (cgiFormFileRead(file, cab_form, CALISTLEN, &veri_fsize) == cgiFormSuccess)) {
+      if(! (cgiFormFileRead(file, cab_form, CALISTLEN, &veri_fsize) == cgiFormSuccess)) {
         snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded certificate bundle file %s", cab_name);
         int_error(error_str);
       }
@@ -555,7 +527,7 @@ int cgiMain() {
     }
 
     /* check if we got any usable CA certificates */
-    if (veri_counter == 0) int_error("No certificates found in CA bundle.");
+    if(veri_counter == 0) int_error("No certificates found in CA bundle.");
     
   /* ---------------------------------------------------------- *
    * Create a verification context from the stack, add the cert *
@@ -568,7 +540,7 @@ int cgiMain() {
     param = X509_VERIFY_PARAM_new();
     X509_VERIFY_PARAM_set_depth(param, depth);
 
-    if (cgiFormCheckboxSingle("X509_V_FLAG_X509_STRICT") == cgiFormSuccess)
+    if(cgiFormCheckboxSingle("X509_V_FLAG_X509_STRICT") == cgiFormSuccess)
       X509_VERIFY_PARAM_set_flags(param, X509_V_FLAG_X509_STRICT);
 
     //X509_STORE_CTX_set_verify_cb(vrfy_ctx, cert_cb);
@@ -614,7 +586,7 @@ int cgiMain() {
     fprintf(cgiOut, "<th class=\"cnt75\">Target:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
-    if(strcmp(crt_type, "lf") == 0) fprintf(cgiOut, "%s", req_name);
+    if(strcmp(crt_type, "lf") == 0) fprintf(cgiOut, "%s", file_name);
     if(strcmp(crt_type, "ru") == 0) fprintf(cgiOut, "%s", url_str);
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -640,9 +612,9 @@ int cgiMain() {
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     fprintf(cgiOut, "Maximum Verification Depth: %d ", X509_VERIFY_PARAM_get_depth(param));
-    if(ret == 0 ) 
+    if(ret == 0) 
       fprintf(cgiOut, "- Error at Depth Level: %d", X509_STORE_CTX_get_error_depth(vrfy_ctx));
-    if(ret == 1 )
+    if(ret == 1)
       fprintf(cgiOut, "- Verification completed at Depth Level: %d", sk_X509_num(res_stack));
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
@@ -678,19 +650,19 @@ int cgiMain() {
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
     /* display the CA file bundle type here */
-    if (strcmp(cab_type, "mz") == 0)
+    if(strcmp(cab_type, "mz") == 0)
       fprintf(cgiOut, "<b>WebCert internal CA certificates</b> - %d certificates, %ld Bytes, last update %s",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
-    if (strcmp(cab_type, "vs") == 0)
+    if(strcmp(cab_type, "vs") == 0)
       fprintf(cgiOut, "<b>Verisign Root certificate bundle</b> - %d certificates, %ld Bytes, last update %s",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
-    if (strcmp(cab_type, "os") == 0)
+    if(strcmp(cab_type, "os") == 0)
       fprintf(cgiOut, "<b>Ubuntu Root certificate bundle</b> - %d certificates, %ld Bytes, last update %s",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
-    if (strcmp(cab_type, "wc") == 0)
+    if(strcmp(cab_type, "wc") == 0)
       fprintf(cgiOut, "<b>WebCert's own Root certificate</b> - %d certificates, %ld Bytes, last update %s",
                       veri_counter, veri_stat.st_size, ctime(&veri_stat.st_mtime));
-    if (strcmp(cab_type, "pc") == 0)
+    if(strcmp(cab_type, "pc") == 0)
       fprintf(cgiOut, "%s certificate bundle - %d certificates, %d Bytes, uploaded on %s",
                       cab_name, veri_counter, veri_fsize, ctime(&now));
     fprintf(cgiOut, "</td>\n");
@@ -729,7 +701,7 @@ int cgiMain() {
       fprintf(cgiOut, "Below is the list of signing certificates that have been received from this server:\n");
       fprintf(cgiOut, "</p>\n");
 
-      for (i = 1; i < rem_chain_count; i++) {
+      for(i = 1; i < rem_chain_count; i++) {
         stack_item = sk_X509_value(rem_chain, i);
         display_cert(stack_item, "Server-provided Signing", "rem_chain", i);
 
@@ -754,7 +726,7 @@ int cgiMain() {
       fprintf(cgiOut, " involved in building the hierarchy of trust:\n");
       fprintf(cgiOut, "</p>\n");
 
-      for (i = 0; i < res_stack_count; i++) {
+      for(i = 0; i < res_stack_count; i++) {
         stack_item = sk_X509_value(res_stack, i);
 
         if(i == 0 && i <  res_stack_count-1) display_cert(stack_item, "Server/System/Application", "wct_chain", i);
@@ -800,7 +772,7 @@ X509_STORE_CTX  *verify_mem_store(STACK_OF(X509_INFO) *st) {
   /* ---------------------------------------------------------- *
    * Initialize the global certificate validation store object. *
    * ---------------------------------------------------------- */
-  if (!(store=X509_STORE_new()))
+  if(!(store=X509_STORE_new()))
      BIO_printf(outbio, "Error creating X509_STORE_CTX object\n");
 
   /* ---------------------------------------------------------- *
@@ -816,14 +788,13 @@ X509_STORE_CTX  *verify_mem_store(STACK_OF(X509_INFO) *st) {
   /* ---------------------------------------------------------- *
    * Complain if there is no cert                               *
    * ---------------------------------------------------------- */
-  if (! (cert_count > 0))
-    BIO_printf(outbio, "Error no certs on stack.\n");
+  if(! (cert_count > 0)) BIO_printf(outbio, "Error no certs on stack.\n");
 
   /* ---------------------------------------------------------- *
    * Cycle through all info stack items, extract the X509 cert  *
    * and put it into the X509_STORE called store.               *
    * ---------------------------------------------------------- */
-  for (i = 0; i < cert_count; i++) {
+  for(i = 0; i < cert_count; i++) {
     list_item = sk_X509_INFO_value(st, i);
     X509_STORE_add_cert(store, list_item->x509);
   }
@@ -915,7 +886,7 @@ int create_socket(char url_str[]) {
     port = ntohs(service->s_port);
   }
 
-  if ( (host = gethostbyname(hostname)) == NULL ) {
+  if((host = gethostbyname(hostname)) == NULL ) {
     snprintf(error_str, sizeof(error_str), "Cannot resolve host [%s]",  hostname);
     int_error(error_str);
     abort();
@@ -935,10 +906,8 @@ int create_socket(char url_str[]) {
   tmp_ptr = inet_ntoa(dest_addr.sin_addr);
 
   /* Try to make the host connect here */
-  if ( connect(sockfd, (struct sockaddr *) &dest_addr,
-                              sizeof(struct sockaddr)) == -1 ) {
-    snprintf(error_str, sizeof(error_str),
-             "Cannot connect to host %s [%s] on port %d.",
+  if(connect(sockfd, (struct sockaddr *) &dest_addr, sizeof(struct sockaddr)) == -1) {
+    snprintf(error_str, sizeof(error_str), "Cannot connect to host %s [%s] on port %d.",
              hostname, tmp_ptr, port);
     int_error(error_str);
   }

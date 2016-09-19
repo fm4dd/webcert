@@ -18,7 +18,7 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "mypassword"
+#define PASS            "webca-secret"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
@@ -107,11 +107,24 @@ void display_csr(X509_REQ *);
 void display_key(EVP_PKEY *);
 
 /* ---------------------------------------------------------- *
- * xxx_validate() does a basic check of xxx PEM format input  *
+ * xxx_validate_PEM(): a basic check of xxx PEM format input  *
  * ---------------------------------------------------------- */
-void key_validate(char *);
-void csr_validate(char *);
+void key_validate_PEM(char *);
+void csr_validate_PEM(char *);
+
+/* ---------------------------------------------------------- *
+ * cgi_load_xxxfile() load a PEM file to corresponding struct *
+ * ---------------------------------------------------------- */
+X509 * cgi_load_certfile(char *);
+X509_REQ * cgi_load_csrfile(char *);
+EVP_PKEY * cgi_load_keyfile(char *);
+
+/* ---------------------------------------------------------- *
+ * cgi_load_xxxform() load a PEM form to corresponding struct *
+ * ---------------------------------------------------------- */
+X509_REQ * cgi_load_csrform(char *);
 
 void keycreate_input();
 
+char error_str[4096];
 /****************************** end webcert.h *********************************/

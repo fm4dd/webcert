@@ -275,7 +275,7 @@ int cgiMain() {
       * check if a key was pasted with the BEGIN and END                     *
       * lines, assuming the key data in between is intact                    *
       * -------------------------------------------------------------------- */
-      key_validate(privkeystr);
+      key_validate_PEM(privkeystr);
 
      /* -------------------------------------------------------------------- *
       * input seems OK, write the key to a temporary mem BIO and load it     *

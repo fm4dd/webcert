@@ -30,7 +30,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<td class=\"getcert\">");
-   fprintf(cgiOut, "<textarea name=\"csr-data\" cols=\"65\" rows=\"25\">");
+   fprintf(cgiOut, "<textarea name=\"csrdata\" cols=\"65\" rows=\"25\">");
    fprintf(cgiOut, "</textarea>");
    fprintf(cgiOut, "</td>");
    fprintf(cgiOut, "</tr>\n");
@@ -56,7 +56,7 @@ int cgiMain() {
    fprintf(cgiOut, "Upload Your CSR file (PEM format)");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<input type=\"file\" name=\"csr-file\" />");
+   fprintf(cgiOut, "<input type=\"file\" name=\"csrfile\" />");
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");
    fprintf(cgiOut, "<tr>\n");

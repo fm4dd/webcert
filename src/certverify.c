@@ -38,78 +38,55 @@ SMIMECapability.9 = SEQUENCE:rsa_enc
 */
 
 int cgiMain() {
-   BIO 			    *inbio   = NULL;
-   BIO                      *outbio  = NULL;
-   X509_REQ 		*webrequest  = NULL;
-   EVP_PKEY                   *pkey  = NULL;
-   X509_NAME 		   *reqname  = NULL;
-   char 		formreq[REQLEN] = "";
-   static char 		title[] = "Verify Request";
-   int                  filesize = 0;
-   cgiFilePtr		file;
+   /* ---------------------------------------------------------- *
+    * Check form if we got CSR data, CSR file, or nothing at all *
+    * -----------------------------------------------------------*/
+   X509_REQ *webrequest  = NULL;
+   char form[REQLEN] = "";
+   if (cgiFormString("csrdata", form, REQLEN) == cgiFormSuccess)
+      webrequest = cgi_load_csrform(form);
+   else {
+   /* ---------------------------------------------------------- *
+    * Check if we got a csr file, load it into the CSR struct    * 
+    * ---------------------------------------------------------- */
+       char file_name[1024] = "";
+       int ret = cgiFormFileName("csrfile", file_name, sizeof(file_name));
 
-  /* ------------------------------------------------------------------------- *
-   * Check form data if we got CSR data, or a CSR file, or nothing at all      *
-   * --------------------------------------------------------------------------*/
-   if (! (cgiFormString("csr-data", formreq, REQLEN) == cgiFormSuccess )) {
-     if (! (cgiFormFileSize("csr-file", &filesize) == cgiFormSuccess)) {
-         /* if we did not get a file either, we report failure */
-         int_error("Error getting request from certrequest.cgi form");
-      }
-      /* we got a file, check the size is between 0 and REQLEN */
-      if (filesize <=0 || filesize > REQLEN)
-         int_error("Error uploaded request file size is to big");
-     
-      /* Try to open the file and get a file handle */
-      if (cgiFormFileOpen("csr-file", &file) != cgiFormSuccess)
-         int_error("Error unable to open the CSR file");
-
-      /* we read the file content into our formreq buffer */
-      if (! (cgiFormFileRead(file, formreq, REQLEN, &filesize) == cgiFormSuccess))
-         int_error("Error uploaded request file is not readable");
+       if (ret == cgiFormSuccess)
+          webrequest = cgi_load_csrfile(file_name);
+       else
+          /* If we did not get a file either, report failure */
+          int_error("Error getting request from certrequest.cgi form");
    }
-
-/* ------------------------------------------------------------------------- *
- * check if a CSR was pasted or if someone just sends garbage                *
- * --------------------------------------------------------------------------*/
-   csr_validate(formreq);
-
-/* ------------------------------------------------------------------------- *
- * input seems OK, write the request to a temporary mem BIO                  *
- * ------------------------------------------------------------------------- */
-   inbio = BIO_new_mem_buf(formreq, -1);
-
-/* ------------------------------------------------------------------------- *
- * Try to read the PEM request with openssl lib functions                    *
- * ------------------------------------------------------------------------- */
-
-   if(! (webrequest = PEM_read_bio_X509_REQ(inbio, NULL, NULL, NULL)))
-      int_error("Error cant read request content with PEM function");
-
+   /* ---------------------------------------------------------- *
+    * Extract the name and public key from the CSR               *
+    * ---------------------------------------------------------- */
+   X509_NAME *reqname  = NULL;
    if(! (reqname = X509_REQ_get_subject_name(webrequest)))
       int_error("Error getting subject from cert request");
 
+   EVP_PKEY *pkey  = NULL;
    if ((pkey=EVP_PKEY_new()) == NULL)
       int_error("Error creating EVP_PKEY structure.");
 
    if (! (pkey = X509_REQ_get_pubkey(webrequest)))
       int_error("Error getting public key from X509_REQ structure.");
 
-/* ------------------------------------------------------------------------- *
- *  Sort out the content and start the html output                           *
- * ------------------------------------------------------------------------- */
-   outbio = BIO_new(BIO_s_file());
-   BIO_set_fp(outbio, cgiOut, BIO_NOCLOSE);
+   /* ---------------------------------------------------------- *
+    *  Sort out the content and start the html output            *
+    * ---------------------------------------------------------- */
+    BIO *outbio = BIO_new(BIO_s_file());
+    BIO_set_fp(outbio, cgiOut, BIO_NOCLOSE);
 
-   pagehead(title);
+    static char title[] = "Verify Request";
+    pagehead(title);
 
-   display_csr(webrequest);
-   fprintf(cgiOut, "<p></p>\n");
+    display_csr(webrequest);
+    fprintf(cgiOut, "<p></p>\n");
 
-   display_signing(webrequest);
+    display_signing(webrequest);
 
-   pagefoot();
-   BIO_free(inbio);
-   BIO_free(outbio);
-   return(0);
+    pagefoot();
+    BIO_free(outbio);
+    return(0);
 }

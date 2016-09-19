@@ -232,108 +232,30 @@ int cgiMain() {
       static char      title[] = "PKCS12 Converter - PKCS12 Creation";
 
       /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-1: get the certificate file name       *
+       * Get the PKCS12 part-1: get the certificate                 *
        * ---------------------------------------------------------- */
+      X509 *cert = NULL;
       char cert_name[1024] = "";
+
       ret = cgiFormFileName("certfile", cert_name, sizeof(cert_name));
       if (ret !=cgiFormSuccess) {
-        snprintf(error_str, sizeof(error_str), "Could not get the certificate file, return code %d", ret);
+        snprintf(error_str, sizeof(error_str), "Could not get the certificate file %s, return code %d", cert_name, ret);
         int_error(error_str);
       }
+      cert = cgi_load_certfile(cert_name);
 
       /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-1: get the certificate file size       *
+       * Get the PKCS12 part-2: get the private key                 *
        * ---------------------------------------------------------- */
-      int cert_fsize = 0;
-      cgiFormFileSize("certfile", &cert_fsize);
-      if (cert_fsize == 0) int_error("The uploaded certificate file is empty (0 bytes)");
-      if (cert_fsize > REQLEN) {
-        snprintf(error_str, sizeof(error_str), "The uploaded certificate file greater %d bytes", REQLEN);
-        int_error(error_str);
-      }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-1: we open the file and get a handle   * 
-       * ---------------------------------------------------------- */
-      cgiFilePtr certfile_ptr = NULL;
-      if (cgiFormFileOpen("certfile", & certfile_ptr) != cgiFormSuccess) {
-        snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", cert_name);
-        int_error(error_str);
-      }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-1: read the file content in a buffer   *
-       * ---------------------------------------------------------- */
-      char cert_form[REQLEN] = "";
-      if (! (cgiFormFileRead(certfile_ptr, cert_form, REQLEN, &cert_fsize) == cgiFormSuccess)) {
-        snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded certificate file %s", cert_name);
-        int_error(error_str);
-      }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-1: get the cert into the X509 struct   *
-       * ---------------------------------------------------------- */
-      BIO *certbio = NULL;
-      certbio = BIO_new_mem_buf(cert_form, -1);
-
-      X509 *cert = NULL;
-      if (! (cert = PEM_read_bio_X509(certbio, NULL, 0, NULL))) {
-        snprintf(error_str, sizeof(error_str), "Error reading cert structure of %s into memory", cert_name);
-        int_error(error_str);
-      }
-      BIO_free(certbio);
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-2: get the private key file name       *
-       * ---------------------------------------------------------- */
+      EVP_PKEY *priv_key = NULL;
       char key_name[1024] = "";
+
       ret = cgiFormFileName("keyfile", key_name, sizeof(key_name));
       if (ret !=cgiFormSuccess) {
         snprintf(error_str, sizeof(error_str), "Could not get the private key file, return code %d", ret);
         int_error(error_str);
       }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-2: get the private key file size       *
-       * ---------------------------------------------------------- */
-      int key_fsize = 0;
-      cgiFormFileSize("keyfile", &key_fsize);
-      if (key_fsize == 0) int_error("The uploaded key file is empty (0 bytes)");
-      if (key_fsize > KEYLEN) {
-        snprintf(error_str, sizeof(error_str), "The uploaded key file greater %d bytes", KEYLEN);
-        int_error(error_str);
-      }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-2: we open the file to get the handle  *
-       * ---------------------------------------------------------- */
-      cgiFilePtr keyfile_ptr = NULL;
-      if (cgiFormFileOpen("keyfile", &keyfile_ptr) != cgiFormSuccess) {
-        snprintf(error_str, sizeof(error_str), "Cannot open the uploaded private key file %s", key_name);
-        int_error(error_str);
-      }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-2: read the file content in a buffer   *
-       * ---------------------------------------------------------- */
-      char key_form[REQLEN] = "";
-      if (! (cgiFormFileRead(keyfile_ptr, key_form, REQLEN, &key_fsize) == cgiFormSuccess)) {
-        snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded private key file %s", key_name);
-        int_error(error_str);
-      }
-
-      /* ---------------------------------------------------------- *
-       * Get the PKCS12 part-2: get the key into the EVP_KEY struct *
-       * ---------------------------------------------------------- */
-      BIO *keybio  = NULL;
-      keybio = BIO_new_mem_buf(key_form, -1);
-
-      EVP_PKEY *priv_key = NULL;
-      if (! (priv_key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL))) {
-        snprintf(error_str, sizeof(error_str), "Error reading private key structure of %s into memory", key_name);
-        int_error(error_str);
-      }
-      BIO_free(keybio);
+      priv_key = cgi_load_keyfile(key_name);
 
       /* ---------------------------------------------------------- *
        * Get the PKCS12 part-3: get the signing certs file name     *
@@ -479,7 +401,7 @@ int cgiMain() {
       pagehead(title);
       fprintf(cgiOut, "<table>\n");
       fprintf(cgiOut, "<th colspan=\"2\">");
-      fprintf(cgiOut, "The PKCS12 certificate bundle %s.p12 for download", p12name);
+      fprintf(cgiOut, "The PKCS12 certificate bundle %s for download", p12name);
       fprintf(cgiOut, "</th>\n");
       fprintf(cgiOut, "</tr>\n");
 

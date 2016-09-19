@@ -160,7 +160,7 @@ int cgiMain() {
       int_error("Error: Wrong keytype - choose either RSA, DSA or ECC.");
 
    if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
-      int_error("Error getting the signature algorithm from buildrequestbuildrequest.cgi form");
+      int_error("Error getting the signature algorithm from buildrequest.cgi form");
 
 /* ------------------------------------------------------------------------- *
  * Generate the certificate request from scratch                             *

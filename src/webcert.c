@@ -18,95 +18,110 @@
 #include <openssl/x509_vfy.h>
 
 /* ---------------------------------------------------------- *
- * csr_validate() does a basic check for the CSR's PEM format * 
+ * csr_validate_PEM(): a basic check for the CSR's PEM format * 
+ *                                                            *
+ * check if a CSR was pasted with the BEGIN and END           *
+ * lines, assuming the request in between is intact           *
  * ---------------------------------------------------------- */
-void csr_validate(char * form) {
-   char reqtest[REQLEN] = "";
-   char beginline[81]   = "";
-   char endline[81]     = "";
-   char *char_pos       = NULL;
+void csr_validate_PEM(char * form) {
 
-
+   /* Check if the form contains a newline character */
    if (! strchr(form, '\n'))
       int_error("Error invalid request format, received garbage line");
 
-   /* ---------------------------------------------------------- *
-    * check if a CSR was pasted with the BEGIN and END           *
-    * lines, assuming the request in between is intact           *
-    * ---------------------------------------------------------- */
-   strcpy(reqtest, form);
-   strcpy(endline, (strrchr(reqtest, '\n') +1));
-   /* should there be a extra newline at the end, we remove it here */
-   if(strlen(endline) == 0 && strlen(reqtest) > 0) {
-      reqtest[strlen(reqtest)-1]='\0';
-      strcpy(endline, (strrchr(reqtest, '\n') +1));
+   /* Use a temporary buffer reqtest to modify the content */
+   char reqtest[REQLEN] = "";
+   strncpy(reqtest, form, REQLEN);
+
+   /* Identify the last line */
+   char endline[81] = "";
+   strncpy(endline, (strrchr(reqtest, '\n')+1), 81);
+
+   /* should there be extra newlines at file end, we remove here */
+   while(strlen(endline) == 0 && strlen(reqtest) > 0) {
+      reqtest[strlen(reqtest)-1] = '\0';
+      strncpy(endline, (strrchr(reqtest, '\n')+1), 81);
    }
+
+   /* Identify the first line */
+   char beginline[81] = "";
    strtok(reqtest, "\n");
-   strcpy(beginline, reqtest);
+   strncpy(beginline, reqtest, 81);
 
    /* should there be a windows carriage return, we remove it here */
+   char *char_pos = NULL;
    if ((char_pos = strchr(beginline, '\r'))) *char_pos='\0';
    if ((char_pos = strchr(endline, '\r'))) *char_pos='\0';
 
-   if(! ( (strcmp(beginline, "-----BEGIN CERTIFICATE REQUEST-----") == 0 &&
-         strcmp(endline, "-----END CERTIFICATE REQUEST-----") == 0)
-         ||
-
-        (strcmp(beginline, "-----BEGIN NEW CERTIFICATE REQUEST-----") == 0 &&
-         strcmp(endline, "-----END NEW CERTIFICATE REQUEST-----") == 0) ) )
-      int_error("Error invalid request format, no BEGIN/END lines");
+   if(! (
+         (strcmp(beginline, "-----BEGIN CERTIFICATE REQUEST-----") == 0 &&
+          strcmp(endline,   "-----END CERTIFICATE REQUEST-----") == 0) ||
+         (strcmp(beginline, "-----BEGIN NEW CERTIFICATE REQUEST-----") == 0 &&
+          strcmp(endline,   "-----END NEW CERTIFICATE REQUEST-----") == 0)
+        )) {
+      snprintf(error_str, sizeof(error_str), 
+        "Error invalid key format, can't read BEGIN/END lines.%s%s%s%s%s",
+        "<p>Beginline: ", beginline, "</p><p>Endline: ", endline, "</p>");
+      int_error(error_str);
+   }
 }
 
 /* ---------------------------------------------------------- *
- * key_validate() does a basic check for the Key's PEM format * 
+ * key_validate_PEM(): a basic check for the Key's PEM format * 
+ *                                                            *
+ * check if a key was pasted with the BEGIN and END           *
+ * lines, assuming the key data in between is intact.         *
+ * The following line variations are expected:                *
+ * -----BEGIN RSA PRIVATE KEY-----                            *
+ * -----BEGIN DSA PRIVATE KEY-----                            *
+ * -----BEGIN EC PRIVATE KEY-----                             *
+ * -----BEGIN PRIVATE KEY-----                                *
  * ---------------------------------------------------------- */
-void key_validate(char * form) {
-   char reqtest[REQLEN] = "";
-   char beginline[81]   = "";
-   char endline[81]     = "";
+void key_validate_PEM(char * form) {
+   /* Check if the form contains a newline character */
+   if (! strchr(form, '\n'))
+      int_error("Error invalid key format, received garbage line.");
 
-   /* -------------------------------------------------------------------- *
-    * check if a key was pasted with the BEGIN and END                     *
-    * lines, assuming the key data in between is intact.                   *
-    * The following line variations are expected:                          *
-    * -----BEGIN RSA PRIVATE KEY-----                                      *
-    * -----BEGIN DSA PRIVATE KEY-----                                      *
-    * -----BEGIN EC PRIVATE KEY-----                                       *
-    * -----BEGIN PRIVATE KEY-----                                          *
-    * -------------------------------------------------------------------- */
+   /* Use a temporary buffer keytest to modify the content */
+   char keytest[KEYLEN] = "";
+   strncpy(keytest, form, KEYLEN);
 
-    if (! strchr(form, '\n'))
-       int_error("Error invalid key format, received garbage line.");
+   /* copy the last line */
+   char endline[81] = "";
+   strncpy(endline, (strrchr(keytest, '\n')+1), 81);
 
-    strcpy(reqtest, form);
-    strcpy(endline, (strrchr(reqtest, '\n') +1));
-    /* should there be extra newlines at the end, we remove it here */
-    if(strlen(endline) == 0 && strlen(reqtest) > 0) {
-       if (strstr(reqtest, "-----END RSA PRIVATE KEY-----") != NULL)
-         strtok(strstr(reqtest, "-----END RSA PRIVATE KEY-----"), "\n");
-       if (strstr(reqtest, "-----END DSA PRIVATE KEY-----") != NULL)
-         strtok(strstr(reqtest, "-----END DSA PRIVATE KEY-----"), "\n");
-       if (strstr(reqtest, "-----END EC PRIVATE KEY-----") != NULL)
-         strtok(strstr(reqtest, "-----END EC PRIVATE KEY-----"), "\n");
-       if (strstr(reqtest, "-----END PRIVATE KEY-----") != NULL)
-         strtok(strstr(reqtest, "-----END PRIVATE KEY-----"), "\n");
-    }
-    strncpy(endline, (strrchr(reqtest, '\n') +1), sizeof(endline));
-    strncpy(beginline, reqtest, (strchr(reqtest, '\n') - reqtest));
+   /* should there be extra newlines at file end, we remove here */
+   while (strlen(endline) == 0 && strlen(keytest) > 0) {
+      keytest[strlen(keytest)-1] = '\0';
+      strncpy(endline, (strrchr(keytest, '\n')+1), 81);
+   }
 
-    /* check for the acceptable line variations */
-    if(! ( (strcmp(beginline, "-----BEGIN RSA PRIVATE KEY-----") == 0 &&
-          strcmp(endline, "-----END RSA PRIVATE KEY-----") == 0)
-          ||
-         (strcmp(beginline, "-----BEGIN DSA PRIVATE KEY-----") == 0 &&
-          strcmp(endline, "-----END DSA PRIVATE KEY-----") == 0)
-          ||
-         (strcmp(beginline, "-----BEGIN EC PRIVATE KEY-----") == 0 &&
-          strcmp(endline, "-----END EC PRIVATE KEY-----") == 0)
-          ||
-         (strcmp(beginline, "-----BEGIN PRIVATE KEY-----") == 0 &&
-          strcmp(endline, "-----END PRIVATE KEY-----") == 0) ) )
-       int_error("Error invalid key format, no BEGIN/END lines found.");
+   /* Identify the first line */
+   char beginline[81] = "";
+   strtok(keytest, "\n");
+   strncpy(beginline, keytest, 81);
+
+   /* should there be a windows carriage return, we remove it here */
+   char *char_pos = NULL;
+   if ((char_pos = strchr(beginline, '\r'))) *char_pos='\0';
+   if ((char_pos = strchr(endline, '\r'))) *char_pos='\0';
+
+   /* check for the acceptable line variations */
+   if(! (
+          (strcmp(beginline, "-----BEGIN RSA PRIVATE KEY-----") == 0 &&
+           strcmp(endline,   "-----END RSA PRIVATE KEY-----") == 0) ||
+          (strcmp(beginline, "-----BEGIN DSA PRIVATE KEY-----") == 0 &&
+           strcmp(endline,   "-----END DSA PRIVATE KEY-----") == 0) ||
+          (strcmp(beginline, "-----BEGIN EC PRIVATE KEY-----") == 0 &&
+           strcmp(endline,   "-----END EC PRIVATE KEY-----") == 0) ||
+          (strcmp(beginline, "-----BEGIN PRIVATE KEY-----") == 0 &&
+           strcmp(endline,   "-----END PRIVATE KEY-----") == 0)
+        )) {
+      snprintf(error_str, sizeof(error_str), 
+        "Error invalid key format, can't read BEGIN/END lines.%s%s%s%s%s",
+        "<p>Beginline: ", beginline, "</p><p>Endline: ", endline, "</p>");
+      int_error(error_str);
+   }
 }
 
 /* ---------------------------------------------------------- *
@@ -799,7 +814,7 @@ void display_signing(X509_REQ *csr) {
   bio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
 
   fprintf(cgiOut, "<form action=\"certsign.cgi\" method=\"post\">");
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"sign-request\" ");
+  fprintf(cgiOut, "<input type=\"hidden\" name=\"csrdata\" ");
   fprintf(cgiOut, "value=\"");
   PEM_write_bio_X509_REQ(bio, csr);
   fprintf(cgiOut, "\">\n");
@@ -1006,4 +1021,191 @@ void keycreate_input() {
 
    fprintf(cgiOut, "<tr><th colspan=\"4\">&nbsp</th></tr>\n");
    fprintf(cgiOut, "</table>\n");
+}
+
+/* ------------------------------------------------------------- *
+ * Function cgi_load_csrfile() loads a CGI form called "csrfile" *
+ * into a X509_REQ struct.                                       *
+ * ------------------------------------------------------------- */
+X509_REQ * cgi_load_csrfile(char *file) {
+X509_REQ *csr = NULL;
+  /* ---------------------------------------------------------- *
+   * Get the certificate request file size                      *
+   * ---------------------------------------------------------- */
+  int csr_fsize = 0;
+
+  cgiFormFileSize("csrfile", &csr_fsize);
+  if (csr_fsize == 0) int_error("The uploaded certificate file is empty (0 bytes)");
+  if (csr_fsize > REQLEN) {
+    snprintf(error_str, sizeof(error_str), "The uploaded CSR file is greater %d bytes", REQLEN);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Open the certificate request file and get a handle         *
+   * ---------------------------------------------------------- */
+  cgiFilePtr csrfile_ptr = NULL;
+
+  if (cgiFormFileOpen("csrfile", & csrfile_ptr) != cgiFormSuccess) {
+    snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", file);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Read the certificate request file content in a buffer      *
+   * ---------------------------------------------------------- */
+  char csr_form[REQLEN] = "";
+  if (! (cgiFormFileRead(csrfile_ptr, csr_form, REQLEN, &csr_fsize) == cgiFormSuccess)) {
+    snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded CSR file %s", file);
+    int_error(error_str);
+  }
+
+ /* ---------------------------------------------------------- *
+  * check if a CSR contains PEM data                           *
+  * ---------------------------------------------------------- */
+  csr_validate_PEM(csr_form);
+
+ /* ---------------------------------------------------------- *
+  * Try to read the PEM request with openssl lib functions     *
+  * ---------------------------------------------------------- */
+  BIO *csrbio = BIO_new_mem_buf(csr_form, -1);
+
+  if (! (csr = PEM_read_bio_X509_REQ(csrbio, NULL, 0, NULL))) {
+    snprintf(error_str, sizeof(error_str), "Error reading csr structure of %s into memory", file);
+    int_error(error_str);
+  }
+  BIO_free(csrbio);
+  return csr;
+}
+/* ------------------------------------------------------------- *
+ * Function cgi_load_csrform() loads a CGI form called "csrdata" * 
+ * into a X509_REQ struct.                                       *
+ * ------------------------------------------------------------- */
+X509_REQ * cgi_load_csrform(char *csr_form) {
+X509_REQ *csr = NULL;
+
+ /* ---------------------------------------------------------- *
+  * check if a CSR was pasted or if someone just sends garbage *
+  * ---------------------------------------------------------- */
+  csr_validate_PEM(csr_form);
+
+ /* ---------------------------------------------------------- *
+  * Try to read the PEM request with openssl lib functions     *
+  * ---------------------------------------------------------- */
+  BIO *csrbio = BIO_new_mem_buf(csr_form, -1);
+
+  if (! (csr = PEM_read_bio_X509_REQ(csrbio, NULL, 0, NULL)))
+    int_error("Error reading PEM csr structure from form data");
+
+  BIO_free(csrbio);
+  return csr;
+}
+
+/* ------------------------------------------------------------ *
+ * Function cgi_load_certfile() loads a CGI form named          *
+ * "certfile" into a X509 struct.                               *
+ * ------------------------------------------------------------ */
+X509 * cgi_load_certfile(char* file) {
+X509 *crt = NULL;
+  /* ---------------------------------------------------------- *
+   * Get the certificate file size                              *
+   * ---------------------------------------------------------- */
+  int cert_fsize = 0;
+
+  cgiFormFileSize("certfile", &cert_fsize);
+  if (cert_fsize == 0) int_error("The uploaded certificate file is empty (0 bytes)");
+  if (cert_fsize > REQLEN) {
+    snprintf(error_str, sizeof(error_str), "The uploaded certificate file greater %d bytes", REQLEN);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Open the certfile and get a handle                         *
+   * ---------------------------------------------------------- */
+  cgiFilePtr certfile_ptr = NULL;
+
+  if (cgiFormFileOpen("certfile", & certfile_ptr) != cgiFormSuccess) {
+    snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", file);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Read the certificate file content in a buffer              *
+   * ---------------------------------------------------------- */
+  char cert_form[REQLEN] = "";
+
+  if (! (cgiFormFileRead(certfile_ptr, cert_form, REQLEN, &cert_fsize) == cgiFormSuccess)) {
+    snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded certificate file %s", file);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Load the cert into the X509 struct                         *
+   * ---------------------------------------------------------- */
+  BIO *certbio = BIO_new_mem_buf(cert_form, -1);
+
+  if (! (crt = PEM_read_bio_X509(certbio, NULL, 0, NULL))) {
+    snprintf(error_str, sizeof(error_str), "Error reading cert structure of %s into memory", file);
+    int_error(error_str);
+  }
+
+  BIO_free(certbio);
+  return crt;
+}
+
+/* ------------------------------------------------------------- *
+ * Function cgi_load_keyfile() loads a CGI form named "keyfile"  *
+ * into a EVP_PKEY struct.                                       *
+ * ------------------------------------------------------------- */
+EVP_PKEY * cgi_load_keyfile(char* file) {
+EVP_PKEY *key = NULL;
+  /* ---------------------------------------------------------- *
+   * Get the key file size                                      *
+   * ---------------------------------------------------------- */
+  int key_fsize = 0;
+
+  cgiFormFileSize("keyfile", &key_fsize);
+  if (key_fsize == 0) int_error("The uploaded key file is empty (0 bytes)");
+  if (key_fsize > KEYLEN) {
+    snprintf(error_str, sizeof(error_str), "The uploaded key file greater %d bytes", KEYLEN);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Open the key file and get a handle                         *
+   * ---------------------------------------------------------- */
+  cgiFilePtr keyfile_ptr = NULL;
+
+  if (cgiFormFileOpen("keyfile", & keyfile_ptr) != cgiFormSuccess) {
+    snprintf(error_str, sizeof(error_str), "Cannot open the uploaded key file %s", file);
+    int_error(error_str);
+  }
+
+  /* ---------------------------------------------------------- *
+   * Read the key file content in a buffer                      *
+   * ---------------------------------------------------------- */
+  char key_form[KEYLEN] = "";
+
+  if (! (cgiFormFileRead(keyfile_ptr, key_form, KEYLEN, &key_fsize) == cgiFormSuccess)) {
+    snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded key file %s", file);
+    int_error(error_str);
+  }
+
+ /* ---------------------------------------------------------- *
+  * check if a key contains PEM data                           *
+  * ---------------------------------------------------------- */
+  key_validate_PEM(key_form);
+
+  /* ---------------------------------------------------------- *
+   * Load the key data into the EVP_PKEY struct                 *
+   * ---------------------------------------------------------- */
+  BIO *keybio = BIO_new_mem_buf(key_form, -1);
+
+  if (! (key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL))) {
+    snprintf(error_str, sizeof(error_str), "Error reading private key structure of %s into memory", file);
+    int_error(error_str);
+  }
+
+  BIO_free(keybio);
+  return key;
 }

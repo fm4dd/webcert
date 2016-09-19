@@ -6,8 +6,6 @@
  * Note: Using OpenSSL EVP_PKEY_cmp() function to check a private key against *
  * a cert or CSR public key does not catch the case when the private key is   *
  * not matching the public key, because only both sides pubkeys are compared. *
- * TODO: implement a a hash/de-hash function to confirm private / public keys *
- * TODO: re-use/globalize the cgi_load_cert and cgi_load_csr functions        *
  * -------------------------------------------------------------------------- */
 #include <stdio.h>
 #include <unistd.h>
@@ -17,12 +15,8 @@
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
+#include <openssl/rand.h>
 #include "webcert.h"
-
-char error_str[4096] = "";
-
-X509 * cgi_load_cert(char *);
-X509_REQ * cgi_load_csr(char *);
 
 int cgiMain() {
 /* ---------------------------------------------------------- *
@@ -144,62 +138,18 @@ int cgiMain() {
     int ret = 0;
 
     /* ---------------------------------------------------------- *
-     * Get the private key file name                              *
+     * Get the private key file                                   *
      * ---------------------------------------------------------- */
+    EVP_PKEY *priv_key = NULL;
     char key_name[1024] = "";
+
     ret = cgiFormFileName("keyfile", key_name, sizeof(key_name));
     if (ret !=cgiFormSuccess) {
       snprintf(error_str, sizeof(error_str), "Could not get the private key file, return code %d", ret);
       int_error(error_str);
     }
 
-    /* ---------------------------------------------------------- *
-     * Get the private key file size                              *
-     * ---------------------------------------------------------- */
-    int key_fsize = 0;
-    cgiFormFileSize("keyfile", &key_fsize);
-    if (key_fsize == 0) int_error("The uploaded key file is empty (0 bytes)");
-    if (key_fsize > KEYLEN) {
-      snprintf(error_str, sizeof(error_str), "The uploaded key file greater %d bytes", KEYLEN);
-      int_error(error_str);
-    }
-
-    /* ---------------------------------------------------------- *
-     * Open the key file to get the handle                        *
-     * ---------------------------------------------------------- */
-    cgiFilePtr keyfile_ptr = NULL;
-    if (cgiFormFileOpen("keyfile", &keyfile_ptr) != cgiFormSuccess) {
-      snprintf(error_str, sizeof(error_str), "Cannot open the uploaded private key file %s", key_name);
-      int_error(error_str);
-    }
-
-    /* ---------------------------------------------------------- *
-     * Load the key file content in a buffer                      *
-     * ---------------------------------------------------------- */
-    char key_form[REQLEN] = "";
-    if (! (cgiFormFileRead(keyfile_ptr, key_form, REQLEN, &key_fsize) == cgiFormSuccess)) {
-      snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded private key file %s", key_name);
-      int_error(error_str);
-    }
-
-    /* ---------------------------------------------------------- *
-     * Check if the key has the ----- BEGIN and ----- END         *
-     * lines, assuming the key data in between is intact          *
-     * ---------------------------------------------------------- */
-    key_validate(key_form);
-
-    /* ---------------------------------------------------------- *
-     * Load the key into the EVP_KEY struct                       *
-     * ---------------------------------------------------------- */
-    BIO *keybio  = NULL;
-    keybio = BIO_new_mem_buf(key_form, -1);
-
-    EVP_PKEY *priv_key = NULL;
-    if (! (priv_key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL))) {
-      snprintf(error_str, sizeof(error_str), "Error reading private key structure of %s into memory", key_name);
-      int_error(error_str);
-    }
-    BIO_free(keybio);
+    priv_key = cgi_load_keyfile(key_name);
 
     /* ---------------------------------------------------------- *
      * Check if we got a cert or csr file to process              *
@@ -214,7 +164,7 @@ int cgiMain() {
       /* ---------------------------------------------------------- *
        * Extract the public key from a certificate                  *
        * ---------------------------------------------------------- */
-        cert = cgi_load_cert(file_name);
+        cert = cgi_load_certfile(file_name);
 
         if ((pub_key = X509_get_pubkey(cert)) == NULL)
           int_error("Error getting public key from certificate");
@@ -225,7 +175,7 @@ int cgiMain() {
         /* ---------------------------------------------------------- *
          * We extract the public key from a CSR file                  *
          * ---------------------------------------------------------- */
-        req = cgi_load_csr(file_name);
+        req = cgi_load_csrfile(file_name);
 
         if ( (req->req_info == NULL) ||
              (req->req_info->pubkey == NULL) ||
@@ -255,6 +205,8 @@ int cgiMain() {
     if(ret ==  0) snprintf(cmp_result, sizeof(cmp_result), "Key Missmatch");
     if(ret ==  1) snprintf(cmp_result, sizeof(cmp_result), "Match");
 
+//    ret = key_encrypt_check(priv_key, pub_key);
+
     /* ---------------------------------------------------------- *
      * start the html output to display the PKCS12 download link  *
      * ---------------------------------------------------------- */
@@ -278,109 +230,3 @@ int cgiMain() {
     return(0);
   } // end if form data wasn't empty
 } // end main
-
-/* ------------------------------------------------------------- *
- * Function cgi_load_cert() loads a CGI form called "certfile"   *
- * into a X509 struct.                                           *
- * ------------------------------------------------------------- */
-X509 * cgi_load_cert(char* file) {
-X509 *crt = NULL;
-  /* ---------------------------------------------------------- *
-   * Get the certificate file size                              *
-   * ---------------------------------------------------------- */
-  int cert_fsize = 0;
-  cgiFormFileSize("certfile", &cert_fsize);
-  if (cert_fsize == 0) int_error("The uploaded certificate file is empty (0 bytes)");
-  if (cert_fsize > REQLEN) {
-    snprintf(error_str, sizeof(error_str), "The uploaded certificate file greater %d bytes", REQLEN);
-    int_error(error_str);
-  }
-
-  /* ---------------------------------------------------------- *
-   * Open the certfile and get a handle                         *
-   * ---------------------------------------------------------- */
-  cgiFilePtr certfile_ptr = NULL;
-  if (cgiFormFileOpen("certfile", & certfile_ptr) != cgiFormSuccess) {
-    snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", file);
-    int_error(error_str);
-  }
-
-  /* ---------------------------------------------------------- *
-   * Read the certificate file content in a buffer              *
-   * ---------------------------------------------------------- */
-  char cert_form[REQLEN] = "";
-  if (! (cgiFormFileRead(certfile_ptr, cert_form, REQLEN, &cert_fsize) == cgiFormSuccess)) {
-    snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded certificate file %s", file);
-    int_error(error_str);
-  }
-
-  /* ---------------------------------------------------------- *
-   * Load the cert into the X509 struct                         *
-   * ---------------------------------------------------------- */
-  BIO *certbio = NULL;
-  certbio = BIO_new_mem_buf(cert_form, -1);
-
-  if (! (crt = PEM_read_bio_X509(certbio, NULL, 0, NULL))) {
-    snprintf(error_str, sizeof(error_str), "Error reading cert structure of %s into memory", file);
-    int_error(error_str);
-  }
-  BIO_free(certbio);
-  return crt;
-}
-
-/* ------------------------------------------------------------- *
- * Function cgi_load_csr() loads a CGI form called "csrfile"     *
- * into a X509_REQ struct.                                       *
- * ------------------------------------------------------------- */
-X509_REQ * cgi_load_csr(char *file) {
-X509_REQ *csr = NULL;
-  /* ---------------------------------------------------------- *
-   * Get the certificate file size                              *
-   * ---------------------------------------------------------- */
-  int csr_fsize = 0;
-  cgiFormFileSize("csrfile", &csr_fsize);
-  if (csr_fsize == 0) int_error("The uploaded certificate file is empty (0 bytes)");
-  if (csr_fsize > REQLEN) {
-    snprintf(error_str, sizeof(error_str), "The uploaded CSR file is greater %d bytes", REQLEN);
-    int_error(error_str);
-  }
-
-  /* ---------------------------------------------------------- *
-   * Open the certificate request file and get a handle         *
-   * ---------------------------------------------------------- */
-  cgiFilePtr csrfile_ptr = NULL;
-  if (cgiFormFileOpen("csrfile", & csrfile_ptr) != cgiFormSuccess) {
-    snprintf(error_str, sizeof(error_str), "Cannot open the uploaded certificate file %s", file);
-    int_error(error_str);
-  }
-
-  /* ---------------------------------------------------------- *
-   * Read the certificate request file content in a buffer      *
-   * ---------------------------------------------------------- */
-  char csr_form[REQLEN] = "";
-  if (! (cgiFormFileRead(csrfile_ptr, csr_form, REQLEN, &csr_fsize) == cgiFormSuccess)) {
-    snprintf(error_str, sizeof(error_str), "Cannot read data from the uploaded CSR file %s", file);
-    int_error(error_str);
-  }
-
- /* ---------------------------------------------------------- *
-  * check if a CSR was pasted or if someone just sends garbage *
-  * ---------------------------------------------------------- */
-  csr_validate(csr_form);
-
-  /* ---------------------------------------------------------- *
-   * input seems OK, write the request to a temporary BIO buffer*
-   * -----------------------------------------------------------*/
-  BIO *csrbio = NULL;
-  csrbio = BIO_new_mem_buf(csr_form, -1);
-
- /* ---------------------------------------------------------- *
-  * Try to read the PEM request with openssl lib functions     *
-  * ---------------------------------------------------------- */
-  if (! (csr = PEM_read_bio_X509_REQ(csrbio, NULL, 0, NULL))) {
-    snprintf(error_str, sizeof(error_str), "Error reading csr structure of %s into memory", file);
-    int_error(error_str);
-  }
-  BIO_free(csrbio);
-  return csr;
-}

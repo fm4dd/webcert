@@ -107,7 +107,7 @@ int cgiMain() {
      * First, check if a key was pasted with the BEGIN and END    *
      * lines, assuming the key data in between is intact          *
      * ---------------------------------------------------------- */
-    key_validate(formkey);
+    key_validate_PEM(formkey);
 
     /* ---------------------------------------------------------- *
      * input seems OK, writing key to a temp mem BIO and load it  *
