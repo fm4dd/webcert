@@ -448,9 +448,7 @@ int cgiMain() {
    }
 
 /* -------------------------------------------------------------------------- *
- *  Set the digest algorithm for signing                                      *
- * if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_DSA)                       *
- *   digest = EVP_dss1(); we used to sign ecc keys, switched to SHA variants  *
+ *  Set the digest algorithm strength for signing. We use SHA variants only   *
  * ---------------------------------------------------------------------------*/
    if(strcmp(sigalgstr, "SHA-224") == 0) digest = EVP_sha224();
    else if(strcmp(sigalgstr, "SHA-256") == 0) digest = EVP_sha256();

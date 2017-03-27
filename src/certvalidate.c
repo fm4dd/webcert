@@ -835,7 +835,7 @@ int get_latest_ca_bundle(char bundlestr[]) {
 
   files_found = scandir(CABUNDLEDIR, &namelist, file_select, alphasort);
   /* pick up the latest file we can find */
-  if(files_found) snprintf(bundlestr, CB_STRLEN, "%s/%s", 
+  if(files_found>0) snprintf(bundlestr, CB_STRLEN, "%s/%s", 
              CABUNDLEDIR, namelist[files_found-1]->d_name);
 
   return files_found;

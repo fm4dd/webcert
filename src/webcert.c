@@ -690,6 +690,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   BIO *test = BIO_new(BIO_s_mem());
   PEM_write_bio_X509(test, ct);
   long PEM_size = BIO_get_mem_data(test, NULL);
+  BIO_free(test);
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th class=\"cnt75\">Cert Data:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
