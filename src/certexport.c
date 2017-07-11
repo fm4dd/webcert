@@ -241,7 +241,7 @@ int cgiMain() {
 
    if (strcmp(format, "pem") == 0) {
      if (! (exportfile=fopen(exportfilestr, "w")))
-        printf("Error open PEM certificate file for writing.\n");
+        int_error("Error open PEM certificate file for writing.");
      BIO_set_fp(outbio, exportfile, BIO_NOCLOSE);
      if (! PEM_write_bio_X509(outbio, cert))
         int_error("Error writing PEM certificate to export directory.");
@@ -249,7 +249,7 @@ int cgiMain() {
    }
    if (strcmp(format, "der") == 0) {
      if (! (exportfile=fopen(exportfilestr, "w")))
-        printf("Error open DER certificate file for writing.\n");
+        int_error("Error open DER certificate file for writing.");
      BIO_set_fp(outbio, exportfile, BIO_NOCLOSE);
      bytes = i2d_X509_bio(outbio, cert);
      if (bytes <= 0)
@@ -313,10 +313,10 @@ int cgiMain() {
         int_error("Error generating a valid PKCS12 structure.");
 
      if (! (exportfile=fopen(exportfilestr, "w")))
-        printf("Error open PKCS12 certificate file bundle for writing.\n");
+        int_error("Error open PKCS12 certificate file bundle for writing.");
      bytes = i2d_PKCS12_fp(exportfile, pkcs12bundle);
      if (bytes <= 0)
-        printf("Error writing PKCS12 certificate to export directory.\n");
+        int_error("Error writing PKCS12 certificate to export directory.");
 
      fclose(exportfile);
      sk_X509_free(cacertstack);
