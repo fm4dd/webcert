@@ -389,7 +389,6 @@ int cgiMain() {
   fprintf(cgiOut, "<p></p>\n");
 
   fprintf(cgiOut, "<table>\n");
-
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th>\n");
   fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
@@ -414,62 +413,75 @@ int cgiMain() {
   fprintf(cgiOut, "&nbsp;");
   fprintf(cgiOut, "</th>\n");
 
-  // goto page 1
-  fprintf(cgiOut, "<th width=\"5\">\n");
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"&lt;&lt;\" />\n");
-  fprintf(cgiOut, "</form>\n");
-  fprintf(cgiOut, "</th>\n");
+  if(pagenumber == 1) {
+    fprintf(cgiOut, "<th width=\"78px\">\n");
+    fprintf(cgiOut, "Newest Page");
+    fprintf(cgiOut, "</th>\n");
+  }
+  else {
+    // goto page 1
+    fprintf(cgiOut, "<th width=\"5\">\n");
+    fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
+    fprintf(cgiOut, "<input type=\"submit\" value=\"&lt;&lt;\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
+  
+    // goto page before
+    fprintf(cgiOut, "<th width=\"5\">\n");
+    fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
+    fprintf(cgiOut, "value=\"");
+    tempcounter = 0;
+    if(pagenumber > 1) tempcounter = pagenumber - 1;
+    else tempcounter = 1;
+    fprintf(cgiOut, "%d", tempcounter);
+    fprintf(cgiOut, "\" />\n");
+    fprintf(cgiOut, "<input type=\"submit\" value=\"&lt; 1\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
+  }
 
-  // goto page before
-  fprintf(cgiOut, "<th width=\"5\">\n");
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
-  fprintf(cgiOut, "value=\"");
-  tempcounter = 0;
-  if(pagenumber > 1) tempcounter = pagenumber - 1;
-  else tempcounter = 1;
-  fprintf(cgiOut, "%d", tempcounter);
-  fprintf(cgiOut, "\" />\n");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"&lt; 1\" />\n");
-  fprintf(cgiOut, "</form>\n");
-  fprintf(cgiOut, "</th>\n");
-
-  // goto page after
-  fprintf(cgiOut, "<th width=\"5\">\n");
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
-  fprintf(cgiOut, "value=\"");
-  tempcounter = 0;
-  if(pagecounter > pagenumber) tempcounter = pagenumber + 1;
-  else tempcounter = pagecounter;
-  fprintf(cgiOut, "%d", tempcounter);
-  fprintf(cgiOut, "\" />\n");
-  fprintf(cgiOut, "<input type=\"submit\" value=\"1 &gt;\" />\n");
-  fprintf(cgiOut, "</form>\n");
-  fprintf(cgiOut, "</th>\n");
-
-  // goto last page
-  fprintf(cgiOut, "<th width=\"5\">\n");
-  fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
-  fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
-  fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
-  fprintf(cgiOut, "<input type=\"submit\" value=\"&gt;&gt;\" />\n");
-  fprintf(cgiOut, "</form>\n");
-  fprintf(cgiOut, "</th>\n");
-
+  if(pagenumber == pagecounter) {
+    fprintf(cgiOut, "<th width=\"78px\">\n");
+    fprintf(cgiOut, "Oldest Page");
+    fprintf(cgiOut, "</th>\n");
+  }
+  else {
+    // goto page after
+    fprintf(cgiOut, "<th width=\"5\">\n");
+    fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">\n");
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
+    fprintf(cgiOut, "value=\"");
+    tempcounter = 0;
+    if(pagecounter > pagenumber) tempcounter = pagenumber + 1;
+    else tempcounter = pagecounter;
+    fprintf(cgiOut, "%d", tempcounter);
+    fprintf(cgiOut, "\" />\n");
+    fprintf(cgiOut, "<input type=\"submit\" value=\"1 &gt;\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
+  
+    // goto last page
+    fprintf(cgiOut, "<th width=\"5\">\n");
+    fprintf(cgiOut, "<form action=\"certstore.cgi\" method=\"post\">");
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", certcounter);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"pagecounter\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"page\" ");
+    fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
+    fprintf(cgiOut, "<input type=\"submit\" value=\"&gt;&gt;\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
+  }
   // goto page number
   fprintf(cgiOut, "<th width=\"120\">\n");
   fprintf(cgiOut, "<form class=\"setpage\" action=\"certstore.cgi\" method=\"post\">\n");
