@@ -18,7 +18,7 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "webca-secret"
+#define PASS            "mypassword"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
@@ -32,6 +32,9 @@
 /*********** certificate lifetime *********************************************/
 #define DAYS_VALID      1095
 #define YEARS_VALID     3
+/*********** The link to webcerts crl *****************************************/
+#define CRLURI          "URI:http://fm4dd.com/sw/webcert/webcert.crl"
+#define CRLPATH         "/srv/www/std-root/fm4dd.com/sw/webcert/webcert.crl"
 
 /* For the public demo, I enforce adding the source IP to the certificate CN */
 /* For internal use, you could take it out. */
@@ -45,8 +48,8 @@
 /***************** no changes required below this line ************************/
 /***************** *********************************** ************************/
 
-#define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.7.8 (01/09/2016)"
+#define CONTACT_EMAIL	"support@ffrank4dd.com"
+#define SW_VERSION	"WebCert v1.7.9 (08/19/2017)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
@@ -105,6 +108,7 @@ void display_cert(X509 *cert, char ct_type[], char chain_type[], int level);
 void display_signing(X509_REQ *);
 void display_csr(X509_REQ *);
 void display_key(EVP_PKEY *);
+void display_crl(X509_CRL *);
 
 /* ---------------------------------------------------------- *
  * xxx_validate_PEM(): a basic check of xxx PEM format input  *
@@ -118,6 +122,7 @@ void csr_validate_PEM(char *);
 X509 * cgi_load_certfile(char *);
 X509_REQ * cgi_load_csrfile(char *);
 EVP_PKEY * cgi_load_keyfile(char *);
+X509_CRL * cgi_load_crlfile(char *);
 
 /* ---------------------------------------------------------- *
  * cgi_load_xxxform() load a PEM form to corresponding struct *

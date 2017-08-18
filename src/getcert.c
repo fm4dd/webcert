@@ -174,7 +174,10 @@ int cgiMain() {
 
    fprintf(cgiOut, "</table>\n");
 
-   // If we show the Root CA cert, we also provide the retired Root CA certs (hardcoded)
+/* -------------------------------------------------------------------------- *
+ * If we show the Root CA cert, we also provide the retired Root CA certs     *
+ * (hardcoded), and CRL info if CRL exists at the given path in webcert.h     *
+ * ---------------------------------------------------------------------------*/
    if (strcmp(certfilestr, "cacert.pem") == 0) {
       fprintf(cgiOut, "<p></p>\n");
       fprintf(cgiOut, "<h3>Retired WebCert Root CA certificates:</h3>\n");
@@ -183,6 +186,16 @@ int cgiMain() {
       fprintf(cgiOut, "<a href=\"../export/webcert-20071207_1021.pem\">webcert-20071207_1021.pem</a></p>\n");
       fprintf(cgiOut, "<p><strong>2004-12-18</strong> 1024 bit RSA WebCert Root CA certificate with MD5 signature: ");
       fprintf(cgiOut, "<a href=\"../export/webcert-20041218_0138.pem\">webcert-20041218_0138.pem</a></p>\n");
+
+      if (fopen(CRLPATH, "r")) {
+         X509_CRL *crl = NULL;
+         crl = cgi_load_crlfile(CRLPATH);
+         fprintf(cgiOut, "<p></p>\n");
+         fprintf(cgiOut, "<h3>CA Certificate Revocation List:</h3>\n");
+         fprintf(cgiOut, "<hr />\n");
+         display_crl(crl);
+      }   
+      //else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLPATH);
    }
    pagefoot();
    BIO_free(outbio);

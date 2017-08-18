@@ -727,6 +727,133 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   BIO_free(bio);
 }
 /* ---------------------------------------------------------- *
+ * display_crl() shows CRL details in a HTML table.           *
+ * ---------------------------------------------------------- */
+void display_crl(X509_CRL *crl) {
+  BIO *bio;
+  bio = BIO_new(BIO_s_file());
+  bio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
+
+  fprintf(cgiOut, "<table>");
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">");
+  fprintf(cgiOut, "Certificate Revocation List Information");
+  fprintf(cgiOut, "</th>");
+  fprintf(cgiOut, "</tr>\n");
+
+  // location
+  const char *crluri = CRLURI;
+  crluri = crluri+4; // move the pointer past "URI:"
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Location:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td><a href=\"%s\">%s</a>\n", crluri, crluri);
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  // size
+  struct stat fstat;
+  unsigned long crl_fsize = 0;
+  if (stat(CRLPATH, &fstat) == 0) crl_fsize = fstat.st_size;
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">File Size:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td>%lu Bytes\n", crl_fsize);
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  // version
+  long version = 0;
+  version = X509_CRL_get_version(crl);
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Version:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td>%lu (0x%lx)\n", version+1, version);
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+
+  // issuer
+  X509_NAME *issuer = NULL;
+  issuer = X509_NAME_new();
+  issuer = X509_CRL_get_issuer(crl);
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Issuer:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td>\n");
+  X509_NAME_print_ex(bio, issuer, 0, XN_FLAG_ONELINE);
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  // lastupdate
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Last Update:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td>\n");
+  if (!ASN1_TIME_print(bio, X509_CRL_get_lastUpdate(crl)))
+    fprintf(cgiOut, "***n/a***");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  // nextupdate
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Next Update:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td>\n");
+  if (!ASN1_TIME_print(bio, X509_CRL_get_nextUpdate(crl)))
+    fprintf(cgiOut, "***n/a***");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  //signature
+  ASN1_STRING     *asn1_sig = NULL;
+  X509_ALGOR      *sig_type = NULL;
+  size_t          sig_bytes = 0;
+  char   sig_type_str[1024] = "";
+  sig_type = crl->sig_alg;
+  asn1_sig = crl->signature;
+  sig_bytes = asn1_sig->length;
+  OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\">Signature:</th>\n");
+  if (strstr(sig_type_str, "Md5") || strstr(sig_type_str, "md5"))
+    fprintf(cgiOut, "<td bgcolor=\"#cf0f0f\">");
+  else fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
+
+  fprintf(cgiOut, "%s, Length: %d Bytes\n", sig_type_str, (int) sig_bytes);
+  fprintf(cgiOut, "<a href=\"javascript:elementHideShow('reqsig');\">\n");
+  fprintf(cgiOut, "Expand or Hide Signature Data</a>");
+  /* display the signature in hex byte format here */
+  fprintf(cgiOut, "<div class=\"showpem\" id=\"reqsig\"  style=\"display: none\"><pre>");
+  if (X509_signature_dump(bio, asn1_sig, 0) != 1)
+    BIO_printf(bio, "Error printing the signature data\n");
+  fprintf(cgiOut, "</pre></div>\n");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  // number of revoked certs
+  STACK_OF(X509_REVOKED) *rev = X509_CRL_get_REVOKED(crl);
+  int revnum = sk_X509_REVOKED_num(rev);
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt75\"># Revoked Certs:");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "<td>%d\n", revnum);
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"2\">&nbsp;");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "</table>\n");
+  BIO_free(bio);
+}
+
+/* ---------------------------------------------------------- *
  * X509_load_ca_file() loads a CA file into a mem BIO using   *
  * (BIO_read_filename(), PEM_X509_INFO_read_bio() puts them   *
  * in a stack, which is then to be added to a store or CTX.   *
@@ -827,7 +954,7 @@ void display_signing(X509_REQ *csr) {
   fprintf(cgiOut, "<table>");
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"3\">");
-  fprintf(cgiOut, "Define certificate details:");
+  fprintf(cgiOut, "Define certificate attributes:");
   fprintf(cgiOut, "</th>");
   fprintf(cgiOut, "</tr>\n");
 
@@ -879,6 +1006,21 @@ void display_signing(X509_REQ *csr) {
   fprintf(cgiOut, "<option value=\"ts\">Time Stamping</option>");
   fprintf(cgiOut, "<option value=\"ocsp\">OCSP Signing</option>");
   fprintf(cgiOut, "</select>");
+  fprintf(cgiOut, "</td>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  /* Add crlDistributionPoints */
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th class=\"cnt\">");
+  fprintf(cgiOut, "<input type=\"checkbox\" name=\"addcrluri\" id=\"crluri_cb\" onclick=\"switchGrey('crluri_cb', 'crluri_td', 'none', 'none');\" />");
+  fprintf(cgiOut, "</th>\n");
+
+  fprintf(cgiOut, "<td class=\"type\">");
+  fprintf(cgiOut, "crlDistributionPoints:");
+  fprintf(cgiOut, "</td>\n");
+
+  fprintf(cgiOut, "<td class=\"even\" id=\"crluri_td\">\n");
+  fprintf(cgiOut, CRLURI);
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
@@ -1212,4 +1354,50 @@ EVP_PKEY *key = NULL;
 
   BIO_free(keybio);
   return key;
+}
+
+/* ------------------------------------------------------------- *
+ * Function cgi_load_crlfile() loads a OpenSSL generated CRL     *
+ * file into a X509_CRL struct.                                  *
+ * ------------------------------------------------------------- */
+X509_CRL * cgi_load_crlfile(char *file) {
+  X509_CRL *crl = NULL;
+  BIO *in = NULL;
+  /* ---------------------------------------------------------- *
+   * complain if we got an empty filename                       *
+   * ---------------------------------------------------------- */
+  if (file == NULL)
+    int_error("Error receiving a valid CRL file name.\n");
+
+  /* ---------------------------------------------------------- *
+   * get file status data                                       *
+   * ---------------------------------------------------------- */
+  struct stat fstat;
+  if (stat(file, &fstat) != 0)
+    int_error("Error cannot stat CRL file.\n");
+
+  /* ---------------------------------------------------------- *
+   * Get the crl file size, complain if file is empty (0 bytes) *
+   * ---------------------------------------------------------- */
+  int crl_fsize = fstat.st_size;
+
+  if(crl_fsize == 0)
+    int_error("Error CRL file size is zero bytes.\n");
+
+  in=BIO_new(BIO_s_file_internal());
+
+  /* ---------------------------------------------------------- *
+   * check if we can open the file for reading                  *
+   * ---------------------------------------------------------- */
+  if ((in == NULL) || (BIO_read_filename(in, file) <= 0))
+    int_error("Error loading CRL file into memory.\n");
+
+  /* ---------------------------------------------------------- *
+   * Try to read CRL from PEM file                              *
+   * ---------------------------------------------------------- */
+  if (! (crl = PEM_read_bio_X509_CRL(in, NULL, NULL, NULL)))
+    int_error("Error reading crl file to BIO.\n");
+
+  BIO_free(in);
+  return crl;
 }

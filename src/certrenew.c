@@ -89,14 +89,20 @@ int cgiMain() {
      fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-renew\" value=\"");
      PEM_write_bio_X509(outbio, cert);
      fprintf(cgiOut, "\">\n");
-     fprintf(cgiOut, "<input type=\"submit\" value=\"Create CSR\" />\n");
+     fprintf(cgiOut, "<input type=\"submit\" value=\"Create CSR with existing key\" />\n");
      fprintf(cgiOut, "</th>\n");
      fprintf(cgiOut, "</tr>\n");
      fprintf(cgiOut, "</table>\n");
 
      fprintf(cgiOut, "<p></p>\n");
      keycreate_input();
+     fprintf(cgiOut, "<p></p>\n");
 
+     fprintf(cgiOut, "<table>\n");
+     fprintf(cgiOut, "<tr>");
+     fprintf(cgiOut, "<th><input type=\"submit\" value=\"Create CSR with a new key\" /></th>");
+     fprintf(cgiOut, "</tr>\n");
+     fprintf(cgiOut, "</table>\n");
      fprintf(cgiOut, "</form>");
 
      pagefoot();
@@ -115,8 +121,8 @@ int cgiMain() {
     BIO *keybio  = NULL;
     keybio = BIO_new_mem_buf(formkey, -1);
 
-    EVP_PKEY *pkey = NULL;
-    if (! (pkey = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL)))
+    EVP_PKEY *priv_key = NULL;
+    if (! (priv_key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL)))
       int_error("Error loading certificate private key content");
 
     /* ---------------------------------------------------------- *
@@ -124,7 +130,7 @@ int cgiMain() {
      * ---------------------------------------------------------- */
     EVP_MD const *digest = NULL;
 
-    switch (pkey->type) {
+    switch (priv_key->type) {
       case EVP_PKEY_RSA: digest = EVP_sha256(); break;
       case EVP_PKEY_DSA: digest = EVP_dss(); break;
       case EVP_PKEY_EC: digest = EVP_ecdsa(); break;
@@ -137,8 +143,53 @@ int cgiMain() {
      * Convert the old certificate +key into a new CSR request    *
      * ---------------------------------------------------------- */
     X509_REQ *certreq = NULL;
-    if ((certreq = X509_to_X509_REQ(cert, pkey, digest)) == NULL) 
-      int_error("Can't convert certificate and key intoa new CSR equest.");
+    if ((certreq = X509_to_X509_REQ(cert, priv_key, digest)) == NULL) 
+      int_error("Can't convert certificate and key into a new CSR equest.");
+
+    /* ---------------------------------------------------------- *
+     * We extract the public key from the new CSR request         *
+     * ---------------------------------------------------------- */
+    EVP_PKEY *pub_key = NULL;
+    if ( (certreq->req_info == NULL) ||
+         (certreq->req_info->pubkey == NULL) ||
+         (certreq->req_info->pubkey->public_key == NULL) ||
+         (certreq->req_info->pubkey->public_key->data == NULL))
+            int_error("Error missing public key in request");
+
+    if ((pub_key=EVP_PKEY_new()) == NULL)
+       int_error("Error creating EVP_PKEY structure for pub_key.");
+
+    if ((pub_key=X509_REQ_get_pubkey(certreq)) == NULL)
+       int_error("Error unpacking public key from request");
+
+    /* ---------------------------------------------------------- *
+     * First key check: Check CSR public key with private key by  *
+     * using EVP_PKEY_cmp: 1 = "match", 0 = "key missmatch",      *
+     * -1 = "type missmatch, -2 = "error"                         *
+     * ---------------------------------------------------------- */
+    char cmp_res1_str[40]; // contains the string for match, missmatch, etc
+    int cmp_res1;
+    cmp_res1 = EVP_PKEY_cmp(priv_key, pub_key);
+
+    if(cmp_res1 == -2) {
+      snprintf(error_str, sizeof(error_str), "Error in EVP_PKEY_cmp(): operation is not supported.");
+      int_error(error_str);
+    }
+    if(cmp_res1 == -1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Type Missmatch");
+    if(cmp_res1 ==  0) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Key Missmatch");
+    if(cmp_res1 ==  1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Match");
+
+    /* ---------------------------------------------------------- *
+     * Second key check by encrypting a test string: 1 = "match", *
+     * 0 = "key missmatch", -1 = "type missmatch, -2 = "error"    *
+     * ---------------------------------------------------------- */
+    int cmp_res2 = 1;
+    char cmp_res2_str[40]; // contains the string for match, missmatch, etc
+    //cmp_res2 = key_enc_check(priv_key, pub_key);
+    // TBD !
+    if(cmp_res2 == -1) snprintf(cmp_res2_str, sizeof(cmp_res2_str), "Type Missmatch");
+    if(cmp_res2 ==  0) snprintf(cmp_res2_str, sizeof(cmp_res2_str), "Key Missmatch");
+    if(cmp_res2 ==  1) snprintf(cmp_res2_str, sizeof(cmp_res2_str), "Match");
 
     /* ---------------------------------------------------------- *
      * Add the following types of existing cert extensions to the *
@@ -176,19 +227,61 @@ int cgiMain() {
       /* ---------------------------------------------------------- *
        * Because we added data to the CSR, we re-do the signature   *
        * ---------------------------------------------------------- */
-      if (!X509_REQ_sign(certreq,pkey,digest))
+      if (!X509_REQ_sign(certreq,priv_key,digest))
          int_error("Error signing X509_REQ structure with digest.");
     }
 
-    /* ---------------------------------------------------------- *
-     * display the CSR data, and link to the certsign CGI         *
-     * -----------------------------------------------------------*/
     pagehead(title);
 
+    /* ---------------------------------------------------------- *
+     * display the CSR data                                       *
+     * -----------------------------------------------------------*/
     display_csr(certreq);
     fprintf(cgiOut, "<p></p>\n");
 
-    display_signing(certreq);
+    /* ---------------------------------------------------------- *
+     * If public/private keys match, link to the certsign CGI.    *
+     * Otherwise refuse processing, show the miss-matching keys.  *
+     * -----------------------------------------------------------*/
+    if(cmp_res1 == 1 && cmp_res2 == 1) {
+      display_signing(certreq);
+    }
+    else {
+      fprintf(cgiOut, "<p></p>\n");
+      fprintf(cgiOut, "ERROR: Public / Private Key Missmatch:</strong></th></tr>\n");
+      fprintf(cgiOut, "<p></p>\n");
+      fprintf(cgiOut, "<table>\n");
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<th><strong>");
+      fprintf(cgiOut, "The private key does not match the CSR-included public key!</th></tr>\n");
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<td class=\"getcert\">\n");
+      fprintf(cgiOut, "<a href=\"javascript:elementHideShow('keypem');\">\n");
+      fprintf(cgiOut, "Expand/Hide Private Key data in PEM format</a>\n");
+      fprintf(cgiOut, "<div class=\"showpem\" id=\"keypem\"  style=\"display: block\"\n>");
+      fprintf(cgiOut, "<pre>\n");
+   
+      if (! PEM_write_PrivateKey(cgiOut,priv_key,NULL,NULL,0,0,NULL)) {
+            int_error("Error printing the private key");
+      }
+   
+      fprintf(cgiOut, "</pre>\n");
+      fprintf(cgiOut, "</div>\n");
+      fprintf(cgiOut, "</td>\n");
+      fprintf(cgiOut, "</tr>\n");
+      fprintf(cgiOut, "<tr>\n");
+      fprintf(cgiOut, "<th>");
+      fprintf(cgiOut, "<form action=\"certrenew.cgi\" method=\"post\">\n");
+      fprintf(cgiOut, "<input type=\"hidden\" name=\"cert-renew\" ");
+      fprintf(cgiOut, "value=\"");
+      PEM_write_bio_X509(outbio, cert);
+      fprintf(cgiOut, "\" />\n");
+      fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"Cancel\" />\n");
+      fprintf(cgiOut, "</form>\n");
+      fprintf(cgiOut, "</th></tr>");
+      fprintf(cgiOut, "</table>\n");
+
+    }
 
     pagefoot();
     BIO_free(keybio);

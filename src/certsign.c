@@ -155,9 +155,9 @@ int cgiMain() {
       int_error("Error loading CA cert into memory");
    fclose(fp);
 
-/* -------------------------------------------------------------------------- *
- * Import CA private key for signing                                          *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Import CA private key for signing                           *
+ * ------------------------------------------------------------*/
    ca_privkey = EVP_PKEY_new();
    if (! (fp = fopen (CAKEY, "r")))
       int_error("Error reading CA private key file");
@@ -165,36 +165,36 @@ int cgiMain() {
       int_error("Error importing key content from file");
    fclose(fp);
 
-/* -------------------------------------------------------------------------- *
- * Build Certificate with data from request                                   *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Build Certificate with data from request                    *
+ * ------------------------------------------------------------*/
    if (! (newcert=X509_new()))
       int_error("Error creating new X509 object");
 
    if (X509_set_version(newcert, 2L) != 1)
       int_error("Error setting certificate version");
 
-/* -------------------------------------------------------------------------- *
- * load the serial number from SERIALFILE                                     *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * load the serial number from SERIALFILE                      *
+ * ------------------------------------------------------------*/
    if (! (bserial = load_serial(SERIALFILE, 1, NULL)))
       int_error("Error getting serial # from serial file");
 
-/* -------------------------------------------------------------------------- *
- * increment the serial number                                                *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * increment the serial number                                 *
+ * ------------------------------------------------------------*/
    if (! (BN_add_word(bserial,1)))
       int_error("Error incrementing serial number"); 
 
-/* -------------------------------------------------------------------------- *
- * save the serial number back to SERIALFILE                                  *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * save the serial number back to SERIALFILE                   *
+ * ------------------------------------------------------------*/
    if ( save_serial(SERIALFILE, 0, bserial, &aserial) == 0 )
       int_error("Error writing serial number to file");
 
-/* -------------------------------------------------------------------------- *
- * set the certificate serial number here                                     *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * set the certificate serial number here                      *
+ * ------------------------------------------------------------*/
    if (! X509_set_serialNumber(newcert, aserial))
       int_error("Error setting serial number of the certificate");
 
@@ -214,9 +214,9 @@ int cgiMain() {
       int_error("Error setting public key of certificate");
    EVP_PKEY_free(req_pubkey);
 
-/* -------------------------------------------------------------------------- *
- * Set X509V3 start date "now" and expiration date "now+valid_secs"           *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Set X509V3 start date "now", expire date "now+valid_secs"   *
+ * ------------------------------------------------------------*/
    if (strcmp(validlist[valid_res], "vd") == 0) {
       if (! (X509_gmtime_adj(X509_get_notBefore(newcert),0)))
          int_error("Error setting beginning time of certificate");
@@ -225,9 +225,9 @@ int cgiMain() {
          int_error("Error setting expiration time of certificate");
    }
 
-/* -------------------------------------------------------------------------- *
- * Set X509V3 start date and expiration date has been specifically set        *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Set X509V3 start and expire date if it was specifically set *
+ * ------------------------------------------------------------*/
    if (strcmp(validlist[valid_res], "se") == 0) {
       if (! ASN1_TIME_set_string(X509_get_notBefore(newcert), startdatestr))
          int_error("Error start date is invalid, it should be YYYYMMDDHHMMSSZ");
@@ -236,9 +236,9 @@ int cgiMain() {
          int_error("Error end date is invalid, it should be YYYYMMDDHHMMSSZ");
    }
 
-/* -------------------------------------------------------------------------- *
- * Add X509V3 extensions                                                      *
- * ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------- *
+ * Add X509V3 extensions                                       *
+ * ------------------------------------------------------------*/
    STACK_OF(X509_EXTENSION) *ext_list = NULL;
    X509_EXTENSION *ext;
    int i;
@@ -372,7 +372,7 @@ int cgiMain() {
       }
    }
 
-   /* Always add subjectKeyIdentifier and authorityKeyIdentifier */
+   /* Always add subjectKeyIdentifier */
    if (! (ext = X509V3_EXT_conf(NULL, &ctx,
                   "subjectKeyIdentifier", "hash"))) {
        int_error("Error creating X509 subjectKeyIdentifier extension object");
@@ -385,6 +385,7 @@ int cgiMain() {
    }
    X509_EXTENSION_free(ext);
 
+   /* Always add authorityKeyIdentifier */
    if (! (ext = X509V3_EXT_conf(NULL, &ctx,
                   "authorityKeyIdentifier", "keyid, issuer:always"))) {
       int_error("Error creating X509 authorityKeyIdentifier extension object");
@@ -395,12 +396,28 @@ int cgiMain() {
      if (! X509_add_ext(newcert, ext, -1))
         int_error("Error adding X509 extension to certificate");
    }
-   X509_EXTENSION_free(ext);
+
+   /* Add cRLDistributionPoints, URI see webcert.h */
+   if (cgiFormCheckboxSingle("addcrluri") == cgiFormSuccess) {
+      if (! (ext = X509V3_EXT_conf(NULL, &ctx,
+                  "crlDistributionPoints", CRLURI))) {
+         int_error("Error creating X509 cRLDistributionPoints extension object");
+      }
+
+      /* extension duplicates: check if the extension is already present */
+      if (check_ext_presence(ext, newcert) == 0) {
+         if (! X509_add_ext(newcert, ext, -1))
+            int_error("Error adding X509 extension to certificate");
+      }
+      X509_EXTENSION_free(ext);
+   }
 
   
-   /* if extended key usages has been requested,we add it here */
-   /* http://tools.ietf.org/html/rfc5280#section-4.2.1.12      */
-   /* http://www.openssl.org/docs/apps/x509v3_config.html      */
+   /* ----------------------------------------------------------- *
+    * If extended key usage has been requested,we add it here.    * 
+    * http://tools.ietf.org/html/rfc5280#section-4.2.1.12         * 
+    * http://www.openssl.org/docs/apps/x509v3_config.html         * 
+    * ----------------------------------------------------------- */
    if (cgiFormCheckboxSingle("extkeyusage") == cgiFormSuccess) {
  
      if (strcmp(extkeytype, "tlsws") == 0) {
@@ -447,24 +464,24 @@ int cgiMain() {
      X509_EXTENSION_free(ext);
    }
 
-/* -------------------------------------------------------------------------- *
- *  Set the digest algorithm strength for signing. We use SHA variants only   *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ *  Set digest algorithm strength, use only SHA variants      *
+ * ---------------------------------------------------------- */
    if(strcmp(sigalgstr, "SHA-224") == 0) digest = EVP_sha224();
    else if(strcmp(sigalgstr, "SHA-256") == 0) digest = EVP_sha256();
    else if(strcmp(sigalgstr, "SHA-384") == 0) digest = EVP_sha384();
    else if(strcmp(sigalgstr, "SHA-512") == 0) digest = EVP_sha512();
    else int_error("Error received unknown sigalg string");
 
-/* -------------------------------------------------------------------------- *
- * Sign the new certificate with CA private key                               *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * Sign the new certificate with CA private key               *
+ * ---------------------------------------------------------- */
    if (! X509_sign(newcert, ca_privkey, digest))
       int_error("Error signing the new certificate");
 
-/* -------------------------------------------------------------------------- *
- *  print the certificate                                                     *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ *  print the certificate                                     *
+ * ---------------------------------------------------------- */
    snprintf(certfile, sizeof(certfile), "%s.pem", BN_bn2hex(bserial));
 
    BIO *outbio = BIO_new(BIO_s_file());
@@ -515,9 +532,10 @@ int cgiMain() {
    fprintf(cgiOut, "</table>\n");
 
    BIO_free(outbio);
-/* -------------------------------------------------------------------------- *
- *  write a certificate backup to local disk, named after its serial number   *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * write a certificate backup to local disk, named after its  *
+ * serial number                                              *
+ * -----------------------------------------------------------*/
    snprintf(certfilestr, sizeof(certfilestr), "%s/%s.pem", CACERTSTORE,
                                                           BN_bn2hex(bserial));
    if (! (fp=fopen(certfilestr, "w")))
@@ -536,10 +554,11 @@ int cgiMain() {
    return(0);
 }
 
-/* -------------------------------------------------------------------------- *
- *  mkdatestr builds a string format YYYYMMDDHHMMSSZ from the form input data *
- *  date = YYYY-MM-DD (i.e. 2012-11-24), time = HH:MM:SS (i.e. 21:45:33)      *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * mkdatestr builds a string "YYYYMMDDHHMMSSZ" from the forms *
+ * input strings date = YYYY-MM-DD (i.e. 2012-11-24), and     *
+ * time = HH:MM:SS (i.e. 21:45:33)                            *
+ * -----------------------------------------------------------*/
 char * mkdatestr(char *date, char *time) {
   static char datestr[16] = "";
   char *err[16];
@@ -618,10 +637,10 @@ char * mkdatestr(char *date, char *time) {
   return datestr;
 }
 
-/* -------------------------------------------------------------------------- *
- *  check_ext_presence() checks if the extension test_ext is present in the   *
- *  certificate 'cert'. Function returns '1' if it is, '0' if it isn't there. *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * check_ext_presence() check if extension test_ext exists in *
+ * the certificate 'cert'. Returns '1' if found, '0' if not.  *
+ * -----------------------------------------------------------*/
 int check_ext_presence(X509_EXTENSION *test_ext, X509 *cert) {
   X509_CINF *cert_inf = NULL;
   STACK_OF(X509_EXTENSION) *list = NULL;
