@@ -106,7 +106,7 @@ int file_select(const struct dirent *entry) {
       e = X509_NAME_get_entry(certsubject, i);
       OBJ_obj2txt(buf, 80, e->object, 0);
 
-      /* when the search file dmatches the cert subject field */
+      /* when the search file matches the cert subject field  */
       /* check if the field value is equal the search value   */
       if(strstr(buf, field) != NULL)
         if(strstr( (char *) e->value->data, dnvalue) != NULL) return 1;
@@ -206,7 +206,7 @@ int file_select(const struct dirent *entry) {
 int cgiMain() {
 
   static char      title[256]        = "";
-  static char      subtitle[256]     = "";
+  static char   subtitle[256]        = "";
          char      sorting[16]       = "desc";
          time_t    now               = time(NULL);
          time_t    start             = time(NULL);
@@ -442,7 +442,8 @@ int cgiMain() {
         if ( cgiFormString("dnvalue", dnvalue, sizeof(dnvalue))
                                                      != cgiFormSuccess )
         int_error("Error retrieving CGI form DN search dnvalue information.");
-        snprintf(title, sizeof(title), "Search Certificates filtered for Subject %s=%s", field, dnvalue);
+        snprintf(title, sizeof(title), "Search Certs by Subject");
+        snprintf(subtitle, sizeof(subtitle), "Certificates with DN %s=%s", field, dnvalue);
       }
       else if (strcmp(search, "exp") == 0) {
         if ( cgiFormString("exp_startdate", exp_startdate, sizeof(exp_startdate))
@@ -467,8 +468,8 @@ int cgiMain() {
         strncat(exp_endstr, exp_enddate, sizeof(exp_endstr)-1);
         strncat(exp_endstr, " ", 1); /* add a space between date and time */
         strncat(exp_endstr, exp_endtime, sizeof(exp_endstr)-strlen(exp_endstr)-1);
-        snprintf(title, sizeof(title), "Search Certificate Expiration");
-        snprintf(subtitle, sizeof(subtitle), " - Expiration is between %s and %s", exp_startstr, exp_endstr);
+        snprintf(title, sizeof(title), "Search Certs by Expiration");
+        snprintf(subtitle, sizeof(subtitle), "Certificates with expiration between %s and %s", exp_startstr, exp_endstr);
       }
       else if (strcmp(search, "ena") == 0) {
         if ( cgiFormString("ena_startdate", ena_startdate, sizeof(ena_startdate))
@@ -493,7 +494,8 @@ int cgiMain() {
         strncat(ena_endstr, ena_enddate, sizeof(ena_endstr)-1);
         strncat(ena_endstr, " ", 1); /* add a space between date and time */
         strncat(ena_endstr, ena_endtime, sizeof(ena_endstr)-strlen(ena_endstr)-1);
-        snprintf(title, sizeof(title), "Search Certificates with Start Date between %s and %s", ena_startstr, ena_endstr);
+        snprintf(title, sizeof(title), "Search Certs by Start Date");
+        snprintf(subtitle, sizeof(subtitle), "Certificates with start date between %s and %s", ena_startstr, ena_endstr);
       }
       else if (strcmp(search, "ser") == 0) {
         if ( cgiFormString("startserial", startserstr, sizeof(startserstr))
@@ -503,7 +505,8 @@ int cgiMain() {
         if ( cgiFormString("endserial", endserstr, sizeof(endserstr))
                                                      != cgiFormSuccess )
         int_error("Error retrieving CGI form end serial value.");
-        snprintf(title, sizeof(title), "Search for Certificates having a Serial Number between %s and %s", startserstr, endserstr);
+        snprintf(title, sizeof(title), "Search Certs by Serial Number");
+        snprintf(subtitle, sizeof(subtitle), "Certificates with serial number between %s and %s", startserstr, endserstr);
       }
       else int_error("Error CGI form retrieving a valid search type.");
     }
@@ -604,7 +607,9 @@ int cgiMain() {
  * start the form output                                                      *
  * ---------------------------------------------------------------------------*/
 
-   fprintf(cgiOut, "<table>");
+   fprintf(cgiOut, "<h3>%s</h3>\n", subtitle);
+   fprintf(cgiOut, "<hr />\n");
+   fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th width=\"20\">");
    fprintf(cgiOut, "#");

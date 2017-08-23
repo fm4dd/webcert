@@ -806,6 +806,50 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
+  // extensions (if included)
+  fprintf(cgiOut, "<tr>");
+  fprintf(cgiOut, "<th class=\"cnt\">Extensions:</th>\n");
+
+  int extnum = 0;
+  extnum = X509_CRL_get_ext_count(crl);
+  if (extnum <= 0) {
+    fprintf(cgiOut, "<td>No extensions available");
+  }
+  else {
+    // If we got extensions (only v2 CRLs)
+    fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
+    fprintf(cgiOut, "%d Extensions\n", extnum);
+    fprintf(cgiOut, "<a href=\"javascript:elementHideShow('csrext');\">\n");
+    fprintf(cgiOut, "Expand or Hide Extension Details</a>");
+    fprintf(cgiOut, "<div class=\"showext\" id=\"csrext\" style=\"display: none;\"><pre>");
+    /* cycle through the extension list */
+    int i;
+    for (i=0; i<extnum; i++) {
+      ASN1_OBJECT *obj;
+      X509_EXTENSION *ext;
+
+      ext = X509_CRL_get_ext(crl, i);
+      obj = X509_EXTENSION_get_object(ext);
+
+      fprintf(cgiOut, "Object %.2d: ", i);
+      i2a_ASN1_OBJECT(bio, obj);
+      fprintf(cgiOut, "\n");
+
+      if (!X509V3_EXT_print(bio, ext, 0, 2)) {
+        /* Some extensions (i.e. LogoType) have no handling    *
+         * defined, we need to print their content as hex data */
+        fprintf(cgiOut, "%*s", 2, "");
+        M_ASN1_OCTET_STRING_print(bio, ext->value);
+      }
+      fprintf(cgiOut, "\n");
+
+      if (i<(extnum-1)) fprintf(cgiOut, "\n");
+    }
+    fprintf(cgiOut, "</pre></div>\n");
+  }
+  fprintf(cgiOut, "</td>");
+  fprintf(cgiOut, "</tr>\n");
+
   //signature
   ASN1_STRING     *asn1_sig = NULL;
   X509_ALGOR      *sig_type = NULL;
@@ -840,7 +884,8 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th class=\"cnt75\"># Revoked Certs:");
   fprintf(cgiOut, "</th>\n");
-  fprintf(cgiOut, "<td>%d\n", revnum);
+  if (revnum < 1) fprintf(cgiOut, "<td>None\n");
+  else fprintf(cgiOut, "<td>%d\n", revnum);
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
