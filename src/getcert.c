@@ -111,6 +111,7 @@ int cgiMain() {
       display_cert(cert, "Server/System/Application", "wct_chain", -1);
    fprintf(cgiOut, "<p></p>\n");
 
+   // Show the cert-specific options to download or revoke
    fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>\n");
 
@@ -120,6 +121,7 @@ int cgiMain() {
    fprintf(cgiOut, "onclick=\"print(); return false;\" />");
    fprintf(cgiOut, "</th>\n");
 
+   // Download PKCS12
    if (strlen(p12fileurl) == 0) {
      fprintf(cgiOut, "<th>\n");
      fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">\n");
@@ -137,6 +139,7 @@ int cgiMain() {
      fprintf(cgiOut, "</th>\n");
    }
 
+   // Download PEM
    if (strlen(pemfileurl) == 0) {
      fprintf(cgiOut, "<th>\n");
      fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">\n");
@@ -154,6 +157,7 @@ int cgiMain() {
      fprintf(cgiOut, "</th>\n");
    }
 
+   // Download DER
    if (strlen(derfileurl) == 0) {
      fprintf(cgiOut, "<th>\n");
      fprintf(cgiOut, "<form action=\"certexport.cgi\" method=\"post\">\n");
@@ -170,6 +174,17 @@ int cgiMain() {
      fprintf(cgiOut, "onclick=\"self.location.href='%s'\" />\n", derfileurl);
      fprintf(cgiOut, "</th>\n");
    }
+
+   // Revoke Cert
+
+   fprintf(cgiOut, "<th>\n");
+   fprintf(cgiOut, "<form action=\"certrevoke.cgi\" method=\"post\">\n");
+   fprintf(cgiOut, "<input type=\"submit\" value=\"Revoke Cert\" />\n");
+   fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
+   fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+   fprintf(cgiOut, "</form>\n");
+   fprintf(cgiOut, "</th>\n");
+
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "</table>\n");
@@ -187,15 +202,15 @@ int cgiMain() {
       fprintf(cgiOut, "<p><strong>2004-12-18</strong> 1024 bit RSA WebCert Root CA certificate with MD5 signature: ");
       fprintf(cgiOut, "<a href=\"../export/webcert-20041218_0138.pem\">webcert-20041218_0138.pem</a></p>\n");
 
-      if (fopen(CRLPATH, "r")) {
+      if (fopen(CRLFILE, "r")) {
          X509_CRL *crl = NULL;
-         crl = cgi_load_crlfile(CRLPATH);
+         crl = cgi_load_crlfile(CRLFILE);
          fprintf(cgiOut, "<p></p>\n");
          fprintf(cgiOut, "<h3>CA Certificate Revocation List:</h3>\n");
          fprintf(cgiOut, "<hr />\n");
          display_crl(crl);
       }   
-      //else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLPATH);
+      //else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLFILE);
    }
    pagefoot();
    BIO_free(outbio);

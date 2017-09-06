@@ -1,7 +1,7 @@
-/* -------------------------------------------------------------------------- *
- * file:         webcert.c                                                    *
- * purpose:      Shared functions across multiple CGI                         *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * file:         webcert.c                                    *
+ * purpose:      Shared functions across multiple CGI         *
+ * -----------------------------------------------------------*/
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -16,6 +16,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/x509_vfy.h>
+#include <openssl/txt_db.h>
 
 /* ---------------------------------------------------------- *
  * csr_validate_PEM(): a basic check for the CSR's PEM format * 
@@ -225,9 +226,9 @@ void display_csr(X509_REQ *csr) {
       fprintf(cgiOut, "%d Extensions\n", sk_X509_EXTENSION_num(ext_list));
       fprintf(cgiOut, "<a href=\"javascript:elementHideShow('csrext');\">\n");
       fprintf(cgiOut, "Expand or Hide Extension Details</a>");
-      /* display the cert extension list here */
+      /* display the csr extension list here */
       fprintf(cgiOut, "<div class=\"showext\" id=\"csrext\" style=\"display: none;\"><pre>");
-      /* cycle through the cert extension list */
+      /* cycle through the csr extension list */
       for (i=0; i<sk_X509_EXTENSION_num(ext_list); i++) {
         ASN1_OBJECT *obj;
         X509_EXTENSION *ext;
@@ -754,7 +755,7 @@ void display_crl(X509_CRL *crl) {
   // size
   struct stat fstat;
   unsigned long crl_fsize = 0;
-  if (stat(CRLPATH, &fstat) == 0) crl_fsize = fstat.st_size;
+  if (stat(CRLFILE, &fstat) == 0) crl_fsize = fstat.st_size;
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th class=\"cnt75\">File Size:");
   fprintf(cgiOut, "</th>\n");
@@ -806,49 +807,49 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
-  // extensions (if included)
-  fprintf(cgiOut, "<tr>");
-  fprintf(cgiOut, "<th class=\"cnt\">Extensions:</th>\n");
-
-  int extnum = 0;
-  extnum = X509_CRL_get_ext_count(crl);
-  if (extnum <= 0) {
-    fprintf(cgiOut, "<td>No extensions available");
-  }
-  else {
-    // If we got extensions (only v2 CRLs)
-    fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
-    fprintf(cgiOut, "%d Extensions\n", extnum);
-    fprintf(cgiOut, "<a href=\"javascript:elementHideShow('csrext');\">\n");
-    fprintf(cgiOut, "Expand or Hide Extension Details</a>");
-    fprintf(cgiOut, "<div class=\"showext\" id=\"csrext\" style=\"display: none;\"><pre>");
-    /* cycle through the extension list */
-    int i;
-    for (i=0; i<extnum; i++) {
-      ASN1_OBJECT *obj;
-      X509_EXTENSION *ext;
-
-      ext = X509_CRL_get_ext(crl, i);
-      obj = X509_EXTENSION_get_object(ext);
-
-      fprintf(cgiOut, "Object %.2d: ", i);
-      i2a_ASN1_OBJECT(bio, obj);
-      fprintf(cgiOut, "\n");
-
-      if (!X509V3_EXT_print(bio, ext, 0, 2)) {
-        /* Some extensions (i.e. LogoType) have no handling    *
-         * defined, we need to print their content as hex data */
-        fprintf(cgiOut, "%*s", 2, "");
-        M_ASN1_OCTET_STRING_print(bio, ext->value);
-      }
-      fprintf(cgiOut, "\n");
-
-      if (i<(extnum-1)) fprintf(cgiOut, "\n");
-    }
-    fprintf(cgiOut, "</pre></div>\n");
-  }
-  fprintf(cgiOut, "</td>");
-  fprintf(cgiOut, "</tr>\n");
+  // extensions (if included) 
+  fprintf(cgiOut, "<tr>"); 
+  fprintf(cgiOut, "<th class=\"cnt\">Extensions:</th>\n"); 
+   
+  int extnum = 0; 
+  extnum = X509_CRL_get_ext_count(crl); 
+  if (extnum <= 0) { 
+    fprintf(cgiOut, "<td>No extensions available"); 
+  } 
+  else { 
+    // If we got extensions (only v2 CRLs) 
+    fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">"); 
+    fprintf(cgiOut, "%d Extensions\n", extnum); 
+    fprintf(cgiOut, "<a href=\"javascript:elementHideShow('csrext');\">\n"); 
+    fprintf(cgiOut, "Expand or Hide Extension Details</a>"); 
+    fprintf(cgiOut, "<div class=\"showext\" id=\"csrext\" style=\"display: none;\"><pre>"); 
+    /* cycle through the extension list */ 
+    int i; 
+    for (i=0; i<extnum; i++) { 
+      ASN1_OBJECT *obj; 
+      X509_EXTENSION *ext; 
+   
+      ext = X509_CRL_get_ext(crl, i); 
+      obj = X509_EXTENSION_get_object(ext); 
+   
+      fprintf(cgiOut, "Object %.2d: ", i); 
+      i2a_ASN1_OBJECT(bio, obj); 
+      fprintf(cgiOut, "\n"); 
+   
+      if (!X509V3_EXT_print(bio, ext, 0, 2)) { 
+        /* Some extensions (i.e. LogoType) have no handling    * 
+         * defined, we need to print their content as hex data */ 
+        fprintf(cgiOut, "%*s", 2, ""); 
+        M_ASN1_OCTET_STRING_print(bio, ext->value); 
+      } 
+      fprintf(cgiOut, "\n"); 
+   
+      if (i<(extnum-1)) fprintf(cgiOut, "\n"); 
+    } 
+    fprintf(cgiOut, "</pre></div>\n"); 
+  } 
+  fprintf(cgiOut, "</td>"); 
+  fprintf(cgiOut, "</tr>\n"); 
 
   //signature
   ASN1_STRING     *asn1_sig = NULL;
@@ -884,8 +885,7 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th class=\"cnt75\"># Revoked Certs:");
   fprintf(cgiOut, "</th>\n");
-  if (revnum < 1) fprintf(cgiOut, "<td>None\n");
-  else fprintf(cgiOut, "<td>%d\n", revnum);
+  fprintf(cgiOut, "<td>%d\n", revnum);
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
@@ -1412,14 +1412,14 @@ X509_CRL * cgi_load_crlfile(char *file) {
    * complain if we got an empty filename                       *
    * ---------------------------------------------------------- */
   if (file == NULL)
-    int_error("Error receiving a valid CRL file name.\n");
+    int_error("Error receiving a valid CRL file name");
 
   /* ---------------------------------------------------------- *
    * get file status data                                       *
    * ---------------------------------------------------------- */
   struct stat fstat;
   if (stat(file, &fstat) != 0)
-    int_error("Error cannot stat CRL file.\n");
+    int_error("Error cannot stat CRL file");
 
   /* ---------------------------------------------------------- *
    * Get the crl file size, complain if file is empty (0 bytes) *
@@ -1427,7 +1427,7 @@ X509_CRL * cgi_load_crlfile(char *file) {
   int crl_fsize = fstat.st_size;
 
   if(crl_fsize == 0)
-    int_error("Error CRL file size is zero bytes.\n");
+    int_error("Error CRL file size is zero bytes");
 
   in=BIO_new(BIO_s_file_internal());
 
@@ -1435,14 +1435,215 @@ X509_CRL * cgi_load_crlfile(char *file) {
    * check if we can open the file for reading                  *
    * ---------------------------------------------------------- */
   if ((in == NULL) || (BIO_read_filename(in, file) <= 0))
-    int_error("Error loading CRL file into memory.\n");
+    int_error("Error loading CRL file into memory");
 
   /* ---------------------------------------------------------- *
    * Try to read CRL from PEM file                              *
    * ---------------------------------------------------------- */
   if (! (crl = PEM_read_bio_X509_CRL(in, NULL, NULL, NULL)))
-    int_error("Error reading crl file to BIO.\n");
+    int_error("Error reading crl file to BIO");
 
   BIO_free(in);
   return crl;
 }
+
+/* ------------------------------------------------------------- *
+ * Function cgi_gencrl() generates a new CRL file from DB file   *
+ * index.txt. This function is based on opensssl's apps/ca.c.    *
+ * ------------------------------------------------------------- */
+int cgi_gencrl(char *crlfile) {
+    
+  /* ------------------------------------------------------------- *
+   * Load the CRL serial number from file (defined in webcert.h)   *
+   * ------------------------------------------------------------- */
+  BIGNUM *crlnumber;
+  if ((crlnumber = load_serial(CRLSEQNUM, 1, NULL)) == NULL)
+    int_error("Error loading CRL serial number from file");
+
+  /* ----------------------------------------------------------- *
+   * increment the serial number                                 *
+   * ------------------------------------------------------------*/
+   if (! (BN_add_word(crlnumber,1)))
+      int_error("Error incrementing CRL serial number");
+
+  // *** debug: output the serial # to screen
+  //unsigned char crlsn_str[BN_num_bytes(crlnumber)];
+  //BN_bn2bin(crlnumber, crlsn_str);
+  //snprintf(error_str, sizeof(error_str), "Check: %d", (int)crlsn_str[0]);
+  //int_error(error_str);
+
+  /* ----------------------------------------------------------- *
+   * save the serial number back to SERIALFILE                   *
+   * ------------------------------------------------------------*/
+   ASN1_INTEGER *aserial = NULL;
+   if ( save_serial(CRLSEQNUM, 0, crlnumber, &aserial) == 0 )
+      int_error("Error writing serial number to file");
+
+  /* ------------------------------------------------------------- *
+   * Create a new CRL object, and set issuer from CA cert          *
+   * ------------------------------------------------------------- */
+  X509_CRL *crl = NULL;
+  if ((crl = X509_CRL_new()) == NULL)
+    int_error("Error creating a new CRL object");
+
+  FILE  *certfile = NULL;
+  if (! (certfile = fopen(CACERT, "r")))
+    int_error("Error can't open CA certificate file");
+
+  X509 *cacert = NULL;
+  if (! (cacert = PEM_read_X509(certfile,NULL,NULL,NULL)))
+    int_error("Error loading CA cert into memory");
+  fclose(certfile);
+
+  if (!X509_CRL_set_issuer_name(crl, X509_get_subject_name(cacert)))
+    int_error("Error setting issuer name to CRL object");
+
+  /* ------------------------------------------------------------- *
+   * Set the CRL current date and expiration date                  *
+   * TODO: hardcoded values                                        *
+   * ------------------------------------------------------------- */
+  int crldays = 30;
+  int crlhours = 0;
+   
+  ASN1_TIME *tmptm = NULL;
+  tmptm = ASN1_TIME_new();
+  if (tmptm == NULL) 
+    int_error("Error cannot get current ASN1_TIME");
+
+  X509_gmtime_adj(tmptm, 0);
+  X509_CRL_set_lastUpdate(crl, tmptm);
+  if (!X509_time_adj_ex(tmptm, crldays, crlhours * 60 * 60, NULL))
+      int_error("Error setting CRL nextUpdate");
+
+  X509_CRL_set_nextUpdate(crl, tmptm);
+  ASN1_TIME_free(tmptm);
+
+  /* ------------------------------------------------------------- *
+   * Set CRL version 2, which supports extensions, e.g. CRL serial *
+   * ------------------------------------------------------------- */
+  if (!X509_CRL_set_version(crl, 1))
+    int_error("Error cannot set CRL version 2");
+
+  /* ------------------------------------------------------------- *
+   * Read all revoked certitifcates from the internal index.txt db *
+   * ------------------------------------------------------------- */
+  CA_DB *db = NULL;
+  DB_ATTR db_attr;
+
+  if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+    int_error("Error cannot load CRL certificate database file");
+
+  /* ------------------------------------------------------------- *
+   * Read all revoked certitifcates from the internal index.txt db *
+   * ------------------------------------------------------------- */
+  int i, j;
+  char *const *pp;
+  X509_REVOKED *r = NULL;
+  BIGNUM *certserial;
+  ASN1_INTEGER *tmpser;
+
+  for (i = 0; i < sk_OPENSSL_PSTRING_num(db->db->data); i++) {
+    pp = sk_OPENSSL_PSTRING_value(db->db->data, i);
+
+    // *** debug: cycle DB_NUMBER should show each field in index.db
+    //for (j = 0; j < DB_NUMBER; j++) { 
+    //  snprintf(error_str, sizeof(error_str), " %d = \"%s\"", j, pp[j]);
+    //} 
+    //int_error(error_str);
+
+    /* ------------------------------------------------------------- *
+     * Check if the cert entry in index.db is in state 'R' = revoked *
+     * ------------------------------------------------------------- */
+    if (pp[DB_type][0] == DB_TYPE_REV) {
+      // *** debug  -> returns "R"
+      //snprintf(error_str, sizeof(error_str), " %d = \"%c\"", i, pp[DB_type][0]);
+      //int_error(error_str);
+
+      if ((r = X509_REVOKED_new()) == NULL)
+        int_error("Error creating X509_REVOKED object");
+      j = make_revoked(r, pp[DB_rev_date]);
+      if (!j) break;
+      if (!BN_hex2bn(&certserial, pp[DB_serial])) break;
+      tmpser = BN_to_ASN1_INTEGER(certserial, NULL);
+      BN_free(certserial);
+      certserial = NULL;
+      if (!tmpser) break;
+      X509_REVOKED_set_serialNumber(r, tmpser);
+      ASN1_INTEGER_free(tmpser);
+      X509_CRL_add0_revoked(crl, r);
+    }
+  }
+
+  TXT_DB_free(db->db);
+  OPENSSL_free(db);
+
+  /* ------------------------------------------------------------- *
+   * sort the data so it will be written in serial number order    *
+   * ------------------------------------------------------------- */
+  X509_CRL_sort(crl);
+
+  /* ------------------------------------------------------------- *
+   * Add CRL extensions                                            *
+   * ------------------------------------------------------------- */
+  X509 *x509 = NULL;
+  X509V3_CTX crlctx;
+  X509V3_set_ctx(&crlctx, x509, NULL, NULL, crl, 0);
+
+  tmpser = BN_to_ASN1_INTEGER(crlnumber, NULL);
+
+  if (tmpser)
+    X509_CRL_add1_ext_i2d(crl, NID_crl_number, tmpser, 0, 0);
+
+  ASN1_INTEGER_free(tmpser);
+
+  /* ------------------------------------------------------------- *
+   * Add CRL serial number extension                               *
+   * ------------------------------------------------------------- */
+  if (!BN_add_word(crlnumber, 1))
+    int_error("Error adding CRL serial extension value");
+
+  BN_free(crlnumber);
+
+  /* ------------------------------------------------------------- *
+   * Import CA private key for signing                             *
+   * --------------------------------------------------------------*/
+  FILE *key_fp;
+  EVP_PKEY *ca_privkey;
+  ca_privkey = EVP_PKEY_new();
+
+  if (!(key_fp = fopen(CAKEY, "r")))
+    int_error("Error reading CA private key file");
+
+  if (!(ca_privkey = PEM_read_PrivateKey(key_fp, NULL, NULL, PASS)))
+    int_error("Error importing key content from file");
+
+  fclose(key_fp);
+
+  /* ------------------------------------------------------------- *
+   * Sign the CRL with the CA's private key, hardcoded with SHA256 *
+   * ------------------------------------------------------------- */
+  const EVP_MD *digest = EVP_sha256();
+  if (!X509_CRL_sign(crl, ca_privkey, digest))
+    int_error("Error signing CRL with CA private key");
+
+  EVP_PKEY_free(ca_privkey);
+
+  /* ------------------------------------------------------------- *
+   * Write the CRL data into a PEM file for download               *
+   * ------------------------------------------------------------- */
+  FILE *fp;
+  if (! (fp=fopen(CRLFILE, "w")))
+    int_error("Error opening CRL file for writing");
+
+  BIO *savbio = BIO_new(BIO_s_file());
+  BIO_set_fp(savbio, fp, BIO_NOCLOSE);
+
+  if (! PEM_write_bio_X509_CRL(savbio, crl))
+    int_error("Error writing PEM data into CRL file");
+
+  BIO_free(savbio);
+  fclose(fp);
+  X509_free(x509);
+  X509_CRL_free(crl);
+  return 0;
+} // end of function cgi_gencrl()

@@ -8,11 +8,12 @@
 #include <openssl/x509v3.h>
 #include "openssl/asn1.h"
 #include "openssl/bn.h"
+#include <openssl/txt_db.h>
 
 /*********** the main URL where the webcert application resides ***************/
-#define HOMELINK	"/sw/webcert/"
+#define HOMELINK	"/webcert/"
 /*********** the application entry URL which is seen first ********************/
-#define REQLINK		"/sw/webcert/cgi-bin/certrequest.cgi"
+#define REQLINK		"/webcert/cgi-bin/certrequest.cgi"
 /*********** where is the ca certificate .pem file ****************************/
 #define CACERT 		"/srv/app/webCA/cacert.pem"
 /*********** where is the ca's private key file *******************************/
@@ -26,15 +27,24 @@
 /*********** The directory to write the exported certificates into ************/
 #define CERTEXPORTDIR   "/srv/www/std-root/fm4dd.com/sw/webcert/export"
 /*********** The export directory URL to download the certificates from *******/
-#define CERTEXPORTURL   "/sw/webcert/export"
+#define CERTEXPORTURL   "/webcert/export"
 /*********** where the ca's serial file is ************************************/
 #define SERIALFILE      "/srv/app/webCA/serial"
 /*********** certificate lifetime *********************************************/
 #define DAYS_VALID      1095
 #define YEARS_VALID     3
-/*********** The link to webcerts crl *****************************************/
-#define CRLURI          "URI:http://fm4dd.com/sw/webcert/webcert.crl"
-#define CRLPATH         "/srv/www/std-root/fm4dd.com/sw/webcert/webcert.crl"
+
+/*********** CRL Handling: The link to webcerts crl ***************************/
+#define CRLURI		"URI:http://fm4dd.com/sw/webcert/webcert.crl"
+#define CRLFILE		"/srv/www/std-root/fm4dd.com/sw/webcert/webcert.crl"
+/*********** we store the list of revoked certs in index.txt ******************/
+#define INDEXFILE       "/srv/app/webCA/index.txt"
+/*********** we store the CRL sequence number in file crlnumber ***************/
+#define CRLSEQNUM       "/srv/app/webCA/crlnumber"
+/*********** we store the CRL default expiration days and hours ***************/
+#define CRLEXPDAYS	30
+#define CRLEXPHRS	0
+
 
 /* For the public demo, I enforce adding the source IP to the certificate CN */
 /* For internal use, you could take it out. */
@@ -48,8 +58,8 @@
 /***************** no changes required below this line ************************/
 /***************** *********************************** ************************/
 
-#define CONTACT_EMAIL	"support@ffrank4dd.com"
-#define SW_VERSION	"WebCert v1.7.9 (08/19/2017)"
+#define CONTACT_EMAIL	"support@fm4dd.com"
+#define SW_VERSION	"WebCert v1.7.8 (01/09/2016)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
@@ -86,6 +96,22 @@
 
 #define int_error(msg)  handle_error(__FILE__, __LINE__, msg)
 
+
+# define DB_type         0
+# define DB_exp_date     1
+# define DB_rev_date     2
+# define DB_serial       3      /* index - unique */
+# define DB_file         4
+# define DB_name         5      /* index - unique when active and not disabled */
+# define DB_NUMBER       6
+# define DB_TYPE_REV     'R'    /* Revoked  */
+# define DB_TYPE_EXP     'E'    /* Expired  */
+# define DB_TYPE_VAL     'V'    /* Valid ; inserted with: ca ... -valid */
+# define DB_TYPE_SUSP    'S'    /* Suspended  */
+
+typedef struct db_attr_st { int unique_subject; } DB_ATTR;
+typedef struct ca_db_st { DB_ATTR attributes; TXT_DB *db; } CA_DB;
+
 /* ---------------------------------------------------------- *
  * Shared function declarations                               *
  * ---------------------------------------------------------- */
@@ -93,8 +119,14 @@ void pagehead(char *title);
 void pagefoot();
 void handle_error(const char *file, int lineno, const char *msg);
 
+/* ---------------------------------------------------------- *
+ * These functions are local copies from openssl apps/apps.c  *
+ * ---------------------------------------------------------- */
 BIGNUM *load_serial(char *serialfile, int create, ASN1_INTEGER **retai);
 int save_serial(char *serialfile, char *suffix, BIGNUM *serial, ASN1_INTEGER **retai);
+int rotate_serial(const char *serialfile, const char *new_suffix, const char *old_suffix);
+CA_DB *load_index(const char *dbfile, DB_ATTR *db_attr);
+int make_revoked(X509_REVOKED *rev, const char *str);
 
 /* ---------------------------------------------------------- *
  * This function adds missing OID's to the internal structure *
@@ -128,6 +160,11 @@ X509_CRL * cgi_load_crlfile(char *);
  * cgi_load_xxxform() load a PEM form to corresponding struct *
  * ---------------------------------------------------------- */
 X509_REQ * cgi_load_csrform(char *);
+
+/* ---------------------------------------------------------- *
+ * cgi_gencrl() creates the CRL file from the CA's index db   *
+ * ---------------------------------------------------------- */
+int cgi_gencrl(char *crlfile);
 
 void keycreate_input();
 

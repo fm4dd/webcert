@@ -7,7 +7,7 @@ HTMDIR=/srv/www/std-root/fm4dd.com/sw/webcert
 CGIDIR=/srv/www/std-root/fm4dd.com/sw/webcert/cgi-bin
 EXPORTDIR=/srv/www/std-root/fm4dd.com/sw/webcert/export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi keycompare.cgi certrenew.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi keycompare.cgi certrenew.cgi certrevoke.cgi
 
 ALLJS=webcert.js
 
@@ -35,26 +35,26 @@ install:
 clean:
 	rm -f *.o *.cgi
 
-buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o webcert.o
-	$(CC) webcert.o buildrequest.o pagehead.o pagefoot.o handle_error.o -o buildrequest.cgi ${LIBS}
+buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o serial.o webcert.o
+	$(CC) serial.o webcert.o buildrequest.o pagehead.o pagefoot.o handle_error.o -o buildrequest.cgi ${LIBS}
 
 genrequest.cgi: webcert.o genrequest.o pagehead.o pagefoot.o handle_error.o
-	$(CC) webcert.o handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
+	$(CC) serial.o webcert.o handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
 
 certsign.cgi: webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o
-	$(CC) webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o -o certsign.cgi ${LIBS}
+	$(CC) serial.o webcert.o pagehead.o pagefoot.o handle_error.o certsign.o -o certsign.cgi ${LIBS}
 
 certrequest.cgi: certrequest.o
 	$(CC) certrequest.o pagehead.o pagefoot.o -o certrequest.cgi ${LIBS}
 
 certverify.cgi: webcert.o certverify.o
-	$(CC) webcert.o certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
+	$(CC) serial.o webcert.o certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
 
 showhtml.cgi: showhtml.o
 	$(CC) showhtml.o pagehead.o pagefoot.o handle_error.o -o showhtml.cgi ${LIBS}
 
 getcert.cgi: webcert.o getcert.o
-	$(CC) webcert.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
+	$(CC) serial.o webcert.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
 
 certstore.cgi: certstore.o
 	$(CC) certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
@@ -63,16 +63,19 @@ certsearch.cgi: certsearch.o
 	$(CC) certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
 
 certexport.cgi: webcert.o certexport.o
-	$(CC) webcert.o certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
+	$(CC) serial.o webcert.o certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
 
 certvalidate.cgi: webcert.o certvalidate.o
-	$(CC) webcert.o certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi ${LIBS}
+	$(CC) serial.o webcert.o certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi ${LIBS}
 
 p12convert.cgi: webcert.o p12convert.o
-	$(CC) webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}
+	$(CC) serial.o webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}
 
 keycompare.cgi: webcert.o keycompare.o
-	$(CC) webcert.o keycompare.o pagehead.o pagefoot.o handle_error.o -o keycompare.cgi ${LIBS}
+	$(CC) serial.o webcert.o keycompare.o pagehead.o pagefoot.o handle_error.o -o keycompare.cgi ${LIBS}
 
 certrenew.cgi: webcert.o certrenew.o
-	$(CC) webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}
+	$(CC) serial.o webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}
+
+certrevoke.cgi: webcert.o serial.o certrevoke.o
+	$(CC) serial.o webcert.o certrevoke.o pagehead.o pagefoot.o handle_error.o -o certrevoke.cgi ${LIBS}

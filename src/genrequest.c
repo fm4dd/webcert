@@ -303,7 +303,7 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"getcert\">\n");
    fprintf(cgiOut, "<a href=\"javascript:elementHideShow('keypem');\">\n");
    fprintf(cgiOut, "Expand/Hide Private Key data in PEM format</a>\n");
-   fprintf(cgiOut, "<div class=\"showpem\" id=\"keypem\"  style=\"display: block\"\n>");
+   fprintf(cgiOut, "<div class=\"showpem\" id=\"keypem\" style=\"display: block\"\n>");
    fprintf(cgiOut, "<pre>\n");
 
    if (! PEM_write_PrivateKey(cgiOut,pkey,NULL,NULL,0,0,NULL)) {

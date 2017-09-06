@@ -159,9 +159,9 @@ int cgiMain() {
  * Import CA private key for signing                           *
  * ------------------------------------------------------------*/
    ca_privkey = EVP_PKEY_new();
-   if (! (fp = fopen (CAKEY, "r")))
+   if (! (fp = fopen(CAKEY, "r")))
       int_error("Error reading CA private key file");
-   if (! (ca_privkey = PEM_read_PrivateKey( fp, NULL, NULL, PASS)))
+   if (! (ca_privkey = PEM_read_PrivateKey(fp, NULL, NULL, PASS)))
       int_error("Error importing key content from file");
    fclose(fp);
 
