@@ -52,7 +52,8 @@
 
 /* On most 32bit systems, the time calculation has the year-2038 bug, when  */
 /* the signed integer rolls over to the year 1901. Here is the protection.  */ 
-#define TIME_PROTECTION  TRUE
+/* webcert demo site runs on a unaffected 64bit system, it defaults to off. */
+//#define TIME_PROTECTION  TRUE
 
 /***************** *********************************** ************************/
 /***************** no changes required below this line ************************/
@@ -97,17 +98,28 @@
 #define int_error(msg)  handle_error(__FILE__, __LINE__, msg)
 
 
-# define DB_type         0
-# define DB_exp_date     1
-# define DB_rev_date     2
-# define DB_serial       3      /* index - unique */
-# define DB_file         4
+# define DB_type         0      /* 'R','E','V' or 'S' */
+# define DB_exp_date     1      /* expiration tstamp  */
+# define DB_rev_date     2      /* revocation tstamp  */
+# define DB_serial       3      /* index - unique     */
+# define DB_file         4      /* currently unused   */
 # define DB_name         5      /* index - unique when active and not disabled */
-# define DB_NUMBER       6
-# define DB_TYPE_REV     'R'    /* Revoked  */
-# define DB_TYPE_EXP     'E'    /* Expired  */
-# define DB_TYPE_VAL     'V'    /* Valid ; inserted with: ca ... -valid */
-# define DB_TYPE_SUSP    'S'    /* Suspended  */
+# define DB_NUMBER       6      /* Number of DB fields */
+
+# define DB_TYPE_REV     'R'    /* Revoked   */
+# define DB_TYPE_EXP     'E'    /* Expired   */
+# define DB_TYPE_VAL     'V'    /* Valid     */
+# define DB_TYPE_SUSP    'S'    /* Suspended */
+
+/* Additional revocation information types per OpenSSL apps/ca.c */
+typedef enum {
+    REV_VALID             = -1, /* Valid (not-revoked) status        */
+    REV_NONE              = 0,  /* No additional information         */
+    REV_CRL_REASON        = 1,  /* Value is CRL reason code          */
+    REV_HOLD              = 2,  /* Value is hold instruction         */
+    REV_KEY_COMPROMISE    = 3,  /* Value is cert key compromise time */
+    REV_CA_COMPROMISE     = 4   /* Value is CA key compromise time   */
+} REVINFO_TYPE;
 
 typedef struct db_attr_st { int unique_subject; } DB_ATTR;
 typedef struct ca_db_st { DB_ATTR attributes; TXT_DB *db; } CA_DB;
@@ -126,6 +138,7 @@ BIGNUM *load_serial(char *serialfile, int create, ASN1_INTEGER **retai);
 int save_serial(char *serialfile, char *suffix, BIGNUM *serial, ASN1_INTEGER **retai);
 int rotate_serial(const char *serialfile, const char *new_suffix, const char *old_suffix);
 CA_DB *load_index(const char *dbfile, DB_ATTR *db_attr);
+int save_index(const char *dbfile, CA_DB *db);
 int make_revoked(X509_REVOKED *rev, const char *str);
 
 /* ---------------------------------------------------------- *

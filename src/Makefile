@@ -77,5 +77,5 @@ keycompare.cgi: webcert.o keycompare.o
 certrenew.cgi: webcert.o certrenew.o
 	$(CC) serial.o webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}
 
-certrevoke.cgi: webcert.o serial.o certrevoke.o
-	$(CC) serial.o webcert.o certrevoke.o pagehead.o pagefoot.o handle_error.o -o certrevoke.cgi ${LIBS}
+certrevoke.cgi: webcert.o serial.o revocation.o certrevoke.o
+	$(CC) serial.o webcert.o revocation.o certrevoke.o pagehead.o pagefoot.o handle_error.o -o certrevoke.cgi ${LIBS}

@@ -44,7 +44,6 @@ int cgiMain() {
    char	   extkeytype[81] = "";
    long	       valid_days = 0;
    long	       valid_secs = 0;
-   time_t             now = 0;
 
 /* ---------------------------------------------------------- *
  * These function calls are essential to make many PEM +      *
@@ -66,6 +65,9 @@ int cgiMain() {
 
    certreq = cgi_load_csrform(formreq);
 
+   if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
+      int_error("Error getting the signature algorithm from genrequest/certverify.cgi forms");
+
    if (cgiFormRadio("valid", validlist, 2, &valid_res, 0) == cgiFormNotFound )
       int_error("Error getting the date range type from genrequest/certverify.cgi forms");
 
@@ -73,33 +75,32 @@ int cgiMain() {
       if(cgiFormString("daysvalid", validdaystr, DAYS_VALID) != cgiFormSuccess)
         int_error("Error getting expiration from genrequest/certverify.cgi form");
 
-   if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
-      int_error("Error getting the signature algorithm from genrequest/certverify.cgi forms");
-
 /* -------------------------------------------------------------------------- *
  * What happens if a negative value is given as the expiration date?          *
  * The certificate is generated with a expiration before it becomes valid.    *
  * We do a check here to prevent that.                                        *
  * -------------------------------------------------------------------------- */
-   /* convert the number string to data type long, max is 10 digits */
-   valid_days = strtoul(validdaystr, NULL, 10);
-   if (valid_days <= 0)
-      int_error("Error invalid (i.e. negative or zero) value for expiration date.");
+      /* convert the number string to data type long, max is 10 digits */
+      valid_days = strtoul(validdaystr, NULL, 10);
+      if (valid_days <= 0)
+         int_error("Error invalid (i.e. negative or zero) value for expiration date.");
 
-   /* convert days into (long) seconds */
-   valid_secs = valid_days*60*60*24;
-   now = time(NULL);
+      /* convert days into (long) seconds */
+      valid_secs = valid_days*60*60*24;
+
 /* -------------------------------------------------------------------------- *
  * year 2038 32bit Unix time integer overflow:                                *
  * What happens if a very large value is given as the expiration date?        *
  * The date rolls over to the old century (1900) and the expiration date      *
  * becomes invalid. We do a check here to prevent that.                       *
  * Although we store the value in type long, 32bit UNIX systems historically  *
- * used a 32bit integertype for counting seconds since Jan 1, 1970.           *
+ * used a 32bit integer datatype for counting seconds since Jan 1, 1970.      *
  * This will cause a range overflow when we reach the year 2038, and the sec  *
  * counter reaches 2,147,483,647, the max value for a unsigned 32bit integer. *
  * -------------------------------------------------------------------------- */
 #ifdef TIME_PROTECTION
+      time_t now = 0;
+      now = time(NULL);
       long future = now + valid_secs;
       if (future > 2147483647 || future < 0)
          int_error("Error expiration date set past 2038, causing trouble on 32bit.");

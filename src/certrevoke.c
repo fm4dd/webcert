@@ -7,19 +7,41 @@
 #include <stdio.h>
 #include <string.h>
 #include <cgic.h>
+#include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
 #include "webcert.h"
 
+/* OpenSSL-defined CRL revocation reason strings */
+static const char *crl_reasons[] = {
+    /* CRL reason strings */
+    "unspecified",
+    "keyCompromise",
+    "CACompromise",
+    "affiliationChanged",
+    "superseded",
+    "cessationOfOperation",
+    "certificateHold",
+    "removeFromCRL",
+    /* Additional pseudo reasons */
+    "holdInstruction",
+    "keyTime",
+    "CAkeyTime"
+};
+
+
+int do_revoke(X509 *x509, CA_DB *db, const char *value);
+char *make_revocation_str(REVINFO_TYPE rev_type, const char *rev_arg);
+
 int cgiMain() {
 
-   char                 formkey[REQLEN]   = "";
-   char 		certfilepath[255] = "";
-   char                 certnamestr[81]   = "";
-   char 		certfilestr[81]   = "[n/a]";
-   FILE 		*certfile         = NULL;
-   char 		title[41]         = "Certificate Revocation";
+  char formkey[REQLEN]   = "";
+  char certfilepath[255] = "";
+  char certnamestr[81]   = "";
+  char certfilestr[81]   = "[n/a]";
+  FILE *certfile         = NULL;
+  char title[41]         = "Certificate Revocation";
 
 /* ---------------------------------------------------------- *
  * These function calls are essential to make many PEM +      *
@@ -32,38 +54,38 @@ int cgiMain() {
 /* ---------------------------------------------------------- *
  * process the CGI calling arguments                          *
  * ---------------------------------------------------------- */
-   if (! (cgiFormString("cfilename", certfilestr, sizeof(certfilestr)) == cgiFormSuccess))
-      int_error("Error getting >cfilename< from calling form");
+  if (! (cgiFormString("cfilename", certfilestr, sizeof(certfilestr)) == cgiFormSuccess))
+    int_error("Error getting >cfilename< from calling form");
 
 /* ------------------------------------------------------------ *
  * Since we access a file, we make sure no "../../.." is passed *
  * from the calling URL, else sensitive files could be read and *
  * we have a security problem. We reject occurrences of '..' '/'*
  * ------------------------------------------------------------ */
-   if ( strstr(certfilestr, "..") ||
+  if ( strstr(certfilestr, "..") ||
         strchr(certfilestr, '/')  ||
         (! strstr(certfilestr, ".pem")) )
-      int_error("Error incorrect data in >cfilename<");
+    int_error("Error incorrect data in >cfilename<");
 
 /* ---------------------------------------------------------- *
  * check if its the CA cert, or open the requested filename   *
  * -----------------------------------------------------------*/
-   if (strcmp(certfilestr, "cacert.pem") == 0) {
-      if (! (certfile = fopen(CACERT, "r")))
-         int_error("Error can't open CA certificate file");
-      strncpy(title, "Display Root CA Certificate", sizeof(title));
-   } else {
-      snprintf(certfilepath, sizeof(certfilepath), "%s/%s", CACERTSTORE,
+  if (strcmp(certfilestr, "cacert.pem") == 0) {
+    if (! (certfile = fopen(CACERT, "r")))
+      int_error("Error can't open CA certificate file");
+    strncpy(title, "Display Root CA Certificate", sizeof(title));
+  } else {
+     snprintf(certfilepath, sizeof(certfilepath), "%s/%s", CACERTSTORE,
 		      						certfilestr);
-      if (! (certfile = fopen(certfilepath, "r")))
-         int_error("Error cant open Certificate file");
-   }
+    if (! (certfile = fopen(certfilepath, "r")))
+      int_error("Error cant open Certificate file");
+  }
 
 /* ---------------------------------------------------------- *
  * strip off the file format extension from the file name     *
  * -----------------------------------------------------------*/
-   strncpy(certnamestr, certfilestr, sizeof(certnamestr));
-   strtok(certnamestr, ".");
+  strncpy(certnamestr, certfilestr, sizeof(certnamestr));
+  strtok(certnamestr, ".");
 
 /* ---------------------------------------------------------- *
  * decode the certificate                                     *
@@ -93,7 +115,7 @@ int cgiMain() {
     fprintf(cgiOut, "<form action=\"certrevoke.cgi\" method=\"post\">");
     fprintf(cgiOut, "<table>\n");
     fprintf(cgiOut, "<tr>\n");
-     fprintf(cgiOut, "<th colspan=\"2\">");
+    fprintf(cgiOut, "<th colspan=\"2\">");
     fprintf(cgiOut, "Please paste the matching certificate's private key into the ");
     fprintf(cgiOut, "field below (PEM format):");
     fprintf(cgiOut, "</th>\n");
@@ -109,17 +131,37 @@ int cgiMain() {
     fprintf(cgiOut, "<th>&nbsp;</th>\n");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "</table>\n");
-    fprintf(cgiOut, "<p></p>\n");
   
+   /* ---------------------------------------------------------- *
+    * Display the table to select a revocation reason from list  *
+    * -----------------------------------------------------------*/
+    fprintf(cgiOut, "<p></p>\n");
     fprintf(cgiOut, "<table>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<th>");
+    fprintf(cgiOut, "<th colspan=\"4\">");
+    fprintf(cgiOut, "Select the appropriate revocation reason</th>");
+    fprintf(cgiOut, "<tr>");
+    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" name=\"crl_reason\" value=\"%d\" checked />%s</td>\n", 0, crl_reasons[0]);
+
+    int i;
+    for (i = 1; i < 8; i++) { // crl_reasons has 8 core entries
+      fprintf(cgiOut, "<td>");
+      fprintf(cgiOut, "<input type=\"radio\" id=\"rsa_rb\" name=\"crl_reason\" value=\"%d\" />%s</td>\n", i, crl_reasons[i]);
+
+      if (i == 3) fprintf(cgiOut, "</tr>\n<tr>");
+    }
+
+    fprintf(cgiOut, "</tr>\n");
+    fprintf(cgiOut, "<tr>\n");
+    fprintf(cgiOut, "<th colspan=\"4\">");
     fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
     fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
     fprintf(cgiOut, "<input type=\"submit\" value=\"Revoke Certificate\" />\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "</table>\n");
+    fprintf(cgiOut, "</form>\n");
   } 
   else {
   /* ---------------------------------------------------------- *
@@ -140,7 +182,7 @@ int cgiMain() {
       int_error("Error loading certificate private key content");
 
   /* ---------------------------------------------------------- *
-   * Extract the public key from a certificate                  *
+   * Extract the public key from the certificate                *
    * ---------------------------------------------------------- */
     EVP_PKEY *pub_key = NULL;
     if ((pub_key = X509_get_pubkey(cert)) == NULL)
@@ -190,13 +232,38 @@ int cgiMain() {
     }
     else {
     /* ---------------------------------------------------------- *
-     * Revocation authorized - add cert to index.txt database     *
+     * Revocation authorized - Add cert as revoked to index.db,   *
+     * create and publish a new CRL file with all revocations.    *
      * -----------------------------------------------------------*/
-      const char indexfile[]  = INDEXFILE;
-      // do the add here ...
+      CA_DB *db = NULL;
+      DB_ATTR db_attr;
 
     /* ---------------------------------------------------------- *
-     * Revocation authorized - create + publish the new CRL file  *
+     * Get the revocation reason code from the calling cgi form   *
+     * ---------------------------------------------------------- */
+    int reason;
+    cgiFormInteger("crl_reason", &reason, 0);
+    //int_error(crl_reasons[reason]);
+
+    /* ---------------------------------------------------------- *
+     * Read all revoked certitifcates from the internal index.txt *
+     * ---------------------------------------------------------- */
+    if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+      int_error("Error cannot load CRL certificate database file");
+
+    /* ---------------------------------------------------------- *
+     * Create the certs DB entry, and set the status to revoked   *
+     * ---------------------------------------------------------- */
+      do_revoke(cert, db, crl_reasons[reason]); 
+
+    /* ---------------------------------------------------------- *
+     * Save updated list of revoked certificates to index.txt     *
+     * ---------------------------------------------------------- */
+    if((save_index(INDEXFILE, db)) != 1)
+      int_error("Error cannot write CRL certificate database file");
+
+    /* ---------------------------------------------------------- *
+     * Create new CRL file from index.txt, overwrite the old one  *
      * -----------------------------------------------------------*/
      cgi_gencrl(CRLFILE);
 
@@ -204,18 +271,16 @@ int cgiMain() {
      * Revocation authorized - confirm revocation to html output  *
      * -----------------------------------------------------------*/
       pagehead(title);
-      fprintf(cgiOut, "<h3>Revoked certificate: %s</h3>\n", certfilestr);
+      fprintf(cgiOut, "<h3>Successfully revoked certificate: %s</h3>\n", certfilestr);
       fprintf(cgiOut, "<hr />\n");
 
       if (fopen(CRLFILE, "r")) {
          X509_CRL *crl = NULL;
          crl = cgi_load_crlfile(CRLFILE);
+         fprintf(cgiOut, "Updated CA Certificate Revocation List:\n");
          fprintf(cgiOut, "<p></p>\n");
-         fprintf(cgiOut, "<h3>CA Certificate Revocation List:</h3>\n");
-         fprintf(cgiOut, "<hr />\n");
          display_crl(crl);
       }
-
     }
   }
 
