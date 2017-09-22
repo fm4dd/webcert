@@ -17,6 +17,12 @@ to do so as well. The first version became an instant hit with over 300
 certificate generations per year. It encouraged me to improve it to the
 version you see here.
 
+### WebCert live URL
+
+WebCert runs at http://fm4dd.com/sw/webcert/
+
+### WebCert Design 
+
 WebCert is using the OpenSSL libraries for certificate operations. It is
 not just a frontend to the openssl program, but independently written.
 It only requires standard C libraries,  the OpenSSL libraries and the CGIC
@@ -101,6 +107,3 @@ modifications, and this notice may in no case be removed.
 Modifications may also be submitted to the author for inclusion
 in the main CGIC distribution.
 
-#### WebCert live
-
-WebCert runs at http://fm4dd.com/sw/webcert/
