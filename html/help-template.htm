@@ -201,7 +201,21 @@ from there. It is very convenient to verify if a servers SSL setup
 is correct.
 </p>
 
-<h3>10. Common Errors</h3>
+<h3>10. Certificate Revocation</h3>
+<hr />
+<div class="pic"><img src="../images/webcert-crl-display-icon.png" alt="webcert certificate revocation" /></div>
+<p>
+The certificate detail view has the action item "Revoke". This
+option asks for the certificate private key as authorization,
+and if successful it adds the certificate serial number into 
+the revoked certs database file.
+</p>
+<p>Webcert maintains a certificate revocation list (CRL) file.
+The CRL can be found by displaying the CA cert information, and
+its location can also be embedded into newly created certs.
+</p>
+
+<h3>11. Common Errors</h3>
 <hr />
 <p>
 Not including the "Begin" or "End" lines, or having an additional
@@ -221,7 +235,7 @@ In short, CAREFULLY pasting the request resolves most errors.
 Trying to generate a certificate from a request that has been
 already processed works just fine.
 </p>
-<h3>11. Browser Complaints</h3>
+<h3>12. Browser Complaints</h3>
 <hr />
 <p>
 Browser constantly asks if this certificate can be trusted and

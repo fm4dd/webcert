@@ -773,7 +773,6 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
-
   // issuer
   X509_NAME *issuer = NULL;
   issuer = X509_NAME_new();
@@ -881,6 +880,8 @@ void display_crl(X509_CRL *crl) {
   // number of revoked certs
   STACK_OF(X509_REVOKED) *rev = X509_CRL_get_REVOKED(crl);
   int revnum = sk_X509_REVOKED_num(rev);
+  // sk_X509_REVOKED_num() returns -1 if no certs were revoked
+  if (revnum == -1) revnum = 0;
 
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th class=\"cnt75\"># Revoked Certs:");
@@ -891,6 +892,71 @@ void display_crl(X509_CRL *crl) {
 
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"2\">&nbsp;");
+  fprintf(cgiOut, "</th>\n");
+  fprintf(cgiOut, "</tr>\n");
+
+  fprintf(cgiOut, "</table>\n");
+  BIO_free(bio);
+}
+
+void display_crl_top(X509_CRL *crl, int count) {
+  BIO *bio;
+  bio = BIO_new(BIO_s_file());
+  bio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
+
+  /* ---------------------------------------------------------- *
+   * Get the number of revoked certs                            *
+   * ---------------------------------------------------------- */
+  STACK_OF(X509_REVOKED) *rev = X509_CRL_get_REVOKED(crl);
+  int revnum = sk_X509_REVOKED_num(rev);
+  /* ---------------------------------------------------------- *
+   * sk_X509_REVOKED_num() returns -1 if no certs were revoked  *
+   * ---------------------------------------------------------- */
+  if (revnum == -1) return;
+  if (revnum < count) count = revnum;
+
+  fprintf(cgiOut, "<table>");
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th>Serial Number</th>");
+  fprintf(cgiOut, "<th>Revocation Date</th>");
+  fprintf(cgiOut, "<th>Revocation Reason</th>");
+  fprintf(cgiOut, "<th width=\"65\">Action</th>");
+  fprintf(cgiOut, "</tr>\n");
+
+  int i;
+  char filename[256];
+  char *serialstr;
+  X509_REVOKED *r;
+  BIGNUM *bn;
+  for (i=0; i < count; i++) {
+    r = sk_X509_REVOKED_value(rev, i);
+    bn = ASN1_INTEGER_to_BN(r->serialNumber, NULL);
+    serialstr = BN_bn2hex(bn);
+    snprintf(filename, sizeof(filename), "%s.pem", serialstr);
+
+    fprintf(cgiOut, "<tr>\n");
+    fprintf(cgiOut, "<td>%s\n", serialstr);
+    fprintf(cgiOut, "</td><td>");
+    ASN1_TIME_print(bio, r->revocationDate);
+    fprintf(cgiOut, "</td><td>");
+    X509V3_extensions_print(bio, NULL, r->extensions, 0, 8);
+    fprintf(cgiOut, "</td>");
+
+    /* action column */
+    fprintf(cgiOut, "<th>");
+    fprintf(cgiOut, "<form action=\"getcert.cgi\" method=\"post\">\n");
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
+    fprintf(cgiOut, "value=\"%s\" />\n", filename);
+    fprintf(cgiOut, "<input type=\"hidden\" name=\"format\" value=\"text\" />\n");
+    fprintf(cgiOut, "<input class=\"getcert\" type=\"submit\" value=\"Detail\" />\n");
+    fprintf(cgiOut, "</form>\n");
+    fprintf(cgiOut, "</th>\n");
+    fprintf(cgiOut, "</tr>\n");
+  }
+
+  fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th colspan=\"4\">");
+  fprintf(cgiOut, "Certificate Revocation List - Latest %d  of %d entries", count, revnum);
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
 

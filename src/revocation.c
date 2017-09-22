@@ -102,7 +102,6 @@ CONF *app_load_config(const char *filename) {
  * returns pointer to CA_DB object, or NULL for errors.       *
  * ---------------------------------------------------------- */
 CA_DB *load_index(const char *dbfile, DB_ATTR *db_attr) {
-
   BIO *in;
   if ((in = BIO_new_file(dbfile, "r")) == NULL)
     int_error("Error: cannot open database file for reading");
@@ -125,8 +124,8 @@ CA_DB *load_index(const char *dbfile, DB_ATTR *db_attr) {
   if (retdb == NULL)
     int_error("Error: cannot allocate memory for new database");
   retdb->db = tmpdb;
-
   tmpdb = NULL;
+
   if (db_attr) retdb->attributes = *db_attr;
   else retdb->attributes.unique_subject = 1;
 
@@ -655,7 +654,7 @@ static char *make_revocation_str(REVINFO_TYPE rev_type, const char *rev_arg) {
  * revoked state, timestamp and revocation reason.            *
  * -----------------------------------------------------------*/
 int do_revoke(X509 *x509, CA_DB *db, const char *value) {
-  char *row[DB_NUMBER], **rrow;
+  char *row[DB_NUMBER];
 
   /* ---------------------------------------------------------- *
    * Zero out the row field array                               *
@@ -716,15 +715,7 @@ int do_revoke(X509 *x509, CA_DB *db, const char *value) {
   }
   
   /* ---------------------------------------------------------- *
-   * Try to lookup the cert in the DB by its serial number      *
-   * -----------------------------------------------------------*/
-  rrow = TXT_DB_get_by_index(db->db, DB_serial, row);
-  if (rrow != NULL) {
-    int_error("Certificate is already on the list of revoked certs");
-  }
-
-  /* ---------------------------------------------------------- *
-   * Write the irow string to the CA database object            *
+   * Write the row strings to the CA database object            *
    * -----------------------------------------------------------*/
   if (!TXT_DB_insert(db->db, row)) {
     snprintf(error_str, sizeof(error_str), "Failed to update database, error number %ld.", db->db->error);
@@ -732,4 +723,38 @@ int do_revoke(X509 *x509, CA_DB *db, const char *value) {
   }
 
   return (1);
+}
+
+/* ---------------------------------------------------------- *
+ * check_index() checks if a certificate has an revoked entry *
+ * in the CA database index.txt, returns yes=1, no=0.         *
+ * -----------------------------------------------------------*/
+int check_index(X509 *x509, CA_DB *db) {
+  /* ---------------------------------------------------------- *
+   * Get the certs serial number, convert it into a hex string  *
+   * -----------------------------------------------------------*/
+  BIGNUM *bn = NULL;
+  bn = ASN1_INTEGER_to_BN(X509_get_serialNumber(x509), NULL);
+  if (!bn)
+    int_error("Cannot extract serial number from cert into BIGNUM");
+
+  char *serialstr = BN_bn2hex(bn);
+  //int_error(serialstr);
+
+  /* ---------------------------------------------------------- *
+   * Check if the cert already exists in DB by using its serial *
+   * -----------------------------------------------------------*/
+  char *const *pp;
+  int i;
+  for (i = 0; i < sk_OPENSSL_PSTRING_num(db->db->data); i++) {
+    pp = sk_OPENSSL_PSTRING_value(db->db->data, i);
+    if ( (strcmp(pp[DB_serial], serialstr) == 0)
+         && (pp[DB_type][0] == DB_TYPE_REV) )  {
+      // debug: int_error("Cert exists in DB and is revoked");
+      return (1);
+    }
+  }
+  // debug: int_error("Cert is new");
+  BN_free(bn);
+  return (0);
 }

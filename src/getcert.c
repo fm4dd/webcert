@@ -11,6 +11,8 @@
 #include <openssl/err.h>
 #include "webcert.h"
 
+int check_index(X509 *x509, CA_DB *db);
+
 int cgiMain() {
 
    X509			*cert;
@@ -100,9 +102,18 @@ int cgiMain() {
       snprintf(p12fileurl, sizeof(p12fileurl), "%s/%s.p12",
                            CERTEXPORTURL, certnamestr);
 
-/* -------------------------------------------------------------------------- *
- * start the html output                                                      *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * Check if the cert already has a DB entry in state revoked  *
+ * ---------------------------------------------------------- */
+   CA_DB *db = NULL;
+   DB_ATTR db_attr;
+   if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+      int_error("Error cannot load CRL certificate database file");
+   int exist = check_index(cert, db);
+
+/* ---------------------------------------------------------- *
+ * start the html output                                      *
+ * -----------------------------------------------------------*/
    pagehead(title);
 
    if (strcmp(certfilestr, "cacert.pem") == 0)
@@ -176,13 +187,17 @@ int cgiMain() {
    }
 
    // Revoke Cert
-
-   fprintf(cgiOut, "<th>\n");
-   fprintf(cgiOut, "<form action=\"certrevoke.cgi\" method=\"post\">\n");
-   fprintf(cgiOut, "<input type=\"submit\" value=\"Revoke Cert\" />\n");
-   fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
-   fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
-   fprintf(cgiOut, "</form>\n");
+   fprintf(cgiOut, "<th width=\"20%%\">\n");
+   if (exist == 0) {
+      fprintf(cgiOut, "<form action=\"certrevoke.cgi\" method=\"post\">\n");
+      fprintf(cgiOut, "<input type=\"submit\" value=\"Revoke Cert\" />\n");
+      fprintf(cgiOut, "<input type=\"hidden\" name=\"cfilename\" ");
+      fprintf(cgiOut, "value=\"%s\" />\n", certfilestr);
+      fprintf(cgiOut, "</form>\n");
+   }
+   else {
+      fprintf(cgiOut, "Revoked");
+   }
    fprintf(cgiOut, "</th>\n");
 
    fprintf(cgiOut, "</tr>\n");
@@ -209,6 +224,8 @@ int cgiMain() {
          fprintf(cgiOut, "<h3>CA Certificate Revocation List:</h3>\n");
          fprintf(cgiOut, "<hr />\n");
          display_crl(crl);
+         fprintf(cgiOut, "<p></p>\n");
+         display_crl_top(crl, 5);
       }   
       //else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLFILE);
    }

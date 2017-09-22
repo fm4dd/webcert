@@ -31,8 +31,8 @@ static const char *crl_reasons[] = {
 };
 
 
+int check_index(X509 *x509, CA_DB *db);
 int do_revoke(X509 *x509, CA_DB *db, const char *value);
-char *make_revocation_str(REVINFO_TYPE rev_type, const char *rev_arg);
 
 int cgiMain() {
 
@@ -241,34 +241,41 @@ int cgiMain() {
     /* ---------------------------------------------------------- *
      * Get the revocation reason code from the calling cgi form   *
      * ---------------------------------------------------------- */
-    int reason;
-    cgiFormInteger("crl_reason", &reason, 0);
-    //int_error(crl_reasons[reason]);
+      int reason;
+      cgiFormInteger("crl_reason", &reason, 0);
+      //int_error(crl_reasons[reason]);
 
     /* ---------------------------------------------------------- *
      * Read all revoked certitifcates from the internal index.txt *
      * ---------------------------------------------------------- */
-    if((db = load_index(INDEXFILE, &db_attr)) == NULL)
-      int_error("Error cannot load CRL certificate database file");
+      if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+        int_error("Error cannot load CRL certificate database file");
 
     /* ---------------------------------------------------------- *
-     * Create the certs DB entry, and set the status to revoked   *
+     * Check if the cert already has a DB entry in state revoked  *
      * ---------------------------------------------------------- */
-      do_revoke(cert, db, crl_reasons[reason]); 
+      int exist = check_index(cert, db);
+
+      if(exist == 0) {
+      /* ---------------------------------------------------------- *
+       * Create the certs DB entry, and set the status to revoked   *
+       * ---------------------------------------------------------- */
+        do_revoke(cert, db, crl_reasons[reason]); 
+
+      /* ---------------------------------------------------------- *
+       * Save updated list of revoked certificates to index.txt     *
+       * ---------------------------------------------------------- */
+        if((save_index(INDEXFILE, db)) != 1)
+          int_error("Error cannot write CRL certificate database file");
+
+      /* ---------------------------------------------------------- *
+       * Create new CRL file from index.txt, overwrite the old one  *
+       * -----------------------------------------------------------*/
+        cgi_gencrl(CRLFILE);
+      }
 
     /* ---------------------------------------------------------- *
-     * Save updated list of revoked certificates to index.txt     *
-     * ---------------------------------------------------------- */
-    if((save_index(INDEXFILE, db)) != 1)
-      int_error("Error cannot write CRL certificate database file");
-
-    /* ---------------------------------------------------------- *
-     * Create new CRL file from index.txt, overwrite the old one  *
-     * -----------------------------------------------------------*/
-     cgi_gencrl(CRLFILE);
-
-    /* ---------------------------------------------------------- *
-     * Revocation authorized - confirm revocation to html output  *
+     * Revocation completed - confirm revocation to html output   *
      * -----------------------------------------------------------*/
       pagehead(title);
       fprintf(cgiOut, "<h3>Successfully revoked certificate: %s</h3>\n", certfilestr);

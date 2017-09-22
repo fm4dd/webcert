@@ -53,8 +53,8 @@ certverify.cgi: webcert.o certverify.o
 showhtml.cgi: showhtml.o
 	$(CC) showhtml.o pagehead.o pagefoot.o handle_error.o -o showhtml.cgi ${LIBS}
 
-getcert.cgi: webcert.o getcert.o
-	$(CC) serial.o webcert.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
+getcert.cgi: webcert.o revocation.o getcert.o
+	$(CC) serial.o webcert.o revocation.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
 
 certstore.cgi: certstore.o
 	$(CC) certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
