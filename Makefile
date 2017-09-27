@@ -2,11 +2,11 @@
 
 # WWWUSER and WWWGROUP are the uid/gid names
 # the webserver is running under. Typically
-# its wwwrun and www. The export directory
+# its www-data:www-data. The export directory
 # needs to be owned by the webserver in order
 # to be able to write the export files to it.
-WWWUSER=wwwrun
-WWWGROUP=www
+WWWUSER=www-data
+WWWGROUP=www-data
 
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
@@ -22,7 +22,7 @@ EXPORTDIR=${BASEDIR}/webcert/export
 ALLHTM=html/*.htm
 ALLSTL=style/style.css
 ALLIMG=images/*.gif
-ALLCGI=src/buildrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/showhtml.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/p12convert.cgi src/certrenew.cgi
+ALLCGI=src/buildrequest.cgi src/genrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/showhtml.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/certvalidate.cgi src/p12convert.cgi src/keycompare.cgi src/certrenew.cgi src/certrevoke.cgi
 ALLSCR=scripts/*.sh
 
 all: 
