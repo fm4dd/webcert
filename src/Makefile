@@ -59,8 +59,8 @@ getcert.cgi: webcert.o revocation.o getcert.o
 certstore.cgi: certstore.o
 	$(CC) certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
 
-certsearch.cgi: certsearch.o
-	$(CC) certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
+certsearch.cgi: revocation.o certsearch.o
+	$(CC) serial.o certsearch.o revocation.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
 
 certexport.cgi: webcert.o certexport.o
 	$(CC) serial.o webcert.o certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}

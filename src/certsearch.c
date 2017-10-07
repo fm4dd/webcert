@@ -1,8 +1,8 @@
-/* -------------------------------------------------------------------------- *
- * file:         certsearch.c                                                 *
- * purpose:      display a selection of local certificates                    *
-                 certsearch.cgi?search=[dn|exp|ena|ser] rev not implemented   * 
- * -------------------------------------------------------------------------- */
+/* ---------------------------------------------------------- *
+ * file:         certsearch.c                                 *
+ * purpose:      display a selection of local certificates    *
+                 certsearch.cgi?search=[dn|exp|ena|rev|ser]   * 
+ * ---------------------------------------------------------- */
 /* defines needed for strptime() function */
 #define _XOPEN_SOURCE
 #define __USE_XOPEN
@@ -31,10 +31,12 @@
          BIO       *membio           = NULL;
          ASN1_TIME *start_date       = NULL;
          ASN1_TIME *expiration_date  = NULL;
+         ASN1_TIME *revocation_date  = NULL;
   struct tm        start_tm;
   struct tm        end_tm;
   struct tm        enable_tm;
   struct tm        expiration_tm;
+  struct tm        revoked_tm;
          char      exp_startdate[11] = "";
          char      exp_starttime[6]  = "";
          char      exp_startstr[17]  = "";
@@ -49,8 +51,10 @@
          char      ena_endstr[17]    = "";
          char      rev_startdate[11] = "";
          char      rev_starttime[6]  = "";
+         char      rev_startstr[17]  = "";
          char      rev_enddate[11]   = "";
          char      rev_endtime[6]    = "";
+         char      rev_endstr[17]    = "";
          char      startserstr[13]   = "1";  /* default seto to 1 */
          char      endserstr[13]     = "10"; /* default set to 10 */
          BIGNUM    *startserialbn    = NULL;
@@ -66,6 +70,8 @@
          FILE      *certfile         = NULL;
 
 void resubmit();
+int check_index(X509 *x509, CA_DB *db);
+int asn1_utctime_to_tm(struct tm *tm, const ASN1_UTCTIME *d);
 
 int hexsort(const struct dirent **test1, const struct dirent **test2) {
   char *endptr;
@@ -124,6 +130,7 @@ int file_select(const struct dirent *entry) {
     ASN1_TIME_print(membio, expiration_date);
     BIO_gets(membio, membio_buf, sizeof(membio_buf));
     BIO_free(membio);
+    //int_error(membio_buf); /* debug correct time parsing */
 
     /* parse the expiration date string into a time struct */
     memset (&expiration_tm, '\0', sizeof(expiration_tm));
@@ -174,6 +181,78 @@ int file_select(const struct dirent *entry) {
     /* check if expiration date >= start date and <= end date */
     if ( difftime(mktime(&start_tm), mktime(&enable_tm)) <=0 &&
          difftime(mktime(&end_tm), mktime(&enable_tm)) >= 0 ) return 1;
+  }
+  /* if search type is rev, check if cert was revoked between start and end date */
+  if (strcmp(search, "rev") == 0) {
+    /* ---------------------------------------------------------- *
+     * Parse the CGI start date string into the start_tm struct   *
+     * ---------------------------------------------------------- */
+    memset (&start_tm, '\0', sizeof(start_tm));
+    strptime(rev_startstr, "%d.%m.%Y %R", &start_tm);
+    /* ---------------------------------------------------------- *
+     * Parse the CGI end date string into the end_tm struct       *
+     * ---------------------------------------------------------- */
+    memset (&end_tm, '\0', sizeof(end_tm));
+    strptime(rev_endstr, "%d.%m.%Y %R", &end_tm);
+    /* ---------------------------------------------------------- *
+     * Get all revoked certificates from revocation DB index.txt  *
+     * ---------------------------------------------------------- */
+    CA_DB *db = NULL;
+    DB_ATTR db_attr;
+
+    if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+      int_error("Error cannot load CRL certificate database file");
+
+    /* ---------------------------------------------------------- *
+     * Get the certs serial number, convert it into a hex string  *
+     * -----------------------------------------------------------*/
+    BIGNUM *bn = NULL;
+    bn = ASN1_INTEGER_to_BN(X509_get_serialNumber(cert), NULL);
+    if (!bn)
+     int_error("Cannot extract serial number from cert into BIGNUM");
+    char *serialstr = BN_bn2hex(bn);
+
+    /* ---------------------------------------------------------- *
+     * Check if the cert is revoked, looking up its serial in DB  *
+     * -----------------------------------------------------------*/
+    char *const *pp;
+    int i;
+    for (i = 0; i < sk_OPENSSL_PSTRING_num(db->db->data); i++) {
+      pp = sk_OPENSSL_PSTRING_value(db->db->data, i);
+
+      if ( (strcmp(pp[DB_serial], serialstr) == 0)
+           && (pp[DB_type][0] == DB_TYPE_REV) )  {
+
+        /* ---------------------------------------------------------- *
+         * Revoked, get the certs revocation date from the database   *
+         * -----------------------------------------------------------*/
+        char *p = strchr(pp[DB_rev_date], ',');
+        if (p) *p = '\0'; // if revocation reason is given, terminate before 
+        char *revokedstr = BUF_strdup(pp[DB_rev_date]);
+        revocation_date = ASN1_UTCTIME_new();
+        ASN1_UTCTIME_set_string(revocation_date, revokedstr);
+        //int_error(revokedstr); /* debug correct time parsing */
+
+        /* copy the certificate revocation date into a string */
+        membio = BIO_new(BIO_s_mem());
+        ASN1_TIME_print(membio, revocation_date);
+        BIO_gets(membio, membio_buf, sizeof(membio_buf));
+        BIO_free(membio);
+        //int_error(membio_buf);
+
+        /* parse the revocation date string into a time struct */
+        memset (&revoked_tm, '\0', sizeof(revoked_tm));
+        strptime(membio_buf, "%h %d %T %Y %z", &revoked_tm);
+        //int_error(asctime(&revoked_tm)); /* debug correct time parsing */
+
+        /* ---------------------------------------------------------- *
+         * Check if revocation date >= start date and <= end date     *
+         * -----------------------------------------------------------*/
+        if ( difftime(mktime(&start_tm), mktime(&revoked_tm)) <=0 &&
+             difftime(mktime(&end_tm), mktime(&revoked_tm)) >= 0 ) return 1;
+      }
+    }
+    BN_free(bn);
   }
   /* if search type is ser, check if serial is between start and end serial */
   if (strcmp(search, "ser") == 0) {
@@ -382,8 +461,8 @@ int cgiMain() {
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
     fprintf(cgiOut, "<td class=\"desc\" colspan=\"4\">\n");
-    fprintf(cgiOut, "Search for certificates that have been revoked from the start date until now. ");
-    fprintf(cgiOut, "Revocation is not yet implemented in Webcert, therefore this returns nothing yet.");
+    fprintf(cgiOut, "Search for certificates that have been revoked between the selected start and end date. ");
+    fprintf(cgiOut, " By default, the search is pre-set to show certificates revoked in the past 3 months.");
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 
@@ -496,6 +575,32 @@ int cgiMain() {
         strncat(ena_endstr, ena_endtime, sizeof(ena_endstr)-strlen(ena_endstr)-1);
         snprintf(title, sizeof(title), "Search Certs by Start Date");
         snprintf(subtitle, sizeof(subtitle), "Certificates with start date between %s and %s", ena_startstr, ena_endstr);
+      }
+      else if (strcmp(search, "rev") == 0) {
+        if ( cgiFormString("rev_startdate", rev_startdate, sizeof(rev_startdate))
+                                                     != cgiFormSuccess )
+        int_error("Error retrieving CGI form enable start date.");
+
+        if ( cgiFormString("rev_starttime", rev_starttime, sizeof(rev_starttime))
+                                                     != cgiFormSuccess )
+        int_error("Error retrieving CGI form enable start time.");
+
+        if ( cgiFormString("rev_enddate", rev_enddate, sizeof(rev_enddate))
+                                                     != cgiFormSuccess )
+        int_error("Error retrieving CGI form enable end date.");
+
+        if ( cgiFormString("rev_endtime", rev_endtime, sizeof(rev_endtime))
+                                                     != cgiFormSuccess )
+        int_error("Error retrieving CGI form enable end time.");
+
+        strncat(rev_startstr, rev_startdate, sizeof(rev_startstr)-1);
+        strncat(rev_startstr, " ", 1); /* add a space between date and time */
+        strncat(rev_startstr, rev_starttime, sizeof(rev_startstr)-strlen(rev_startstr)-1);
+        strncat(rev_endstr, rev_enddate, sizeof(rev_endstr)-1);
+        strncat(rev_endstr, " ", 1); /* add a space between date and time */
+        strncat(rev_endstr, rev_endtime, sizeof(rev_endstr)-strlen(rev_endstr)-1);
+        snprintf(title, sizeof(title), "Search Revoked Certificates");
+        snprintf(subtitle, sizeof(subtitle), "Certificates revoked between %s and %s", rev_startstr, rev_endstr);
       }
       else if (strcmp(search, "ser") == 0) {
         if ( cgiFormString("startserial", startserstr, sizeof(startserstr))

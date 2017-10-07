@@ -246,7 +246,7 @@ int cgiMain() {
       //int_error(crl_reasons[reason]);
 
     /* ---------------------------------------------------------- *
-     * Read all revoked certitifcates from the internal index.txt *
+     * Get all revoked certificates from revocation DB index.txt  *
      * ---------------------------------------------------------- */
       if((db = load_index(INDEXFILE, &db_attr)) == NULL)
         int_error("Error cannot load CRL certificate database file");
