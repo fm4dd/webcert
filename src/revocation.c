@@ -741,6 +741,8 @@ int check_index(X509 *x509, CA_DB *db) {
   char *serialstr = BN_bn2hex(bn);
   //int_error(serialstr);
 
+  char *subjectstr = X509_NAME_oneline(X509_get_subject_name(x509), NULL, 0);
+
   /* ---------------------------------------------------------- *
    * Check if the cert already exists in DB by using its serial *
    * -----------------------------------------------------------*/
@@ -748,7 +750,8 @@ int check_index(X509 *x509, CA_DB *db) {
   int i;
   for (i = 0; i < sk_OPENSSL_PSTRING_num(db->db->data); i++) {
     pp = sk_OPENSSL_PSTRING_value(db->db->data, i);
-    if ( (strcmp(pp[DB_serial], serialstr) == 0)
+    if (   (strcmp(pp[DB_serial], serialstr) == 0)
+         && (strcmp(pp[DB_name], subjectstr) == 0)
          && (pp[DB_type][0] == DB_TYPE_REV) )  {
       // debug: int_error("Cert exists in DB and is revoked");
       return (1);

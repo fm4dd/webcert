@@ -35,20 +35,20 @@ install:
 clean:
 	rm -f *.o *.cgi
 
-buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o serial.o webcert.o
-	$(CC) serial.o webcert.o buildrequest.o pagehead.o pagefoot.o handle_error.o -o buildrequest.cgi ${LIBS}
+buildrequest.cgi: buildrequest.o pagehead.o pagefoot.o handle_error.o serial.o revocation.o webcert.o
+	$(CC) serial.o revocation.o webcert.o buildrequest.o pagehead.o pagefoot.o handle_error.o -o buildrequest.cgi ${LIBS}
 
-genrequest.cgi: webcert.o genrequest.o pagehead.o pagefoot.o handle_error.o
-	$(CC) serial.o webcert.o handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
+genrequest.cgi: serial.o revocation.o webcert.o genrequest.o pagehead.o pagefoot.o handle_error.o
+	$(CC) serial.o revocation.o webcert.o handle_error.o genrequest.o pagehead.o pagefoot.o -o genrequest.cgi ${LIBS}
 
 certsign.cgi: webcert.o pagehead.o pagefoot.o handle_error.o serial.o certsign.o
-	$(CC) serial.o webcert.o pagehead.o pagefoot.o handle_error.o certsign.o -o certsign.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o pagehead.o pagefoot.o handle_error.o certsign.o -o certsign.cgi ${LIBS}
 
 certrequest.cgi: certrequest.o
 	$(CC) certrequest.o pagehead.o pagefoot.o -o certrequest.cgi ${LIBS}
 
 certverify.cgi: webcert.o certverify.o
-	$(CC) serial.o webcert.o certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o certverify.o pagehead.o pagefoot.o handle_error.o -o certverify.cgi ${LIBS}
 
 showhtml.cgi: showhtml.o
 	$(CC) showhtml.o pagehead.o pagefoot.o handle_error.o -o showhtml.cgi ${LIBS}
@@ -60,22 +60,22 @@ certstore.cgi: revocation.o certstore.o
 	$(CC) serial.o revocation.o certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
 
 certsearch.cgi: revocation.o certsearch.o
-	$(CC) serial.o certsearch.o revocation.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
+	$(CC) serial.o revocation.o certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
 
 certexport.cgi: webcert.o certexport.o
-	$(CC) serial.o webcert.o certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o certexport.o pagehead.o pagefoot.o handle_error.o -o certexport.cgi ${LIBS}
 
 certvalidate.cgi: webcert.o certvalidate.o
-	$(CC) serial.o webcert.o certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o certvalidate.o pagehead.o pagefoot.o handle_error.o -o certvalidate.cgi ${LIBS}
 
 p12convert.cgi: webcert.o p12convert.o
-	$(CC) serial.o webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o p12convert.o pagehead.o pagefoot.o handle_error.o -o p12convert.cgi ${LIBS}
 
 keycompare.cgi: webcert.o keycompare.o
-	$(CC) serial.o webcert.o keycompare.o pagehead.o pagefoot.o handle_error.o -o keycompare.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o keycompare.o pagehead.o pagefoot.o handle_error.o -o keycompare.cgi ${LIBS}
 
 certrenew.cgi: webcert.o certrenew.o
-	$(CC) serial.o webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o certrenew.o pagehead.o pagefoot.o handle_error.o -o certrenew.cgi ${LIBS}
 
 certrevoke.cgi: webcert.o serial.o revocation.o certrevoke.o
-	$(CC) serial.o webcert.o revocation.o certrevoke.o pagehead.o pagefoot.o handle_error.o -o certrevoke.cgi ${LIBS}
+	$(CC) serial.o revocation.o webcert.o certrevoke.o pagehead.o pagefoot.o handle_error.o -o certrevoke.cgi ${LIBS}

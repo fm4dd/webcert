@@ -18,6 +18,8 @@
 #include <openssl/x509_vfy.h>
 #include <openssl/txt_db.h>
 
+int check_index(X509 *x509, CA_DB *db);
+
 /* ---------------------------------------------------------- *
  * csr_validate_PEM(): a basic check for the CSR's PEM format * 
  *                                                            *
@@ -486,6 +488,15 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   long cert_version;
   int i;
 
+  /* ---------------------------------------------------------- *
+   * Check if the cert already has a DB entry in state revoked  *
+   * ---------------------------------------------------------- */
+  CA_DB *db = NULL;
+  DB_ATTR db_attr;
+  if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+     int_error("Error cannot load CRL certificate database file");
+  int exist = check_index(ct, db);
+
   BIO *bio = BIO_new(BIO_s_file());
   bio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
   /* ---------------------------------------------------------- *
@@ -589,6 +600,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, " &nbsp; End Date: ");
   if (!ASN1_TIME_print(bio ,X509_get_notAfter(ct)))
     fprintf(cgiOut, "***n/a***");
+  if(exist == 1) fprintf(cgiOut, "<span class=\"revoked\"> (Revoked)</span>");
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
 
