@@ -183,7 +183,7 @@ body a:visited {
     color: #ffffff;
 }
 
-#content th.exnok {
+#content th.exnok, span.revoked {
     color: #ff0000;
 }
 

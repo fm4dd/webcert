@@ -24,6 +24,8 @@
 #include <openssl/pem.h>
 #include "webcert.h"
 
+int check_index(X509 *x509, CA_DB *db);
+
 int hexsort(const struct dirent **test1, const struct dirent **test2) {
   char *endptr;
   return (strtol((*test1)->d_name, &endptr, 16)
@@ -75,16 +77,23 @@ int cgiMain() {
          cert                       = X509_new();
          certsubject                = X509_NAME_new();
 
-/* -------------------------------------------------------------------------- *
- * Get the list of .pem files from the cert directory                         *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * Get all revoked certificates from revocation DB index.txt  *
+ * ---------------------------------------------------------- */
+  CA_DB *db = NULL;
+  DB_ATTR db_attr;
+  if((db = load_index(INDEXFILE, &db_attr)) == NULL)
+    int_error("Error cannot load CRL certificate database file");
+
+/* ---------------------------------------------------------- *
+ * Get the list of .pem files from the cert directory         *
+ * ---------------------------------------------------------- */
   certcounter = scandir(CACERTSTORE, &certstore_files, file_select, hexsort);
   if(certcounter<=0) int_error("Error: No certificate files found.");
 
-/* -------------------------------------------------------------------------- *
- * calculate how many pages we get with MAXCERTDISPLAY                         *
- * ---------------------------------------------------------------------------*/
-
+/* ----------------------------------------------------------- *
+ * calculate how many pages we get with MAXCERTDISPLAY         *
+ * ------------------------------------------------------------*/
   if(certcounter<=MAXCERTDISPLAY) pagecounter = 1;
   else {
     disp_calc = div(certcounter, MAXCERTDISPLAY);
@@ -94,10 +103,9 @@ int cgiMain() {
     else pagecounter = disp_calc.quot +1;
   }
 
-/* -------------------------------------------------------------------------- *
- * Check if we have been subsequently called with a pagenumber & sort request *
- * ---------------------------------------------------------------------------*/
-
+/* ---------------------------------------------------------- *
+ * Check if CGI was called with a pagenumber and sort request *
+ * ---------------------------------------------------------- */
   if(cgiFormInteger("page", &pagenumber, 1) == cgiFormSuccess)
     if(pagenumber > pagecounter || pagenumber <=0)
       int_error("Error: Page does not exist.");
@@ -105,12 +113,11 @@ int cgiMain() {
   if(cgiFormString("sort", sorting, sizeof(sorting)) != cgiFormSuccess)
       strncpy(sorting, "desc", sizeof(sorting));
 
-/* -------------------------------------------------------------------------- *
- * now we know how many certs we have in total and we can build the page(s).  *
- * For every MAXCERTDISPLAY certs we start a new page and cycle through by    *
- * calling ourself with the requested certs in range.                         *
- * ---------------------------------------------------------------------------*/
-
+/* ---------------------------------------------------------- *
+ * We know how many total certs exist, let's build the page.  *
+ * For every MAXCERTDISPLAY certs we start a new page, and    *
+ * cycle by calling ourself with the requested certs in range.*
+ * ---------------------------------------------------------- */
   if(strcmp(sorting, "asc") == 0) {
 
     if(certcounter <= MAXCERTDISPLAY) {
@@ -151,9 +158,9 @@ int cgiMain() {
       }
   }
 
-/* -------------------------------------------------------------------------- *
- * start the html output                                                      *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * start the html output                                      *
+ * ---------------------------------------------------------- */
 
   outbio = BIO_new(BIO_s_file());
   BIO_set_fp(outbio, cgiOut, BIO_NOCLOSE);
@@ -169,9 +176,9 @@ int cgiMain() {
   //fprintf(cgiOut, "</BODY></HTML>\n");
   //exit(0);
 
-/* -------------------------------------------------------------------------- *
- * start the form output                                                      *
- * ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------- *
+ * start the form output                                      *
+ * ---------------------------------------------------------- */
 
    fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>\n");
@@ -219,15 +226,23 @@ int cgiMain() {
       PEM_read_X509(certfile, &cert, NULL, NULL);
       certsubject = X509_get_subject_name(cert);
 
-      /* display the subject data, use the UTF-8 flag to show  *
-       * Japanese Kanji, also needs the separator flag to work */
+    /* ---------------------------------------------------------- *
+     * Display the subject data. Use the UTF-8 flag to show       *
+     * Japanese Kanji. This also needs the separator flag to work *
+     * ---------------------------------------------------------- */
       X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
          ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
 
-      /* store certificate start date for later eval */
-      start_date = X509_get_notBefore(cert);
+    /* ---------------------------------------------------------- *
+     * Check if the cert has been revoked, if yes add a marker.   *
+     * ---------------------------------------------------------- */
+      int exist = check_index(cert, db);
+      if(exist == 1) fprintf(cgiOut, "<span class=\"revoked\"> (Revoked)</span>");
 
-      /* store certificate expiration date for later eval */
+    /* ---------------------------------------------------------- *
+     * store certificate start and expiration date for later use  *
+     * ---------------------------------------------------------- */
+      start_date = X509_get_notBefore(cert);
       expiration_date = X509_get_notAfter(cert);
 
       /* check the start and end dates in the cert */

@@ -56,8 +56,8 @@ showhtml.cgi: showhtml.o
 getcert.cgi: webcert.o revocation.o getcert.o
 	$(CC) serial.o webcert.o revocation.o getcert.o pagehead.o pagefoot.o handle_error.o -o getcert.cgi ${LIBS}
 
-certstore.cgi: certstore.o
-	$(CC) certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
+certstore.cgi: revocation.o certstore.o
+	$(CC) serial.o revocation.o certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
 
 certsearch.cgi: revocation.o certsearch.o
 	$(CC) serial.o certsearch.o revocation.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}
