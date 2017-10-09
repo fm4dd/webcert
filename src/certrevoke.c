@@ -189,20 +189,37 @@ int cgiMain() {
       int_error("Error getting public key from certificate");
 
   /* ---------------------------------------------------------- *
-   * First key check with EVP_PKEY_cmp: 1 = "match",            *
+   * 1st try: check key against cert. EVP_PKEY_cmp: 1 = "match" *
    * 0 = "key missmatch", -1 = "type missmatch, -2 = "error"    *
    * ---------------------------------------------------------- */
     char cmp_res1_str[40]; // contains the string for match, missmatch, etc
     int cmp_res1;
     cmp_res1 = EVP_PKEY_cmp(priv_key, pub_key);
 
-    if(cmp_res1 == -2) {
-      snprintf(error_str, sizeof(error_str), "Error in EVP_PKEY_cmp(): operation is not supported.");
-      int_error(error_str);
+    if(cmp_res1 == -2) int_error("Cert key problem in EVP_PKEY_cmp(): operation is not supported");
+    if(cmp_res1 == -1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Cert key type missmatch");
+    if(cmp_res1 ==  1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Cert key authorized");
+
+    /* ---------------------------------------------------------- *
+     * If the given private key did not match the cert pubkey, do *
+     * 2nd try: see if the key matches the global revocation key  *
+     * -----------------------------------------------------------*/
+    if(cmp_res1 == 0) {
+      BIO *revbio = BIO_new(BIO_s_file());
+      if ((revbio == NULL) || (BIO_read_filename(revbio, REVOKEY) <= 0))
+        int_error("Error reading revocation key file");
+
+      EVP_PKEY *revo_key = NULL;
+      if (! (revo_key = PEM_read_bio_PUBKEY(revbio, NULL, NULL, NULL)))
+        int_error("Error loading revocation key content");
+
+      cmp_res1 = EVP_PKEY_cmp(priv_key, revo_key);
+
+      if(cmp_res1 == -2) int_error("Revocation key problem in EVP_PKEY_cmp(): operation is not supported");
+      if(cmp_res1 == -1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Revocation key type missmatch");
+      if(cmp_res1 ==  1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Revocation key authorized");
+      if(cmp_res1 ==  0) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Revocation key missmatch");
     }
-    if(cmp_res1 == -1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Type Missmatch");
-    if(cmp_res1 ==  0) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Key Missmatch");
-    if(cmp_res1 ==  1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Match");
 
     if(cmp_res1 !=  1) {
     /* ---------------------------------------------------------- *

@@ -19,7 +19,7 @@
 /*********** where is the ca's private key file *******************************/
 #define CAKEY           "/srv/app/webCA/private/cakey.pem"
 /*********** The password for the ca's private key ****************************/
-#define PASS            "mypassword"
+#define PASS            "webca-secret"
 /*********** The directory where the generated certificates are stored ********/
 #define CACERTSTORE	"/srv/app/webCA/certs"
 /*********** The directory for the external, trusted CA bundles files *********/
@@ -37,6 +37,7 @@
 /*********** CRL Handling: The link to webcerts crl ***************************/
 #define CRLURI		"URI:http://fm4dd.com/sw/webcert/webcert.crl"
 #define CRLFILE		"/srv/www/std-root/fm4dd.com/sw/webcert/webcert.crl"
+#define REVOKEY         "/srv/app/webCA/private/revocation-pub.pem"
 /*********** we store the list of revoked certs in index.txt ******************/
 #define INDEXFILE       "/srv/app/webCA/index.txt"
 /*********** we store the CRL sequence number in file crlnumber ***************/

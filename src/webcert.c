@@ -917,7 +917,8 @@ void display_crl_top(X509_CRL *crl, int count) {
 
   fprintf(cgiOut, "<table>");
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th>Serial Number</th>");
+  fprintf(cgiOut, "<th>Serial</th>");
+  fprintf(cgiOut, "<th>Subject</th>");
   fprintf(cgiOut, "<th>Revocation Date</th>");
   fprintf(cgiOut, "<th>Revocation Reason</th>");
   fprintf(cgiOut, "<th width=\"65\">Action</th>");
@@ -925,22 +926,69 @@ void display_crl_top(X509_CRL *crl, int count) {
 
   int i;
   char filename[256];
+  char filepath[1024];
   char *serialstr;
   X509_REVOKED *r;
+  FILE *certfile;
+  X509 *cert = X509_new();
+  X509_NAME *certsubject = NULL;
+  X509_EXTENSION *reason = NULL;
   BIGNUM *bn;
   for (i=0; i < count; i++) {
+    /* ---------------------------------------------------------- *
+     * Get the revocation entry from the CRL                      *
+     * ---------------------------------------------------------- */
     r = sk_X509_REVOKED_value(rev, i);
+    /* ---------------------------------------------------------- *
+     * Get cert serial from the revocation entry                  *
+     * ---------------------------------------------------------- */
     bn = ASN1_INTEGER_to_BN(r->serialNumber, NULL);
+    /* ---------------------------------------------------------- *
+     * Convert the serial to a hex string                         *
+     * ---------------------------------------------------------- */
     serialstr = BN_bn2hex(bn);
+    /* ---------------------------------------------------------- *
+     * deduct the cert filename from its serial number in hex     *
+     * ---------------------------------------------------------- */
     snprintf(filename, sizeof(filename), "%s.pem", serialstr);
+    /* ---------------------------------------------------------- *
+     * define the file path to the cert                           *
+     * ---------------------------------------------------------- */
+    snprintf(filepath, sizeof(filepath), "%s/%s", CACERTSTORE, filename);
+    /* ---------------------------------------------------------- *
+     * try to read the cert file itself                           *
+     * ---------------------------------------------------------- */
+    if ( (certfile = fopen(filepath, "r")) != NULL) {
+      PEM_read_X509(certfile, &cert, NULL, NULL);
+      certsubject = X509_get_subject_name(cert);
+    }
+    /* ---------------------------------------------------------- *
+     * try to get the CRL reason, if the extension exists         *
+     * ---------------------------------------------------------- */
+    int loc = -1;
+    loc = X509_REVOKED_get_ext_by_NID(r, NID_crl_reason, -1);
+    reason = X509_REVOKED_get_ext(r, loc);
 
+    /* serial string column */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td>%s\n", serialstr);
-    fprintf(cgiOut, "</td><td>");
+    fprintf(cgiOut, "<td>%s</td>\n", serialstr);
+
+    /* subject line column */
+    fprintf(cgiOut, "<td>");
+    X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
+         ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
+    fprintf(cgiOut, "</td>\n");
+
+    /* revocation date column */
+    fprintf(cgiOut, "<td>");
     ASN1_TIME_print(bio, r->revocationDate);
-    fprintf(cgiOut, "</td><td>");
-    X509V3_extensions_print(bio, NULL, r->extensions, 0, 8);
-    fprintf(cgiOut, "</td>");
+    fprintf(cgiOut, "</td>\n");
+
+    /* revocation reason column */
+    fprintf(cgiOut, "<td>");
+    if (loc > -1) X509V3_EXT_print(bio, reason, 0, 2);
+    else fprintf(cgiOut, "N/A");
+    fprintf(cgiOut, "</td>\n");
 
     /* action column */
     fprintf(cgiOut, "<th>");
@@ -955,7 +1003,7 @@ void display_crl_top(X509_CRL *crl, int count) {
   }
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th colspan=\"4\">");
+  fprintf(cgiOut, "<th colspan=\"5\">");
   fprintf(cgiOut, "Certificate Revocation List - Latest %d  of %d entries", count, revnum);
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
