@@ -110,7 +110,7 @@ int cgiMain() {
     }
     fprintf(cgiOut, "<p></p>\n");
 
-    fprintf(cgiOut, "<h3>Authorize the revocation by submitting the certficate private key</h3>\n");
+    fprintf(cgiOut, "<h3>Authorize revocation with the certificate private key, or revocation master key</h3>\n");
     fprintf(cgiOut, "<hr />\n");
     fprintf(cgiOut, "<form action=\"certrevoke.cgi\" method=\"post\">");
     fprintf(cgiOut, "<table>\n");
