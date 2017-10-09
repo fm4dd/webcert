@@ -767,10 +767,14 @@ int cgiMain() {
 
     if ( (certfile = fopen(certfilestr, "r")) != NULL) {
       PEM_read_X509(certfile, &cert, NULL, NULL);
-      certsubject = X509_get_subject_name(cert);
 
-      /* display the cert subject here */
-      X509_NAME_print_ex_fp(cgiOut, certsubject, 0, 0);
+      /* ---------------------------------------------------------- *
+       * Display the subject data. Use the UTF-8 flag to show       *
+       * Japanese Kanji. This also needs the separator flag to work *
+       * ---------------------------------------------------------- */
+      certsubject = X509_get_subject_name(cert);
+      X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
+         ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
 
       /* store certificate start date for later eval */
       start_date = X509_get_notBefore(cert);
