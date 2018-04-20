@@ -27,7 +27,7 @@
 /*********** The directory to write the exported certificates into ************/
 #define CERTEXPORTDIR   "/srv/www/std-root/fm4dd.com/sw/webcert/export"
 /*********** The export directory URL to download the certificates from *******/
-#define CERTEXPORTURL   "/webcert/export"
+#define CERTEXPORTURL   "/sw/webcert/export"
 /*********** where the ca's serial file is ************************************/
 #define SERIALFILE      "/srv/app/webCA/serial"
 /*********** certificate lifetime *********************************************/

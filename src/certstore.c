@@ -230,6 +230,7 @@ int cgiMain() {
      * Display the subject data. Use the UTF-8 flag to show       *
      * Japanese Kanji. This also needs the separator flag to work *
      * ---------------------------------------------------------- */
+      fprintf(cgiOut, "<div class=\"scroll\">");
       X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
          ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
 
@@ -262,7 +263,7 @@ int cgiMain() {
     else 
        fprintf(cgiOut, "Error: Can't open certificate file %s for reading.",
                                                                  certfilestr);
-    fprintf(cgiOut, "</td>\n");
+    fprintf(cgiOut, "</div></td>\n");
 
     if(certvalidity == 0) {
 
