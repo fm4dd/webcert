@@ -25,9 +25,9 @@
 /*********** The directory for the external, trusted CA bundles files *********/
 #define CABUNDLEDIR	"/srv/app/webCA/ca-bundles"
 /*********** The directory to write the exported certificates into ************/
-#define CERTEXPORTDIR   "/srv/www/std-root/fm4dd.com/sw/webcert/export"
+#define CERTEXPORTDIR   "/srv/www/webcert/export"
 /*********** The export directory URL to download the certificates from *******/
-#define CERTEXPORTURL   "/sw/webcert/export"
+#define CERTEXPORTURL   "/export"
 /*********** where the ca's serial file is ************************************/
 #define SERIALFILE      "/srv/app/webCA/serial"
 /*********** certificate lifetime *********************************************/
@@ -61,7 +61,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.8.0 (03/03/2019)"
+#define SW_VERSION	"WebCert v1.8.0 (03/17/2019)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
