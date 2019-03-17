@@ -134,14 +134,11 @@ int cgiMain() {
 /* ----------------------------------------------------------- *
  * Certificate request public key verification                 * 
  * ------------------------------------------------------------*/
+   EVP_PKEY *pkey  = NULL;
+   if (! (pkey = X509_REQ_get_pubkey(certreq)))
+      int_error("Error getting public key from X509_REQ structure.");
+
    req_pubkey = EVP_PKEY_new();
-   if ( (certreq->req_info == NULL) ||
-        (certreq->req_info->pubkey == NULL) ||
-        (certreq->req_info->pubkey->public_key == NULL) ||
-        (certreq->req_info->pubkey->public_key->data == NULL))
-        {
-           int_error("Error missing public key in request");
-        }
    if (! (req_pubkey=X509_REQ_get_pubkey(certreq)))
            int_error("Error unpacking public key from request");
    if (X509_REQ_verify(certreq,req_pubkey) != 1)
@@ -643,16 +640,14 @@ char * mkdatestr(char *date, char *time) {
  * the certificate 'cert'. Returns '1' if found, '0' if not.  *
  * -----------------------------------------------------------*/
 int check_ext_presence(X509_EXTENSION *test_ext, X509 *cert) {
-  X509_CINF *cert_inf = NULL;
-  STACK_OF(X509_EXTENSION) *list = NULL;
+  const STACK_OF(X509_EXTENSION) *list = NULL;
   ASN1_OBJECT *test_obj;
   int i, test_nid;
 
   /* ---------------------------------------------------------- *
    * Extract the certificate's extensions                       *
    * ---------------------------------------------------------- */
-  cert_inf = cert->cert_info;
-  list = cert_inf->extensions;
+  list = X509_get0_extensions(cert);
 
   if (list == NULL) return (0);
   if (sk_X509_EXTENSION_num(list) <= 0) return (0);

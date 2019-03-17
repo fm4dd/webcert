@@ -20,27 +20,26 @@ void pagefoot() {
   }
 
   fprintf(cgiOut, "</div>\n");
+
   fprintf(cgiOut, "<div id=\"sidecontent\">\n");
-
   if ((fp = fopen(SIDEBAR_TEMPL, "r"))) {
-    for(;;) {
-       ret = getc(fp);
-       if(ret == EOF) break;
-       fprintf(cgiOut, "%c", ret);
-     }
+     for(;;) {
+        ret = getc(fp);
+        if(ret == EOF) break;
+        fprintf(cgiOut, "%c", ret);
+    }
   }
-
   fprintf(cgiOut, "</div>\n");
+
   fprintf(cgiOut, "<div id=\"footer\">\n");
-  fprintf(cgiOut, "<span class=\"left\">&copy; %s by <a href=\"http://fm4dd.com/\">Frank4DD</a> - licensed under GPL.</span>\n", SW_VERSION);
+  fprintf(cgiOut, "<span class=\"left\">&copy; %s by <a href=\"http://fm4dd.com/\">Frank4DD</a>.</span>\n", SW_VERSION);
   fprintf(cgiOut, "<span class=\"right\">");
   fprintf(cgiOut, "Generated on: %s", hostport);
-  fprintf(cgiOut, " for: ");
+  fprintf(cgiOut, " for ");
   if (strlen(cgiRemoteUser) != 0) fprintf(cgiOut, "%s", cgiRemoteUser);
   if (strlen(cgiRemoteAddr) != 0) fprintf(cgiOut, "%s", cgiRemoteAddr);
   else fprintf(cgiOut, "%s", "[unknown]");
   fprintf(cgiOut, "</span>\n");
-  fprintf(cgiOut, "</div>\n");
   fprintf(cgiOut, "</div>\n");
 
   if ((fp = fopen(FOOTER_TEMPL, "r"))) {
@@ -51,6 +50,7 @@ void pagefoot() {
      }
   }
 
+  fprintf(cgiOut, "</div>\n");
   fprintf(cgiOut, "</body>\n");
   fprintf(cgiOut, "</html>\n");
 }

@@ -19,7 +19,7 @@ version you see here.
 
 ### WebCert live URL
 
-WebCert runs at http://fm4dd.com/sw/webcert/
+WebCert runs at http://webcert.fm4dd.com/
 
 ### WebCert Design 
 

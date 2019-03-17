@@ -11,13 +11,13 @@
 </head>
 
 <body>
-<div id="wrapper">
   <div id="banner">
     <h1>WebCert</h1>
     <h2>Web-based Digital Certificate Management</h2>
   </div>
   <!--#include virtual="/site-navigation.htm" -->
 
+<div id="wrapper">
   <div id="content">
 <p style="text-align: center">
 <img src="images/cert.gif" alt="WebCert Application" height="515" width="682"/>
@@ -28,8 +28,6 @@ Forward to the application
 </p>
   </div>
   <div id="sidecontent">
- <br />
- <a href="http://www.openssl.org"><img src="images/openssl_button.gif" alt="OpenSSL Logo" /></a>
  <br />
     <h4>Topics</h4>
     <ul>

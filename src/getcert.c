@@ -217,17 +217,17 @@ int cgiMain() {
       fprintf(cgiOut, "<p><strong>2004-12-18</strong> 1024 bit RSA WebCert Root CA certificate with MD5 signature: ");
       fprintf(cgiOut, "<a href=\"../export/webcert-20041218_0138.pem\">webcert-20041218_0138.pem</a></p>\n");
 
+         fprintf(cgiOut, "<p></p>\n");
       if (fopen(CRLFILE, "r")) {
          X509_CRL *crl = NULL;
          crl = cgi_load_crlfile(CRLFILE);
-         fprintf(cgiOut, "<p></p>\n");
          fprintf(cgiOut, "<h3>CA Certificate Revocation List:</h3>\n");
          fprintf(cgiOut, "<hr />\n");
          display_crl(crl);
          fprintf(cgiOut, "<p></p>\n");
          display_crl_top(crl, 5);
       }   
-      //else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLFILE);
+      else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLFILE);
    }
    pagefoot();
    BIO_free(outbio);

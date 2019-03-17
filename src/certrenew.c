@@ -126,18 +126,10 @@ int cgiMain() {
       int_error("Error loading certificate private key content");
 
     /* ---------------------------------------------------------- *
-     * Set digest: sha256 for RSA, dss for DSA, ecdsa for ECC key *
+     * Set digest to sha256 for all key types. Previous digests   *
+     * like EVP_dss and EVP_ecdsa have been removed from OpenSSL  *
      * ---------------------------------------------------------- */
-    EVP_MD const *digest = NULL;
-
-    switch (priv_key->type) {
-      case EVP_PKEY_RSA: digest = EVP_sha256(); break;
-      case EVP_PKEY_DSA: digest = EVP_dss(); break;
-      case EVP_PKEY_EC: digest = EVP_ecdsa(); break;
-      default:
-        int_error("Unknown/unsupported key type, not RSA, DSA, or ECC  type");
-        break;
-    }
+    EVP_MD const *digest = EVP_sha256();
 
     /* ---------------------------------------------------------- *
      * Convert the old certificate +key into a new CSR request    *
@@ -150,14 +142,6 @@ int cgiMain() {
      * We extract the public key from the new CSR request         *
      * ---------------------------------------------------------- */
     EVP_PKEY *pub_key = NULL;
-    if ( (certreq->req_info == NULL) ||
-         (certreq->req_info->pubkey == NULL) ||
-         (certreq->req_info->pubkey->public_key == NULL) ||
-         (certreq->req_info->pubkey->public_key->data == NULL))
-            int_error("Error missing public key in request");
-
-    if ((pub_key=EVP_PKEY_new()) == NULL)
-       int_error("Error creating EVP_PKEY structure for pub_key.");
 
     if ((pub_key=X509_REQ_get_pubkey(certreq)) == NULL)
        int_error("Error unpacking public key from request");
@@ -195,12 +179,14 @@ int cgiMain() {
      * Add the following types of existing cert extensions to the *
      * CSR: SAN, Basic Constraints, Key Usage, Extended Key Usage *
      * -----------------------------------------------------------*/
-    STACK_OF(X509_EXTENSION) *ext_list = NULL;
-    X509_CINF *cert_inf = cert->cert_info;
+    const STACK_OF(X509_EXTENSION) *ext_list = X509_get0_extensions(cert);
+    int ext_count = X509v3_get_ext_count(ext_list);
 
     /* if there are any cert exts */
-    if ((ext_list = cert_inf->extensions) != NULL) {
+    if (ext_count > 0) {
       STACK_OF(X509_EXTENSION) *csr_list = NULL;
+
+      /* define the extensions we want to copy over */
       int copy_ext[4] = { NID_subject_alt_name, NID_key_usage,
                           NID_basic_constraints, NID_ext_key_usage };
       int i;

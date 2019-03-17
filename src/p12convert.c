@@ -516,16 +516,24 @@ int cgiMain() {
       fprintf(cgiOut, "<td>%d Bytes</td>\n", p12_fsize);
       fprintf(cgiOut, "</tr>\n");
 
-      if (p12->version) {
-        fprintf(cgiOut, "<tr>\n");
-        fprintf(cgiOut, "<th class=\"cnt75\">Version:</th>\n");
-        fprintf(cgiOut, "<td>%ld (3 == PKCS#12 v1.1)</td>\n",
-                        ASN1_INTEGER_get(p12->version));
-        fprintf(cgiOut, "</tr>\n");
-      }
+      // Since OpenSSL 1.1.0 we can't access the objects directly
+      // and there is not get function for the version. OpenSSL
+      // hardcodes the version to 3 in crypto/pkcs12/p12_init.c 
+      //if (p12->version) {
+      //  fprintf(cgiOut, "<tr>\n");
+      //  fprintf(cgiOut, "<th class=\"cnt75\">Version:</th>\n");
+      //  fprintf(cgiOut, "<td>%ld (3 == PKCS#12 v1.1)</td>\n",
+      //                  ASN1_INTEGER_get(p12->version));
+      //  fprintf(cgiOut, "</tr>\n");
+      //}
 
       /* P12 using password integrity mode? */
-      if (p12->mac) {
+      if (PKCS12_mac_present(p12)) {
+         const X509_ALGOR *pmacalg = NULL;
+	 const ASN1_OCTET_STRING *psalt = NULL;
+	 const ASN1_INTEGER *piter = NULL;
+         PKCS12_get0_mac(NULL, &pmacalg, &psalt, &piter, p12);
+
         fprintf(cgiOut, "<tr>\n");
         fprintf(cgiOut, "<th  class=\"cnt75\">Auth Mode:</th>\n");
         fprintf(cgiOut, "<td>Password</td>\n");
@@ -534,14 +542,14 @@ int cgiMain() {
         fprintf(cgiOut, "<tr>\n");
         fprintf(cgiOut, "<th class=\"cnt75\">MAC Algorithm:</th>\n");
         char buf[1024];
-        OBJ_obj2txt(buf, 1024, p12->mac->dinfo->algor->algorithm, 0);
+        OBJ_obj2txt(buf, 1024, pmacalg->algorithm, 0);
         fprintf(cgiOut, "<td>%s</td>\n", buf);
         fprintf(cgiOut, "</tr>\n");
 
         fprintf(cgiOut, "<tr>\n");
         fprintf(cgiOut, "<th class=\"cnt75\">MAC Iteration:</th>\n");
         fprintf(cgiOut, "<td>%ld (Compatibility: 1, OpenSSL Default: 2048, Windows 7 Default: 2000)</td>\n",
-                        p12->mac->iter ? ASN1_INTEGER_get(p12->mac->iter) : 1);
+                        ASN1_INTEGER_get(piter));
         fprintf(cgiOut, "</tr>\n");
 
         STACK_OF(PKCS7) *asafes = NULL;

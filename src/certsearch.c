@@ -66,7 +66,7 @@
          X509      *cert             = NULL;
          X509_NAME *certsubject      = NULL;
 	 X509_NAME_ENTRY *e          = NULL;
-         char      certfilestr[225]  = "";
+         char      certfilestr[277]  = "";
          FILE      *certfile         = NULL;
 
 void resubmit();
@@ -110,12 +110,12 @@ int file_select(const struct dirent *entry) {
     /* now we cycle through all entries of the subject */
     for (i = 0; i < X509_NAME_entry_count(certsubject); i++) {
       e = X509_NAME_get_entry(certsubject, i);
-      OBJ_obj2txt(buf, 80, e->object, 0);
+      OBJ_obj2txt(buf, 80, X509_NAME_ENTRY_get_object(e), 0);
 
       /* when the search file matches the cert subject field  */
       /* check if the field value is equal the search value   */
       if(strstr(buf, field) != NULL)
-        if(strstr( (char *) e->value->data, dnvalue) != NULL) return 1;
+        if(strstr( (char *) X509_NAME_ENTRY_get_data(e), dnvalue) != NULL) return 1;
     }
   }
 
@@ -713,7 +713,7 @@ int cgiMain() {
  * ---------------------------------------------------------------------------*/
 
    fprintf(cgiOut, "<h3>%s</h3>\n", subtitle);
-   fprintf(cgiOut, "<hr />\n");
+   fprintf(cgiOut, "<p></p>\n");
    fprintf(cgiOut, "<table>\n");
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<th width=\"20\">");
@@ -1042,7 +1042,7 @@ int cgiMain() {
 
   // goto page number
   fprintf(cgiOut, "<th width=\"120\">\n");
-  fprintf(cgiOut, "<form action=\"certsearch.cgi\" method=\"post\">\n");
+  fprintf(cgiOut, "<form class=\"setpage\" action=\"certsearch.cgi\" method=\"post\">\n");
   fprintf(cgiOut, "<input type=\"hidden\" name=\"certcounter\" ");
   fprintf(cgiOut, "value=\"");
   fprintf(cgiOut, "%d", certcounter);
@@ -1052,9 +1052,9 @@ int cgiMain() {
   fprintf(cgiOut, "%d", pagecounter);
   fprintf(cgiOut, "\" />\n");
   resubmit();
-  fprintf(cgiOut, "<input type=\"submit\" value=\"Goto\" />\n");
+  fprintf(cgiOut, "<input class=\"goto\" type=\"submit\" value=\"Goto\" />\n");
   fprintf(cgiOut, "&nbsp; &nbsp;");
-  fprintf(cgiOut, "<input type=\"text\" name=\"page\" size=\"3\" ");
+  fprintf(cgiOut, "<input class=\"page\" type=\"text\" name=\"page\" ");
   fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
   fprintf(cgiOut, "</form>\n");
   fprintf(cgiOut, "</th>\n");

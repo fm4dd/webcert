@@ -46,7 +46,7 @@ int cgiMain() {
 
   static char      title[]           = "List of existing Certificates";
          char      sorting[16]       = "desc";
-         char      certfilestr[225]  = "";
+         char      certfilestr[277]  = "";
          FILE      *certfile         = NULL;
          BIO       *membio           = NULL;
          BIO       *outbio           = NULL;
@@ -510,10 +510,12 @@ int cgiMain() {
   fprintf(cgiOut, "%d", pagecounter);
   fprintf(cgiOut, "\" />\n");
   fprintf(cgiOut, "<input class=\"goto\" type=\"submit\" value=\"Goto\" />\n");
+  fprintf(cgiOut, "&nbsp; &nbsp;");
   fprintf(cgiOut, "<input class=\"page\" type=\"text\" name=\"page\" ");
   fprintf(cgiOut, "value=\"%d\" />\n", pagecounter);
   fprintf(cgiOut, "</form>\n");
   fprintf(cgiOut, "</th>\n");
+
   fprintf(cgiOut, "</tr>\n");
   fprintf(cgiOut, "</table>\n");
 

@@ -36,7 +36,7 @@
 
 /*********** CRL Handling: The link to webcerts crl ***************************/
 #define CRLURI		"URI:http://fm4dd.com/sw/webcert/webcert.crl"
-#define CRLFILE		"/srv/www/std-root/fm4dd.com/sw/webcert/webcert.crl"
+#define CRLFILE		"/srv/www/webcert/webcert.crl"
 #define REVOKEY         "/srv/app/webCA/private/revocation-pub.pem"
 /*********** we store the list of revoked certs in index.txt ******************/
 #define INDEXFILE       "/srv/app/webCA/index.txt"
@@ -61,7 +61,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.7.9 (08/19/2017)"
+#define SW_VERSION	"WebCert v1.8.0 (03/03/2019)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */

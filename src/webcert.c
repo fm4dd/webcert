@@ -132,7 +132,7 @@ void key_validate_PEM(char * form) {
  * hex bytes, separated with : and a newline after 54 chars.  *
  * (2 chars + 1 ':' = 3 chars, 3 chars * 18 = 54)             *
  * ---------------------------------------------------------- */
-int X509_signature_dump(BIO *bp, const ASN1_STRING *sig, int indent) {
+int X509_signature_dump(BIO *bp, const ASN1_BIT_STRING *sig, int indent) {
   const unsigned char *s;
   int i, n;
 
@@ -206,12 +206,12 @@ void display_csr(X509_REQ *csr) {
 
   for (i = 0; i < X509_NAME_entry_count(reqname); i++) {
     e = X509_NAME_get_entry(reqname, i);
-    OBJ_obj2txt(buf, 80, e->object, 0);
+    OBJ_obj2txt(buf, 80, X509_NAME_ENTRY_get_object(e), 0);
 
     fprintf(cgiOut, "<tr>");
     fprintf(cgiOut, "<th class=\"cnt75\">%s</th\n>", buf);
     fprintf(cgiOut, "<td>");
-    ASN1_STRING_print_ex(bio, e->value, ASN1_STRFLGS_UTF8_CONVERT);
+    ASN1_STRING_print_ex(bio, X509_NAME_ENTRY_get_data(e), ASN1_STRFLGS_UTF8_CONVERT);
     fprintf(cgiOut, "</td>");
     fprintf(cgiOut, "</tr>\n");
   }
@@ -246,7 +246,7 @@ void display_csr(X509_REQ *csr) {
           /* Some extensions (i.e. LogoType) have no handling    *
            * defined, we need to print their content as hex data */
           fprintf(cgiOut, "%*s", 2, "");
-          M_ASN1_OCTET_STRING_print(bio, ext->value);
+          ASN1_STRING_print(bio, X509_EXTENSION_get_data(ext));
         }
         fprintf(cgiOut, "\n");
 
@@ -269,7 +269,7 @@ void display_csr(X509_REQ *csr) {
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   if (pkey) {
     EC_KEY *myecc = NULL;
-    switch (pkey->type) {
+    switch (EVP_PKEY_base_id(pkey)) {
       case EVP_PKEY_RSA:
         fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
         break;
@@ -283,7 +283,7 @@ void display_csr(X509_REQ *csr) {
                             OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
         break;
       default:
-        fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(pkey->type));
+        fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(EVP_PKEY_base_id(pkey)));
         break;
     }
   }
@@ -301,12 +301,11 @@ void display_csr(X509_REQ *csr) {
   /* ---------------------------------------------------------- *
    * Extract the CSR signature data.                            *
    * ---------------------------------------------------------- */
-  ASN1_STRING     *asn1_sig = NULL;
-  X509_ALGOR      *sig_type = NULL;
-  size_t          sig_bytes = 0;
-  char   sig_type_str[1024] = "";
-  sig_type = csr->sig_alg;
-  asn1_sig = csr->signature;
+  const ASN1_BIT_STRING *asn1_sig = NULL;
+  const X509_ALGOR      *sig_type = NULL;
+  size_t                 sig_bytes = 0;
+  char          sig_type_str[1024] = "";
+  X509_REQ_get0_signature(csr, &asn1_sig, &sig_type);
   sig_bytes = asn1_sig->length;
   OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
 
@@ -386,7 +385,7 @@ void display_key(EVP_PKEY *pkey) {
   /* display the key type and size here */
   if (pkey) {
     EC_KEY *myecc = NULL;
-    switch (pkey->type) {
+    switch (EVP_PKEY_base_id(pkey)) {
       case EVP_PKEY_RSA:
         fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
         break;
@@ -425,7 +424,7 @@ void display_key(EVP_PKEY *pkey) {
   /* display the key type and size here */
   if (pkey) {
     EC_KEY *myecc = NULL;
-    switch (pkey->type) {
+    switch (EVP_PKEY_base_id(pkey)) {
       case EVP_PKEY_RSA:
         fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
         break;
@@ -474,17 +473,17 @@ void display_key(EVP_PKEY *pkey) {
 void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   X509_NAME       *certname = NULL;
   X509_NAME     *issuername = NULL;
-  X509_CINF       *cert_inf = NULL;
-  STACK_OF(X509_EXTENSION) *ext_list;
+  //X509_CINF       *cert_inf = NULL;
+  const STACK_OF(X509_EXTENSION) *ext_list;
   const EVP_MD *fprint_type = NULL;
   unsigned char fprint[EVP_MAX_MD_SIZE];
   ASN1_INTEGER *asn1_serial = 0;
              EVP_PKEY *pkey = NULL;
   unsigned int   thumb_size = 0;
-  ASN1_STRING     *asn1_sig = NULL;
-  X509_ALGOR      *sig_type = NULL;
-  size_t          sig_bytes = 0;
-  char   sig_type_str[1024] = "";
+  const ASN1_BIT_STRING *asn1_sig = NULL;
+  const X509_ALGOR      *sig_type = NULL;
+  size_t                sig_bytes = 0;
+  char         sig_type_str[1024] = "";
   long cert_version;
   int i;
 
@@ -521,14 +520,14 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   /* ---------------------------------------------------------- *
    * Extract the certificate's extensions                       *
    * ---------------------------------------------------------- */
-  cert_inf = ct->cert_info;
-  ext_list = cert_inf->extensions;
+  //cert_inf = ct->cert_info;
+  //ext_list = cert_inf->extensions;
+  ext_list = X509_get0_extensions(ct);
 
   /* ---------------------------------------------------------- *
    * Extract the certificate's signature data.                  *
    * ---------------------------------------------------------- */
-  sig_type = ct->sig_alg;
-  asn1_sig = ct->signature;
+  X509_get0_signature(&asn1_sig, &sig_type, ct);
   sig_bytes = asn1_sig->length;
   OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
 
@@ -631,7 +630,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
     /* Some extensions (i.e. LogoType) have no handling    *
      * defined, we need to print their content as hex data */
       fprintf(cgiOut, "%*s", 2, "");
-      M_ASN1_OCTET_STRING_print(bio, ext->value);
+      ASN1_STRING_print(bio,(ASN1_STRING *)X509_EXTENSION_get_data(ext));
     }
     fprintf(cgiOut, "\n");
 
@@ -651,7 +650,7 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   /* display the key type and size here */
   if (pkey) {
     EC_KEY *myecc = NULL;
-    switch (pkey->type) {
+    switch (EVP_PKEY_base_id(pkey)) {
       case EVP_PKEY_RSA:
         fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
         break;
@@ -803,7 +802,7 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "<th class=\"cnt75\">Last Update:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>\n");
-  if (!ASN1_TIME_print(bio, X509_CRL_get_lastUpdate(crl)))
+  if (!ASN1_TIME_print(bio, X509_CRL_get0_lastUpdate(crl)))
     fprintf(cgiOut, "***n/a***");
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
@@ -813,7 +812,7 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "<th class=\"cnt75\">Next Update:");
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "<td>\n");
-  if (!ASN1_TIME_print(bio, X509_CRL_get_nextUpdate(crl)))
+  if (!ASN1_TIME_print(bio, X509_CRL_get0_nextUpdate(crl)))
     fprintf(cgiOut, "***n/a***");
   fprintf(cgiOut, "</td>\n");
   fprintf(cgiOut, "</tr>\n");
@@ -851,7 +850,7 @@ void display_crl(X509_CRL *crl) {
         /* Some extensions (i.e. LogoType) have no handling    * 
          * defined, we need to print their content as hex data */ 
         fprintf(cgiOut, "%*s", 2, ""); 
-        M_ASN1_OCTET_STRING_print(bio, ext->value); 
+        ASN1_STRING_print(bio,(ASN1_STRING *)X509_EXTENSION_get_data(ext));
       } 
       fprintf(cgiOut, "\n"); 
    
@@ -863,12 +862,11 @@ void display_crl(X509_CRL *crl) {
   fprintf(cgiOut, "</tr>\n"); 
 
   //signature
-  ASN1_STRING     *asn1_sig = NULL;
-  X509_ALGOR      *sig_type = NULL;
-  size_t          sig_bytes = 0;
-  char   sig_type_str[1024] = "";
-  sig_type = crl->sig_alg;
-  asn1_sig = crl->signature;
+  const ASN1_BIT_STRING *asn1_sig = NULL;
+  const X509_ALGOR      *sig_type = NULL;
+  size_t                sig_bytes = 0;
+  char         sig_type_str[1024] = "";
+  X509_CRL_get0_signature(crl, &asn1_sig, &sig_type);
   sig_bytes = asn1_sig->length;
   OBJ_obj2txt(sig_type_str, sizeof(sig_type_str), sig_type->algorithm, 0);
 
@@ -945,7 +943,10 @@ void display_crl_top(X509_CRL *crl, int count) {
   X509 *cert = X509_new();
   X509_NAME *certsubject = NULL;
   X509_EXTENSION *reason = NULL;
-  BIGNUM *bn;
+  const ASN1_INTEGER *ser = NULL;
+  BIGNUM *bn = NULL;
+  char altcol[5] = "";
+  div_t oddline_calc;
   for (i=0; i < count; i++) {
     /* ---------------------------------------------------------- *
      * Get the revocation entry from the CRL                      *
@@ -954,11 +955,11 @@ void display_crl_top(X509_CRL *crl, int count) {
     /* ---------------------------------------------------------- *
      * Get cert serial from the revocation entry                  *
      * ---------------------------------------------------------- */
-    bn = ASN1_INTEGER_to_BN(r->serialNumber, NULL);
+    ser = X509_REVOKED_get0_serialNumber(r);;
     /* ---------------------------------------------------------- *
      * Convert the serial to a hex string                         *
      * ---------------------------------------------------------- */
-    serialstr = BN_bn2hex(bn);
+    serialstr = BN_bn2hex(ASN1_INTEGER_to_BN(ser, bn));
     /* ---------------------------------------------------------- *
      * deduct the cert filename from its serial number in hex     *
      * ---------------------------------------------------------- */
@@ -981,23 +982,27 @@ void display_crl_top(X509_CRL *crl, int count) {
     loc = X509_REVOKED_get_ext_by_NID(r, NID_crl_reason, -1);
     reason = X509_REVOKED_get_ext(r, loc);
 
+    oddline_calc = div(i+1, 2);
+    if(oddline_calc.rem) strncpy(altcol, "odd", sizeof(altcol));
+    else strncpy(altcol, "even", sizeof(altcol));
+
     /* serial string column */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td>%s</td>\n", serialstr);
+    fprintf(cgiOut, "<td class=\"%s\">%s</td>\n", altcol, serialstr);
 
     /* subject line column */
-    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<td class=\"%s\">", altcol);
     X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
          ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
     fprintf(cgiOut, "</td>\n");
 
     /* revocation date column */
-    fprintf(cgiOut, "<td>");
-    ASN1_TIME_print(bio, r->revocationDate);
+    fprintf(cgiOut, "<td class=\"%s\">", altcol);
+    ASN1_TIME_print(bio, X509_REVOKED_get0_revocationDate(r));
     fprintf(cgiOut, "</td>\n");
 
     /* revocation reason column */
-    fprintf(cgiOut, "<td>");
+    fprintf(cgiOut, "<td class=\"%s\">", altcol);
     if (loc > -1) X509V3_EXT_print(bio, reason, 0, 2);
     else fprintf(cgiOut, "N/A");
     fprintf(cgiOut, "</td>\n");
@@ -1052,7 +1057,7 @@ STACK_OF(X509_INFO) *X509_load_ca_file(int *cert_count,
   if(fstat->st_size == 0)
     int_error("Error CA cert bundle file size is zero bytes.\n");
 
-  inbio=BIO_new(BIO_s_file_internal());
+  inbio=BIO_new(BIO_s_file());
 
   /* ---------------------------------------------------------- *
    * check if we can open the file for reading                  *
@@ -1336,7 +1341,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<td class=\"desc180\">select CSR signing algorithm here</td>");
    fprintf(cgiOut, "</tr>\n");
 
-   fprintf(cgiOut, "<tr><th colspan=\"4\">&nbsp</th></tr>\n");
+   fprintf(cgiOut, "<tr><th colspan=\"4\">&nbsp;</th></tr>\n");
    fprintf(cgiOut, "</table>\n");
 }
 
@@ -1555,7 +1560,7 @@ X509_CRL * cgi_load_crlfile(char *file) {
   if(crl_fsize == 0)
     int_error("Error CRL file size is zero bytes");
 
-  in=BIO_new(BIO_s_file_internal());
+  in=BIO_new(BIO_s_file());
 
   /* ---------------------------------------------------------- *
    * check if we can open the file for reading                  *

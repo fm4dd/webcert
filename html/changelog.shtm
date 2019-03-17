@@ -10,14 +10,22 @@
 </head>
 
 <body>
-<div id="wrapper">
   <div id="banner">
     <h1>WebCert - Changelog</h1>
     <h2>Web-based Digital Certificate Management - Software Changes</h2>
   </div>
   <!--#include virtual="/site-navigation.htm" -->
 
+<div id="wrapper">
   <div id="content">
+    <h3>2019-03-17 new version 1.8.0 released</h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+      <li>Webcert has been updated to work with the latest versions of OpenSSL 1.1.x</li>
+      <li>Minor UI design CSS style update</li>
+    </ul>
+
    <h3>2017-08-19 new version 1.7.9 released</h3>
     <hr />
     <h4>New functionality:</h4>
@@ -319,31 +327,16 @@ Perl CGI's provide a web interface to take PEM-encoded certificate requests
   </div>
   <div id="sidecontent">
  <br />
- <a href="http://www.openssl.org"><img src="images/openssl_button.gif" alt="OpenSSL Logo" /></a>
- <br />
     <h4>Topics:</h4>
-    <ul>
-      <li><a href="about.htm">About WebCert</a></li>
-      <li><a href="roadmap.htm">Roadmap</a></li>
-      <li><a href="install.htm">Installation</a></li>
-      <li><a href="cgi-bin/help.cgi">WebCert Help</a></li>
-      <li><a href="index.htm">WebCert Start</a></li>
+        <ul>
+      <li><a href="cgi-bin/showhtml.cgi?templ=policy">About WebCert</a></li>
+      <li><a href="changelog.shtm">Changelog</a></li>
+      <li><a href="roadmap.shtm">Roadmap</a></li>
+      <li><a href="cgi-bin/showhtml.cgi?templ=help">WebCert Help</a></li>
+      <li><a href="cgi-bin/showhtml.cgi?templ=index">WebCert Start</a></li>
+      <li><a href="http://github.com/fm4dd/webcert/">Github</a></li>
     </ul>
-    <p>
-    <script type="text/javascript"><!--
-      google_ad_client = "pub-6688183504093504";
-      /* Opensource Software 120x600 */
-      google_ad_slot = "0003115987";
-      google_ad_width = 120;
-      google_ad_height = 600;
-      //-->
-    </script>
-    <script type="text/javascript"
-      src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-    </script>
-    </p>
   </div>
-  <!--#include virtual="/site-discussion.htm" -->
   <!--#include virtual="/site-footerdata.htm" -->
 </div>
 </body>

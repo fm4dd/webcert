@@ -3,9 +3,9 @@ CFLAGS= -O3 -Wall -g
 LIBS= -L/home/lib -lcgic -lm -lssl -lcrypto
 AR=ar
 
-HTMDIR=/srv/www/std-root/fm4dd.com/sw/webcert
-CGIDIR=/srv/www/std-root/fm4dd.com/sw/webcert/cgi-bin
-EXPORTDIR=/srv/www/std-root/fm4dd.com/sw/webcert/export
+HTMDIR=/srv/www/webcert
+CGIDIR=/srv/www/webcert/cgi-bin
+EXPORTDIR=/srv/www/webcert/export
 
 ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi keycompare.cgi certrenew.cgi certrevoke.cgi
 

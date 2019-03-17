@@ -123,9 +123,12 @@ int cgiMain() {
    if ((pkey=EVP_PKEY_new()) == NULL)
       int_error("Error creating EVP_PKEY structure.");
 
+    BIGNUM *exp = BN_new();
+    BN_set_word(exp, RSA_F4);
+
    if(strcmp(keytype, "rsa") == 0) {
       myrsa = RSA_new();
-      if (! (myrsa = RSA_generate_key(rsastrength, RSA_F4, NULL, NULL)))
+      if (! (RSA_generate_key_ex(myrsa, rsastrength, exp, NULL)))
          int_error("Error generating the RSA key.");
 
       if (!EVP_PKEY_assign_RSA(pkey,myrsa))
@@ -134,8 +137,7 @@ int cgiMain() {
 
    else if(strcmp(keytype, "dsa") == 0) {
       mydsa = DSA_new();
-      mydsa = DSA_generate_parameters(dsastrength, NULL, 0, NULL, NULL,
-                                                            NULL, NULL);
+      DSA_generate_parameters_ex(mydsa, dsastrength, NULL, 0, NULL, NULL, NULL);
       if (! (DSA_generate_key(mydsa)))
          int_error("Error generating the DSA key.");
 

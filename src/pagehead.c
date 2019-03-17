@@ -9,8 +9,8 @@
 
 void pagehead(char* title) {
    cgiHeaderContentType("text/html; charset=UTF-8");
-   fprintf(cgiOut, "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-   fprintf(cgiOut, "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">\n");
+   fprintf(cgiOut, "<!DOCTYPE html>");
+   fprintf(cgiOut, "<html>\n");
    fprintf(cgiOut, "<head>\n");
    fprintf(cgiOut, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
    fprintf(cgiOut, "<link rel=\"stylesheet\" type=\"text/css\" href=\"../style/style.css\" />\n");
@@ -22,7 +22,6 @@ void pagehead(char* title) {
    fprintf(cgiOut, "</head>\n");
 
    fprintf(cgiOut, "<body>\n");
-   fprintf(cgiOut, "<div id=\"wrapper\">\n");
    fprintf(cgiOut, "<div id=\"banner\">\n");
    fprintf(cgiOut, "<h1>WebCert - %s</h1>\n", title);
    fprintf(cgiOut, "<h2>Web-based Digital Certificate Management</h2>\n");
@@ -44,5 +43,6 @@ void pagehead(char* title) {
    fprintf(cgiOut, "</ul>\n");
    fprintf(cgiOut, "</div>\n");
 
+   fprintf(cgiOut, "<div id=\"wrapper\">\n");
    fprintf(cgiOut, "<div id=\"content\">\n");
 }

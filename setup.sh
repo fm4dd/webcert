@@ -8,7 +8,7 @@
 # Run as root.
 ##########################################################
 WEBCA_HOME=/srv/app/webCA
-WEBCA_BASE=/var/www/html/webcert
+WEBCA_BASE=/srv/www/webcert
 
 
 echo "Check for $WEBCA_HOME folder."

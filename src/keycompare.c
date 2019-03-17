@@ -182,19 +182,10 @@ int cgiMain() {
         /* ---------------------------------------------------------- *
          * We extract the public key from a CSR file                  *
          * ---------------------------------------------------------- */
-        req = cgi_load_csrfile(file_name);
+         req = cgi_load_csrfile(file_name);
 
-        if ( (req->req_info == NULL) ||
-             (req->req_info->pubkey == NULL) ||
-             (req->req_info->pubkey->public_key == NULL) ||
-             (req->req_info->pubkey->public_key->data == NULL))
-                int_error("Error missing public key in request");
-
-        if ((pub_key=EVP_PKEY_new()) == NULL)
-           int_error("Error creating EVP_PKEY structure.");
-
-        if ((pub_key=X509_REQ_get_pubkey(req)) == NULL)
-           int_error("Error unpacking public key from request");
+         if (! (pub_key = X509_REQ_get_pubkey(req)))
+            int_error("Error getting public key from X509_REQ structure.");
       }
       else int_error("Error getting a certificate or CSR file");
     }
@@ -268,9 +259,9 @@ int cgiMain() {
  * ------------------------------------------------------------- */
 int key_data_check(EVP_PKEY *priv, EVP_PKEY *pub) {
   int ret = -1;
-  switch (priv->type) {
+  switch (EVP_PKEY_base_id(priv)) {
     case EVP_PKEY_RSA:
-      if(pub->type == EVP_PKEY_RSA) {
+      if(EVP_PKEY_base_id(pub) == EVP_PKEY_RSA) {
         RSA *privrsa, *pubrsa;
 
         if((privrsa = EVP_PKEY_get1_RSA(priv)) == NULL)
@@ -286,7 +277,7 @@ int key_data_check(EVP_PKEY *priv, EVP_PKEY *pub) {
       break;
 
     case EVP_PKEY_DSA:
-     if(pub->type == EVP_PKEY_DSA) {
+     if(EVP_PKEY_base_id(pub) == EVP_PKEY_DSA) {
         return ret;
       }
       else
@@ -294,7 +285,7 @@ int key_data_check(EVP_PKEY *priv, EVP_PKEY *pub) {
       break;
 
     case EVP_PKEY_EC:
-      if(pub->type == EVP_PKEY_EC) {
+      if(EVP_PKEY_base_id(pub) == EVP_PKEY_EC) {
         return ret;
       }
       else
@@ -315,12 +306,14 @@ int key_data_check(EVP_PKEY *priv, EVP_PKEY *pub) {
  * ------------------------------------------------------------- */
 int rsa_cmp_mod(RSA *priv, RSA *pub) {
   int match;
+  const BIGNUM **priv_mod = NULL;
+  const BIGNUM **pub_mod = NULL;
 
-  BIGNUM *priv_mod = priv->n;
-  char *priv_mod_hex = BN_bn2hex(priv_mod);
+  RSA_get0_key(priv, priv_mod, NULL, NULL);
+  char *priv_mod_hex = BN_bn2hex(*priv_mod);
 
-  BIGNUM *pub_mod = pub->n;
-  char *pub_mod_hex = BN_bn2hex(pub_mod);
+  RSA_get0_key(pub, pub_mod, NULL, NULL);
+  char *pub_mod_hex = BN_bn2hex(*pub_mod);
 
   //printf("priv: %s\n", priv_mod_hex);
   //printf("pub: %s\n", pub_mod_hex);
@@ -342,9 +335,9 @@ int rsa_cmp_mod(RSA *priv, RSA *pub) {
  * ------------------------------------------------------------- */
 int key_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
   int ret = -1;
-  switch (priv->type) {
+  switch (EVP_PKEY_base_id(priv)) {
     case EVP_PKEY_RSA:
-      if(pub->type == EVP_PKEY_RSA) {
+      if(EVP_PKEY_base_id(pub) == EVP_PKEY_RSA) {
         RSA *privrsa, *pubrsa;
 
         if((privrsa = EVP_PKEY_get1_RSA(priv)) == NULL)
@@ -362,7 +355,7 @@ int key_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
       break;
 
     case EVP_PKEY_DSA:
-     if(pub->type == EVP_PKEY_DSA) {
+     if(EVP_PKEY_base_id(pub) == EVP_PKEY_DSA) {
         DSA *privdsa, *pubdsa;
 
         if((privdsa = EVP_PKEY_get1_DSA(priv)) == NULL)
@@ -381,7 +374,7 @@ int key_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
       break;
 
     case EVP_PKEY_EC:
-      if(pub->type == EVP_PKEY_EC) {
+      if(EVP_PKEY_base_id(pub) == EVP_PKEY_EC) {
         return ret;
       }
       else

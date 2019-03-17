@@ -27,7 +27,7 @@
 #include <openssl/x509_vfy.h>
 
 #define MAXFLAGS 15
-#define CB_STRLEN 255
+#define CB_STRLEN 282
 #define MOZI_PREFIX "mozilla-bundle-"
 #define VERI_PREFIX "verisign-bundle-"
 #define UBUN_PREFIX "ubuntu-bundle-"
@@ -603,7 +603,8 @@ int cgiMain() {
     fprintf(cgiOut, "<th class=\"cnt75\">Reason:");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "<td>");
-    fprintf(cgiOut, "%s", X509_verify_cert_error_string(vrfy_ctx->error));
+    int vrfyerr = X509_STORE_CTX_get_error(vrfy_ctx);
+    fprintf(cgiOut, "%s", X509_verify_cert_error_string(vrfyerr));
     fprintf(cgiOut, "</td>\n");
     fprintf(cgiOut, "</tr>\n");
 

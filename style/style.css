@@ -1,11 +1,11 @@
 /***** Page *****/
 
 body {
-    background: #EFEFEF;
+    background: #FFFFFF;
     background-position: top;
     background-repeat: repeat-x;
     color: #333;
-    margin: .5em;
+    margin: 0;
     padding: 0;
     font-family: Arial, Helvetica, sans-serif;
     font-size: .8em;
@@ -19,12 +19,11 @@ body a:visited {
 /***** Wrapper *****/
 
 #wrapper {
-    background: #FCFBE9;
-    border: 1px solid #BBD1E2;
+    background-color: #f2f2f2;
     color: #000;
-    margin: 0 auto;
-    padding: 12px;
-    width: 900px;
+    margin: 0;
+    padding: 0;
+    width: 902px;
 }
 
 /***** Banner *****/
@@ -34,7 +33,7 @@ body a:visited {
     width: 100%;
     color: #FFFFFF;
     background-color: #004477;
-    background-image:url('../images/logo.gif');
+    background-image:url('/images/logo.gif');
     background-position:98% 50%;
     background-repeat:no-repeat;
 }
@@ -42,7 +41,7 @@ body a:visited {
 #banner h1 {
     margin: 0 0 -.2em 0;
     padding: 0.5em 0 0 1.0em;
-    font-size: 1.5em;
+    font-size: 1.3em;
     letter-spacing: .1em;
     color: #ffffff;
     background-color: transparent;
@@ -62,21 +61,22 @@ body a:visited {
 
 #vmenu {
     width: 100%;
-    height: 30px;
+    height: 29px;
     margin: 0;
     padding: 0;
-    background: #000000 url(../images/bgplastic.gif) top left repeat-x;
+    background: #000000 url(/images/bgplastic.gif) top left repeat-x;
 }
 #vmenu ul {
     list-style: none;
     margin: 0;
     padding: 0;
+    min-width: 880px;
 }
 #vmenu ul li {
     float: left;
     margin: 0;
     padding: 0;
-    background: transparent url(../images/bgplastic-button.gif) top left no-repeat;
+    background: transparent url(/images/bgplastic-button.gif) top left no-repeat;
     height: 30px;
 }
 
@@ -100,18 +100,19 @@ body a:visited {
 }
 
 #vmenu ul li a:hover {
-    background: transparent url(../images/bgplastic-red.gif) top left no-repeat;
+    background: transparent url(/images/bgplastic-red.gif) top left no-repeat;
 }
 
 /***** Content *****/
 
 #content {
+    border-left: 1px solid #e0e0e0;
+    float: right;
+    display: inline;
     background: #FFFFFF;
-    float: left;
-    padding: 10px 15px 10px 15px;
+    padding: 10px 0px 10px 15px;
     margin: 0; 
     width: 700px;
-    border: 1px solid #000000;
     color: #000000;
     min-height: 620px;
 }
@@ -399,10 +400,8 @@ body a:visited {
 /***** Side Content *****/
 
 #sidecontent {
-    float: right;
-    width: 160px;
+    width: 190px;
     color: #000000;
-    background-color: #FCFBE9;
 }
 
 #sidecontent h4 {
@@ -410,7 +409,7 @@ body a:visited {
     font-weight: bold;
     margin: 0;
     /* t r b l */
-    padding: 10px 15px 2px 10px;
+    padding: 10px 15px 2px 15px;
 }
 #sidecontent ul {
     list-style: none;
@@ -421,7 +420,7 @@ body a:visited {
 
 #sidecontent p {
     /* t r b l */
-    padding: 10px 10px 0 10px;
+    padding: 10px 10px 0 15px;
 }
 
 #sidecontent a {
@@ -437,13 +436,13 @@ body a:visited {
     text-decoration: none;
     font-size: 1em;
     display: block;
-    padding: 8px 10px;
+    padding: 8px 15px;
     background: inherit;
 }
 
 #sidecontent li a:hover {
     color: #FFFFFF;
-    background: transparent url(../images/bgplastic-red.gif) top left no-repeat;
+    background: transparent url(/images/bgplastic-red.gif) top left no-repeat;
 }
 
 #sidecontent li ul li {
@@ -460,6 +459,7 @@ body a:visited {
 
 #sidecontent img {
     border-style: none;
+    padding: 8px 15px;
 }
 
 /***** Footer *****/
@@ -484,10 +484,12 @@ body a:visited {
 #footer {
     clear: both;
     color: #006666;
+    background-color: #9999999;
     font-size: .9em;
     height: 1.8em;
     line-height: 1.8em;
     text-align: center;
+    margin: 5px 15px;
 }
 
 #footer a {

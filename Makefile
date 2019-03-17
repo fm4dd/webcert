@@ -12,16 +12,16 @@ INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 
 CADIR=/srv/app/webCA
-BASEDIR=/srv/www/std-root/fm4dd.com/sw
-HTMDIR=${BASEDIR}/webcert
-STLDIR=${BASEDIR}/webcert/style
-IMGDIR=${BASEDIR}/webcert/images
-CGIDIR=${BASEDIR}/webcert/cgi-bin
-EXPORTDIR=${BASEDIR}/webcert/export
+BASEDIR=/srv/www/webcert
+HTMDIR=${BASEDIR}
+STLDIR=${BASEDIR}/style
+IMGDIR=${BASEDIR}/images
+CGIDIR=${BASEDIR}/cgi-bin
+EXPORTDIR=${BASEDIR}/export
 
 ALLHTM=html/*.htm
 ALLSTL=style/style.css
-ALLIMG=images/*.gif
+ALLIMG=images/*.gif images/*.png
 ALLCGI=src/buildrequest.cgi src/genrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/showhtml.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/certvalidate.cgi src/p12convert.cgi src/keycompare.cgi src/certrenew.cgi src/certrevoke.cgi
 ALLSCR=scripts/*.sh
 
