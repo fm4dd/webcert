@@ -223,16 +223,17 @@ int cgiMain() {
      * ---------------------------------------------------------- */
     pagehead(title);
 
-    fprintf(cgiOut, "<h3>Key Comparison Result:</h3>\n");
-    fprintf(cgiOut, "<hr />\n");
-    fprintf(cgiOut, "<p>\n");
+    fprintf(cgiOut, "<h3>Key Comparison:</h3>\n");
+    fprintf(cgiOut, "<p></p>\n");
     fprintf(cgiOut, "<table>\n");
+    fprintf(cgiOut, "<tr><th colspan=2>Result</th></tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td>Result 1: %s</td>\n", cmp_res1_str);
+    fprintf(cgiOut, "<th class=\"cnt75\">Result 1:</th><td>%s</td>\n", cmp_res1_str);
     fprintf(cgiOut, "</tr>\n");
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td>Result 2: %s</td>\n", cmp_res2_str);
+    fprintf(cgiOut, "<th class=\"cnt75\">Result 2:</th><td>%s</td>\n", cmp_res2_str);
     fprintf(cgiOut, "</tr>\n");
+    fprintf(cgiOut, "<tr><th colspan=2>&nbsp;</th></tr>\n");
     fprintf(cgiOut, "</table>\n");
     fprintf(cgiOut, "</p>\n");
     fprintf(cgiOut, "<p>\n");
