@@ -60,10 +60,14 @@ int cgiMain() {
    char 	typesan2[81]     = "";
    char 	typesan3[81]     = "";
    char 	typesan4[81]     = "";
+   char 	typesan5[81]     = "";
+   char 	typesan6[81]     = "";
    char         datasan1[255]    = "";
    char         datasan2[255]    = "";
    char         datasan3[255]    = "";
    char         datasan4[255]    = "";
+   char         datasan5[255]    = "";
+   char         datasan6[255]    = "";
    char 	surname[81]      = "";
    char 	givenname[81]    = "";
 
@@ -90,10 +94,14 @@ int cgiMain() {
    cgiFormString("typesan2", typesan2, sizeof(typesan2));
    cgiFormString("typesan3", typesan3, sizeof(typesan3));
    cgiFormString("typesan4", typesan4, sizeof(typesan4));
+   cgiFormString("typesan5", typesan5, sizeof(typesan5));
+   cgiFormString("typesan6", typesan6, sizeof(typesan6));
    cgiFormString("datasan1", datasan1, sizeof(datasan1));
    cgiFormString("datasan2", datasan2, sizeof(datasan2));
    cgiFormString("datasan3", datasan3, sizeof(datasan3));
    cgiFormString("datasan4", datasan4, sizeof(datasan4));
+   cgiFormString("datasan5", datasan5, sizeof(datasan5));
+   cgiFormString("datasan6", datasan6, sizeof(datasan6));
    cgiFormString("sn", surname, sizeof(surname));
    cgiFormString("gn", givenname, sizeof(givenname));
 
@@ -220,7 +228,8 @@ int cgiMain() {
  * If provided, add SubjectAltName data to the request as a extension        *
  * ------------------------------------------------------------------------- */
    if (strlen(datasan1) != 0 || strlen(datasan2) != 0 ||
-       strlen(datasan3) != 0 || strlen(datasan4) != 0) {
+       strlen(datasan3) != 0 || strlen(datasan4) != 0 ||
+       strlen(datasan5) != 0 || strlen(datasan6) != 0 ) {
       X509_EXTENSION *ext;
       char subaltname[4096] = "";
 
@@ -249,6 +258,22 @@ int cgiMain() {
          strncat(subaltname, typesan4, sizeof(subaltname) - strlen(subaltname));
          strncat(subaltname, ":", sizeof(subaltname) - strlen(subaltname));
          strncat(subaltname, datasan4, sizeof(subaltname) - strlen(subaltname));
+      }
+
+      if (strlen(typesan5) != 0 && strlen(datasan5) != 0) {
+         if (strcmp(subaltname, "") != 0)
+            strncat(subaltname, ", ", sizeof(subaltname) - strlen(subaltname));
+         strncat(subaltname, typesan5, sizeof(subaltname) - strlen(subaltname));
+         strncat(subaltname, ":", sizeof(subaltname) - strlen(subaltname));
+         strncat(subaltname, datasan5, sizeof(subaltname) - strlen(subaltname));
+      }
+
+      if (strlen(typesan6) != 0 && strlen(datasan6) != 0) {
+         if (strcmp(subaltname, "") != 0)
+            strncat(subaltname, ", ", sizeof(subaltname) - strlen(subaltname));
+         strncat(subaltname, typesan6, sizeof(subaltname) - strlen(subaltname));
+         strncat(subaltname, ":", sizeof(subaltname) - strlen(subaltname));
+         strncat(subaltname, datasan6, sizeof(subaltname) - strlen(subaltname));
       }
 
       /* creating the extension object NID_subject_alt_name */

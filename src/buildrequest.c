@@ -111,7 +111,7 @@ int cgiMain() {
    fprintf(cgiOut, "</tr>\n");
 
    fprintf(cgiOut, "<tr>");
-   fprintf(cgiOut, "<th rowspan=\"4\">SAN</th>");
+   fprintf(cgiOut, "<th rowspan=\"6\">SAN</th>");
    fprintf(cgiOut, "<td class=\"type\">");
    fprintf(cgiOut, "<select name=\"typesan1\">\n");
    fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 1</option>\n");
@@ -170,6 +170,37 @@ int cgiMain() {
    fprintf(cgiOut, "<td class=\"desc180\">");
    fprintf(cgiOut, "Subject Alternative Name 4</td>");
    fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "<select name=\"typesan5\">\n");
+   fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 5</option>\n");
+   fprintf(cgiOut, "<option value=\"IP\">IP Address 5</option>\n");
+   fprintf(cgiOut, "<option value=\"URI\">URI 5</option>\n");
+   fprintf(cgiOut, "<option value=\"RID\">Registered ID 5</option>\n");
+   fprintf(cgiOut, "</select></td>\n");
+   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"datasan5\" size=\"40\" value=\"\" />");
+   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">");
+   fprintf(cgiOut, "Subject Alternative Name 5</td>");
+   fprintf(cgiOut, "</tr>\n");
+
+   fprintf(cgiOut, "<tr>");
+   fprintf(cgiOut, "<td class=\"type\">");
+   fprintf(cgiOut, "<select name=\"typesan6\">\n");
+   fprintf(cgiOut, "<option value=\"DNS\" selected=\"selected\">DNS Name 6</option>\n");
+   fprintf(cgiOut, "<option value=\"IP\">IP Address 6</option>\n");
+   fprintf(cgiOut, "<option value=\"URI\">URI 6</option>\n");
+   fprintf(cgiOut, "<option value=\"RID\">Registered ID 6</option>\n");
+   fprintf(cgiOut, "</select></td>\n");
+   fprintf(cgiOut, "<td>");
+   fprintf(cgiOut, "<input type=\"text\" name=\"datasan6\" size=\"40\" value=\"\" />");
+   fprintf(cgiOut, "</td>");
+   fprintf(cgiOut, "<td class=\"desc180\">");
+   fprintf(cgiOut, "Subject Alternative Name 6</td>");
+   fprintf(cgiOut, "</tr>\n");
+
 
    fprintf(cgiOut, "<tr>");
    fprintf(cgiOut, "<th colspan=\"4\">");

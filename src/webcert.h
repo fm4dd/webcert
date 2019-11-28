@@ -61,7 +61,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.8.0 (03/17/2019)"
+#define SW_VERSION	"WebCert v1.8.1 (11/28/2019)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
