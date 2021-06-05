@@ -178,6 +178,10 @@ int cgiMain() {
    if ((webrequest=X509_REQ_new()) == NULL)
       int_error("Error creating new X509_REQ structure.");
 
+   /* set PKCS#10 CSR version as 0x0 = 'v1' */
+   if (X509_REQ_set_version(webrequest, 0) == 0)
+      int_error("Error setting CSR version for X509_REQ structure.");
+
    if (X509_REQ_set_pubkey(webrequest, pkey) == 0)
       int_error("Error setting public key for X509_REQ structure.");
 

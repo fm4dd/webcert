@@ -28,7 +28,7 @@ int cgiMain() {
    char	  certfile[81]    = "";
    char	  email_head[255] = "email:";
    char	  email_name[248] = "";
-   char	 certfilestr[255] = "";
+   char	 certfilestr[81]  = "";
    char	     *validlist[] = { "vd","se" };
    int	        valid_res = 0;
    char  startdatestr[16] = "";
@@ -117,8 +117,9 @@ int cgiMain() {
       if (! (cgiFormString("endtime", endtime, 11) == cgiFormSuccess ))
          int_error("Error getting end time from previous form");
 
-      strncpy(startdatestr, mkdatestr(startdate, starttime), 16);
-      strncpy(enddatestr, mkdatestr(enddate, endtime), 16);
+      /* mkdatestr returns a 15-char string + \0 */
+      strncpy(startdatestr, mkdatestr(startdate, starttime), 15);
+      strncpy(enddatestr, mkdatestr(enddate, endtime), 15);
    }
 
    if (cgiFormRadio("type", typelist, 5, &type_res, 0) == cgiFormNotFound )

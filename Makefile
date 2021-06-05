@@ -26,6 +26,7 @@ ALLCGI=src/buildrequest.cgi src/genrequest.cgi src/certsign.cgi src/certrequest.
 ALLSCR=scripts/*.sh
 
 all: 
+	cd cgic && ${MAKE}
 	cd src && ${MAKE}
 
 install:
@@ -55,4 +56,5 @@ install:
 	install -v ${ALLSCR} ${CADIR}/scripts
 
 clean:
+	cd cgic && ${MAKE} clean
 	cd src && ${MAKE} clean

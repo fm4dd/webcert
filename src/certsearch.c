@@ -66,7 +66,7 @@
          X509      *cert             = NULL;
          X509_NAME *certsubject      = NULL;
 	 X509_NAME_ENTRY *e          = NULL;
-         char      certfilestr[277]  = "";
+         char      certfilestr[281]  = "";
          FILE      *certfile         = NULL;
 
 void resubmit();

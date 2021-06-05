@@ -31,10 +31,10 @@ int cgiMain() {
    char 		certfilestr[81]     = "[n/a]";
    FILE 		*cacertfile         = NULL;
    FILE 		*certfile           = NULL;
-   char 		exportfilestr[81]   = "[n/a]";
+   char 		exportfilestr[125]  = "[n/a]";
    FILE 		*exportfile         = NULL;
    int			bytes               = 0;
-   char 		title[41]           = "Download Certificate";
+   char 		title[111]          = "Download Certificate";
    char 		privkeystr[KEYLEN]  = "";
    char			p12pass[P12PASSLEN] = "";
    char			cainc[4]            = "";

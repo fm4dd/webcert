@@ -33,23 +33,23 @@ void csr_validate_PEM(char * form) {
       int_error("Error invalid request format, received garbage line");
 
    /* Use a temporary buffer reqtest to modify the content */
-   char reqtest[REQLEN] = "";
+   char reqtest[REQLEN+1] = "";
    strncpy(reqtest, form, REQLEN);
 
    /* Identify the last line */
    char endline[81] = "";
-   strncpy(endline, (strrchr(reqtest, '\n')+1), 81);
+   strncpy(endline, (strrchr(reqtest, '\n')+1), 80);
 
    /* should there be extra newlines at file end, we remove here */
    while(strlen(endline) == 0 && strlen(reqtest) > 0) {
       reqtest[strlen(reqtest)-1] = '\0';
-      strncpy(endline, (strrchr(reqtest, '\n')+1), 81);
+      strncpy(endline, (strrchr(reqtest, '\n')+1), 80);
    }
 
    /* Identify the first line */
    char beginline[81] = "";
    strtok(reqtest, "\n");
-   strncpy(beginline, reqtest, 81);
+   strncpy(beginline, reqtest, 80);
 
    /* should there be a windows carriage return, we remove it here */
    char *char_pos = NULL;
@@ -86,23 +86,23 @@ void key_validate_PEM(char * form) {
       int_error("Error invalid key format, received garbage line.");
 
    /* Use a temporary buffer keytest to modify the content */
-   char keytest[KEYLEN] = "";
+   char keytest[KEYLEN+1] = "";
    strncpy(keytest, form, KEYLEN);
 
    /* copy the last line */
    char endline[81] = "";
-   strncpy(endline, (strrchr(keytest, '\n')+1), 81);
+   strncpy(endline, (strrchr(keytest, '\n')+1), 80);
 
    /* should there be extra newlines at file end, we remove here */
    while (strlen(endline) == 0 && strlen(keytest) > 0) {
       keytest[strlen(keytest)-1] = '\0';
-      strncpy(endline, (strrchr(keytest, '\n')+1), 81);
+      strncpy(endline, (strrchr(keytest, '\n')+1), 80);
    }
 
    /* Identify the first line */
    char beginline[81] = "";
    strtok(keytest, "\n");
-   strncpy(beginline, keytest, 81);
+   strncpy(beginline, keytest, 80);
 
    /* should there be a windows carriage return, we remove it here */
    char *char_pos = NULL;

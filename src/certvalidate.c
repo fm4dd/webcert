@@ -868,13 +868,13 @@ int create_socket(char url_str[]) {
   strncpy(srvname, url_str, (strchr(url_str, ':')-url_str));
 
   /* the hostname starts after the "://" part */
-  strncpy(hostname, strstr(url_str, "://")+3, sizeof(hostname));
+  strncpy(hostname, strstr(url_str, "://")+3, sizeof(hostname)-1);
 
   /* if the hostname contains :, we got a port number */
   if(strchr(hostname, ':')) {
     tmp_ptr = strchr(hostname, ':');
     /* the last : starts the port number, if avail, i.e. 8443 */
-    strncpy(portnum, tmp_ptr+1,  sizeof(portnum));
+    strncpy(portnum, tmp_ptr+1,  sizeof(portnum)-1);
     *tmp_ptr = '\0';
     port = atoi(portnum);
   }

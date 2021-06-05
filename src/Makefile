@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS= -O3 -Wall -g
-LIBS= -L/home/lib -lcgic -lm -lssl -lcrypto
+CFLAGS= -I../cgic -O3 -Wall -g
+LIBS= -L../cgic -lcgic -lm -lssl -lcrypto
 AR=ar
 
 HTMDIR=/srv/www/webcert

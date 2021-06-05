@@ -46,7 +46,7 @@ int cgiMain() {
 
   static char      title[]           = "List of existing Certificates";
          char      sorting[16]       = "desc";
-         char      certfilestr[277]  = "";
+         char      certfilestr[281]  = "";
          FILE      *certfile         = NULL;
          BIO       *membio           = NULL;
          BIO       *outbio           = NULL;

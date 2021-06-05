@@ -18,6 +18,16 @@
 
 <div id="wrapper">
   <div id="content">
+    <h3>2021-06-05 new version 1.8.2 released</h3>
+    <hr />
+    <h4>Bug fixes:</h4>
+    <ul>
+      <li>Set the generated certificate signing request version as '1' (0x0)</li>
+      <li>Review and correct code for gcc v9 compiler warnings</li>
+      <li>Embed the dependend CGIC library</li>
+      <li>Add the Github compile check workflow</li>
+    </ul>
+
     <h3>2019-03-17 new version 1.8.0 released</h3>
     <hr />
     <h4>New functionality:</h4>

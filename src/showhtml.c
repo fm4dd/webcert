@@ -11,7 +11,7 @@ int cgiMain() {
   int ret;
   FILE *fp = NULL;
   static char templ[41];
-  static char title[41];
+  static char title[81];
 
   if (! (cgiFormString("templ", templ, sizeof(templ)) == cgiFormSuccess))
     int_error("Error getting >templ< from calling URL");

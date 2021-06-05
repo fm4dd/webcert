@@ -1,4 +1,7 @@
 ## WebCert
+
+![test](https://github.com/fm4dd/webcert/workflows/test/badge.svg)
+
 #### A Web Tool for Generation and Management of digital Certificates
 
 Digital Certificates are needed everywhere in today's world. They are used
@@ -79,9 +82,7 @@ The webserver writeable certificate and export directory should be secured
 
 #### Copyright and License:
 
-WebCert was written by Frank4DD. It is distributed under the GPL.
-Anybody may reproduce it, use it, send it, print it, transfer on a T-shirt,
-etc. without modifying its content or removing the copyright.
+WebCert was written by Frank4DD. It is distributed under the MIT license.
 
 #### Legal Disclaimer:
 
