@@ -19,7 +19,7 @@ IMGDIR=${BASEDIR}/images
 CGIDIR=${BASEDIR}/cgi-bin
 EXPORTDIR=${BASEDIR}/export
 
-ALLHTM=html/*.htm
+ALLHTM=html/*.htm html/*.shtm
 ALLSTL=style/style.css
 ALLIMG=images/*.gif images/*.png
 ALLCGI=src/buildrequest.cgi src/genrequest.cgi src/certsign.cgi src/certrequest.cgi src/certverify.cgi src/showhtml.cgi src/getcert.cgi src/certstore.cgi src/certsearch.cgi src/certexport.cgi src/certvalidate.cgi src/p12convert.cgi src/keycompare.cgi src/certrenew.cgi src/certrevoke.cgi

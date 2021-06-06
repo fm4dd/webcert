@@ -58,7 +58,7 @@ will show you the certificate information that will be signed.
 </p>
 <p>
 Here, several additional certificate extensions can be set such as
-the <b>key usage</b>, defining the type of the certificate.
+the <b>Key Usage</b>, defining the type of the certificate.
 The extended key usage option can be be added to certificates who *really*
 need it. Please enable this option only if you are sure this is
 needed. For example, server certificates used with Microsoft Windows
@@ -127,8 +127,8 @@ the <b>Export</b> functions to download the certificate as a file.
 <br />
 A detailed description for generating a S/Mime certificate to
 enable e-mail encryption is here:
-<a href="http://fm4dd.com/howto/openssl/webcert-smime-howto.htm">
-http://fm4dd.com/howto/openssl/webcert-smime-howto.htm</a>
+<a href="http://fm4dd.com/openssl/webcert-smime-howto.htm">
+http://fm4dd.com/openssl/webcert-smime-howto.htm</a>
 </p>
 <h3>5. Certificate Export</h3>
 <hr />
@@ -155,7 +155,7 @@ such as [certfile].pem for PEM files - try to rename it if that is
 the case. Sometimes it is also necessary to co-install the CA Root
 certificate to enable the verification of the generated certificate.
 WebCerts singing Root CA certificate is available for download
-through the <b>Root CA Cert</b> menu item.
+through the <b>CA Cert</b> menu item.
 </p>
 <h3>7. Certificate Management</h3>
 <hr />
@@ -187,7 +187,7 @@ are about to expire, and let us renew them before they become invalid.
 <hr />
 <div class="pic"><img src="../images/webcert-certificate-validation-icon.png" alt="webcert certificate validation" /></div>
 <p>
-The <b>Verify Certs</b> menu option is a powerful way to identify
+The <b>Verify Cert</b> menu option is a powerful way to identify
 issues around certificates. A crucial part of using certificates
 lies in the validation through a chain of "signing" certificates.
 With this function, the chain can be constructed and verified,
@@ -235,41 +235,35 @@ In short, CAREFULLY pasting the request resolves most errors.
 Trying to generate a certificate from a request that has been
 already processed works just fine.
 </p>
-<h3>12. Browser Complaints</h3>
+<h3>12. Browser Warnings</h3>
 <hr />
 <p>
-Browser constantly asks if this certificate can be trusted and
-complains about various things:
+Browsers generate certificate warnings or errors with the most
+likely causes being the certificate being expired, the certificate
+not being signed by a trusted CA, or the certificate does not
+match the URL/device name being accessed.
 </p>
 <p>
 Importing the Root CA "parent" certificate can help resolve
-this issue. Thats what the "Get Root CA cert" is for. Loading
-the Root CA into your browser enables the automatic
-verification of the certificate every time you connect. No
-questions asked.
+the issue of trust. In Webcert, the "CA Cert" can be used to
+import the Root CA into your system, and enable the automatic
+verification of the certificate every time you connect.
 </p>
 <p>
 If there is still the window popping up asking if you want
 to accept this certificate, then its mostly a missmatch between
 the certificate common name (CN) and the device name/server
 name/device IP/server IP.  Either the certificate was requested
-wrongly, or the device changed its name/IP recently. Ask the
-device owner to generate a new certificate (request) with the
-valid device name/IP entry.
+wrongly, or the device changed its name/IP recently. This
+requires the device owner to generate a new certificate with the
+valid name or IP included.
 </p>
 <p>
 Certificates are signed to be valid for a time range and
 "expire". The expiration defaults to 3 years. This should
 give plenty of time to regenerate a new certificate when
 the time comes. Certificates still can work when when expired,
-but the browser comes up with and error message. Re-
-certification of devices is a good way to enforce inventory
-updates.
-</p>
-<p>
-OpenSSL on 32-bit systems may encounter the year-2038 bug.
-WebCert can restrict the certificate generation prior to
-the critical date.
+but the date verification typically lets connections fail.
 </p>
 <h3>13. Links</h3>
 <hr />
@@ -278,5 +272,5 @@ the critical date.
 generate S/MIME e-mail encryption certificates with WebCert</a></li>
 </ul>
 <p>
-last update 1/11/2016			@2003-2016 Frank4DD
+last update 1/11/2021			@2003-2021 fm4dd
 </p>

@@ -35,7 +35,7 @@
 #define YEARS_VALID     3
 
 /*********** CRL Handling: The link to webcerts crl ***************************/
-#define CRLURI		"URI:http://fm4dd.com/sw/webcert/webcert.crl"
+#define CRLURI		"URI:http://webcert.fm4dd.com/webcert.crl"
 #define CRLFILE		"/srv/www/webcert/webcert.crl"
 #define REVOKEY         "/srv/app/webCA/private/revocation-pub.pem"
 /*********** we store the list of revoked certs in index.txt ******************/
