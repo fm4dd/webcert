@@ -68,6 +68,7 @@
 	 X509_NAME_ENTRY *e          = NULL;
          char      certfilestr[281]  = "";
          FILE      *certfile         = NULL;
+	 int       certssearched     = 0;
 
 void resubmit();
 int check_index(X509 *x509, CA_DB *db);
@@ -97,9 +98,11 @@ int file_select(const struct dirent *entry) {
 
   /* if we cannot open the file, we move on  to the next */
   if ((certfile = fopen(certfilestr, "r")) == NULL) return 0;
+  // errno=0; if ((certfile = fopen(certfilestr, "r")) == NULL) int_error(strerror(errno));
 
-  /* now we load the certificate data */
+  /* now we load the certificate data and increment counter */
   if (! (cert = PEM_read_X509(certfile,NULL,NULL,NULL))) return 0;
+  certssearched++;
 
   /* if search type is dn, check if dn field contains the search value */
   if (strcmp(search, "dn") == 0) {
@@ -113,9 +116,12 @@ int file_select(const struct dirent *entry) {
       OBJ_obj2txt(buf, 80, X509_NAME_ENTRY_get_object(e), 0);
 
       /* when the search file matches the cert subject field  */
-      /* check if the field value is equal the search value   */
-      if(strstr(buf, field) != NULL)
-        if(strstr( (char *) X509_NAME_ENTRY_get_data(e), dnvalue) != NULL) return 1;
+      if(strstr(buf, field) != NULL) {
+        ASN1_STRING *asn1Data = X509_NAME_ENTRY_get_data(e);
+	const unsigned char *datastr = ASN1_STRING_get0_data(asn1Data);
+        /* check if the field value is equal the search value   */
+        if(strstr((char *)datastr, dnvalue) != NULL) return 1;
+      }
     }
   }
 
@@ -278,7 +284,7 @@ int file_select(const struct dirent *entry) {
     if ( BN_cmp(startserialbn, certserialbn) <= 0 &&
          BN_cmp(endserialbn, certserialbn) >= 0 ) return 1;
   }
-
+  fclose(certfile);
   return 0;
 }
 
@@ -522,7 +528,7 @@ int cgiMain() {
                                                      != cgiFormSuccess )
         int_error("Error retrieving CGI form DN search dnvalue information.");
         snprintf(title, sizeof(title), "Search Certs by Subject");
-        snprintf(subtitle, sizeof(subtitle), "Certificates with DN %s=%s", field, dnvalue);
+        snprintf(subtitle, sizeof(subtitle), "Certificates with DN %s containing %s", field, dnvalue);
       }
       else if (strcmp(search, "exp") == 0) {
         if ( cgiFormString("exp_startdate", exp_startdate, sizeof(exp_startdate))
@@ -930,7 +936,7 @@ int cgiMain() {
 
   fprintf(cgiOut, "<tr>\n");
   fprintf(cgiOut, "<th colspan=\"5\">");
-  fprintf(cgiOut, "Total # of certs: %d | ", certcounter);
+  fprintf(cgiOut, " Found %d of %d Certs | ", certcounter, certssearched);
   fprintf(cgiOut, "Page %d of %d", pagenumber, pagecounter);
   fprintf(cgiOut, "</th>");
   fprintf(cgiOut, "</tr>");

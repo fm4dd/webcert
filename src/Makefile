@@ -7,7 +7,7 @@ HTMDIR=/srv/www/webcert
 CGIDIR=/srv/www/webcert/cgi-bin
 EXPORTDIR=/srv/www/webcert/export
 
-ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi keycompare.cgi certrenew.cgi certrevoke.cgi
+ALLCGI=buildrequest.cgi genrequest.cgi certsign.cgi certrequest.cgi certverify.cgi showhtml.cgi getcert.cgi certstore.cgi certsearch.cgi certexport.cgi certvalidate.cgi p12convert.cgi keycompare.cgi certrenew.cgi certrevoke.cgi crlstore.cgi
 
 ALLJS=webcert.js
 
@@ -58,6 +58,9 @@ getcert.cgi: webcert.o revocation.o getcert.o
 
 certstore.cgi: revocation.o certstore.o
 	$(CC) serial.o revocation.o certstore.o pagehead.o pagefoot.o handle_error.o -o certstore.cgi ${LIBS}
+
+crlstore.cgi: webcert.o crlstore.o
+	$(CC) serial.o revocation.o webcert.o crlstore.o pagehead.o pagefoot.o handle_error.o -o crlstore.cgi ${LIBS}
 
 certsearch.cgi: revocation.o certsearch.o
 	$(CC) serial.o revocation.o certsearch.o pagehead.o pagefoot.o handle_error.o -o certsearch.cgi ${LIBS}

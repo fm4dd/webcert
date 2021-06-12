@@ -909,7 +909,8 @@ void display_crl(X509_CRL *crl) {
   BIO_free(bio);
 }
 
-void display_crl_top(X509_CRL *crl, int count) {
+/* rename to display_crl_list() */
+void display_crl_list(X509_CRL *crl, int count, char *order, int page) {
   BIO *bio;
   bio = BIO_new(BIO_s_file());
   bio = BIO_new_fp(cgiOut, BIO_NOCLOSE);
@@ -927,6 +928,7 @@ void display_crl_top(X509_CRL *crl, int count) {
 
   fprintf(cgiOut, "<table>");
   fprintf(cgiOut, "<tr>\n");
+  fprintf(cgiOut, "<th>#</th>");
   fprintf(cgiOut, "<th>Serial</th>");
   fprintf(cgiOut, "<th>Subject</th>");
   fprintf(cgiOut, "<th>Revocation Date</th>");
@@ -934,7 +936,7 @@ void display_crl_top(X509_CRL *crl, int count) {
   fprintf(cgiOut, "<th width=\"65\">Action</th>");
   fprintf(cgiOut, "</tr>\n");
 
-  int i;
+  int i = 0;
   char filename[256];
   char filepath[1024];
   char *serialstr;
@@ -947,11 +949,19 @@ void display_crl_top(X509_CRL *crl, int count) {
   BIGNUM *bn = NULL;
   char altcol[5] = "";
   div_t oddline_calc;
-  for (i=0; i < count; i++) {
+
+  if ((strcmp(order, "asc") == 0) && (page >= 1)) i=1+(count*(page-1));
+  if ((strcmp(order, "desc") == 0) && (page >= 1)) i=(revnum-(count*(page-1)));
+  if ((strcmp(order, "desc") == 0) && (i<count)) count = i;
+
+  while(1) {
+    if ((strcmp(order, "desc") == 0) && (i == revnum-(count*page))) break;
+    if ((strcmp(order, "asc") == 0) && (i == (count*page)+1)) break;
+    if (i < 1 || i > revnum) break;
     /* ---------------------------------------------------------- *
      * Get the revocation entry from the CRL                      *
      * ---------------------------------------------------------- */
-    r = sk_X509_REVOKED_value(rev, i);
+    r = sk_X509_REVOKED_value(rev, i-1);
     /* ---------------------------------------------------------- *
      * Get cert serial from the revocation entry                  *
      * ---------------------------------------------------------- */
@@ -986,12 +996,15 @@ void display_crl_top(X509_CRL *crl, int count) {
     if(oddline_calc.rem) strncpy(altcol, "odd", sizeof(altcol));
     else strncpy(altcol, "even", sizeof(altcol));
 
-    /* serial string column */
+    /* certcount column */
     fprintf(cgiOut, "<tr>\n");
-    fprintf(cgiOut, "<td class=\"%s\">%s</td>\n", altcol, serialstr);
+    fprintf(cgiOut, "<th width=\"20\">%d</th>\n", i);
+
+    /* serial string column */
+    fprintf(cgiOut, "<td width=\"30\" class=\"%s\">%s</td>\n", altcol, serialstr);
 
     /* subject line column */
-    fprintf(cgiOut, "<td class=\"%s\">", altcol);
+    fprintf(cgiOut, "<td width=\"465\"class=\"%s\">", altcol);
     X509_NAME_print_ex_fp(cgiOut, certsubject, 0,
          ASN1_STRFLGS_UTF8_CONVERT|XN_FLAG_SEP_CPLUS_SPC);
     fprintf(cgiOut, "</td>\n");
@@ -1017,11 +1030,14 @@ void display_crl_top(X509_CRL *crl, int count) {
     fprintf(cgiOut, "</form>\n");
     fprintf(cgiOut, "</th>\n");
     fprintf(cgiOut, "</tr>\n");
+
+    if (strcmp(order, "desc") == 0) i--;
+    if (strcmp(order, "asc") == 0) i++;
   }
 
   fprintf(cgiOut, "<tr>\n");
-  fprintf(cgiOut, "<th colspan=\"5\">");
-  fprintf(cgiOut, "Certificate Revocation List - Latest %d  of %d entries", count, revnum);
+  fprintf(cgiOut, "<th colspan=\"6\">");
+  fprintf(cgiOut, "Total number of revoked certs %d | Page %d", revnum, page);
   fprintf(cgiOut, "</th>\n");
   fprintf(cgiOut, "</tr>\n");
 

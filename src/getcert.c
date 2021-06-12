@@ -224,8 +224,8 @@ int cgiMain() {
          fprintf(cgiOut, "<h3>CA Certificate Revocation List:</h3>\n");
          fprintf(cgiOut, "<hr />\n");
          display_crl(crl);
-         fprintf(cgiOut, "<p></p>\n");
-         display_crl_top(crl, 5);
+         //fprintf(cgiOut, "<p></p>\n");
+         //display_crl_list(crl, 4, "desc",1);
       }   
       else fprintf(cgiOut, "<p>Cannot find file: %s</p>\n", CRLFILE);
    }

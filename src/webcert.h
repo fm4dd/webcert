@@ -61,7 +61,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.8.2 (06/05/2021)"
+#define SW_VERSION	"WebCert v1.8.3 (06/12/2021)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
@@ -155,7 +155,7 @@ void display_signing(X509_REQ *);
 void display_csr(X509_REQ *);
 void display_key(EVP_PKEY *);
 void display_crl(X509_CRL *);
-void display_crl_top(X509_CRL *crl, int count);
+void display_crl_list(X509_CRL *crl, int count, char *sorting, int pagenum);
 
 /* ---------------------------------------------------------- *
  * xxx_validate_PEM(): a basic check of xxx PEM format input  *

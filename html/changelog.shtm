@@ -18,6 +18,18 @@
 
 <div id="wrapper">
   <div id="content">
+    <h3>2021-06-12 new version 1.8.3 released</h3>
+    <hr />
+    <h4>New functionality:</h4>
+    <ul>
+      <li>Adding "List Revoked" to display the full list of revoked certs</li>
+    </ul>
+        <h4>Bug fixes:</h4>
+    <ul>
+      <li>certsearch.cgi - Search by DN returned no data</li>
+      <li>certsearch.cgi - "too many open files" error</li>
+    </ul>
+
     <h3>2021-06-05 new version 1.8.2 released</h3>
     <hr />
     <h4>Bug fixes:</h4>

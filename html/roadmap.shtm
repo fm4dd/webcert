@@ -18,7 +18,7 @@
 
 <div id="wrapper">
   <div id="content">
-    <h3>2019-12-31 target for version 1.8.1 release</h3>
+    <h3>2022 target for version 1.8.4 release</h3>
     <hr />
     <p>
 The initial design goal of keeping it "simple" is a major challenge. PKI and certificates are anything but simple, and although WebCert is not meant to be a full-blown CA, it certainly starts to add more CA functionality.
@@ -26,12 +26,6 @@ The initial design goal of keeping it "simple" is a major challenge. PKI and cer
     <h4>Functions Wishlist:</h4>
 <p>At least one of the following features should make it:</p>
     <ul>
-      <li>
-Implementation of a renewal function for expired certificates
-      </li>
-      <li>
-Implementation of certificate revocations with a CRL
-      </li>
       <li>
 Implementation of OCSP
       </li>
