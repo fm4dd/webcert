@@ -61,7 +61,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.8.3 (06/12/2021)"
+#define SW_VERSION	"WebCert v1.8.4 (12/20/2021)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
@@ -183,5 +183,5 @@ int cgi_gencrl(char *crlfile);
 
 void keycreate_input();
 
-char error_str[4096];
+extern char error_str[4096];
 /****************************** end webcert.h *********************************/

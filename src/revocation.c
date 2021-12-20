@@ -11,6 +11,7 @@
 #include <openssl/ocsp.h>
 #include <openssl/conf.h>
 #include "webcert.h"
+#include "common.h"
 
 #define BSIZE           256
 #define B_FORMAT_TEXT   0x8000

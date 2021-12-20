@@ -18,6 +18,14 @@
 
 <div id="wrapper">
   <div id="content">
+    <h3>2021-12-20 new version 1.8.4 released</h3>
+    <hr />
+        <h4>Bug fixes:</h4>
+    <ul>
+	    <li>Apply patch from mshedsilegx to fix RHEL8 gcc 10 linker errors on multiple definitions of error_str, <a href="https://github.com/fm4dd/webcert/issues/3">github issue #3</a></li>
+      <li>refactor strncpy into memcpy with dedicated string termination to eliminate two gcc warnings for -Wstringop-truncation</li>
+    </ul>
+
     <h3>2021-06-12 new version 1.8.3 released</h3>
     <hr />
     <h4>New functionality:</h4>

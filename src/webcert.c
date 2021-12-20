@@ -48,8 +48,14 @@ void csr_validate_PEM(char * form) {
 
    /* Identify the first line */
    char beginline[81] = "";
-   strtok(reqtest, "\n");
-   strncpy(beginline, reqtest, 80);
+   strtok(reqtest, "\n");            // remove all data after first newline
+   int beginlen = strlen(reqtest);   // check 1st line is less than 81 chars
+   if(beginlen < 81) {
+      memcpy(beginline, reqtest, beginlen); // copy 1st line to beginline
+      beginline[beginlen+1] = '\0';         // terminate string
+   }
+   else
+      int_error("Error invalid request format, received garbage line");
 
    /* should there be a windows carriage return, we remove it here */
    char *char_pos = NULL;
@@ -102,7 +108,14 @@ void key_validate_PEM(char * form) {
    /* Identify the first line */
    char beginline[81] = "";
    strtok(keytest, "\n");
-   strncpy(beginline, keytest, 80);
+   int beginlen = strlen(keytest);   // check 1st line is less than 81 chars
+   if(beginlen < 81) {
+      memcpy(beginline, keytest, beginlen); // copy 1st line to beginline
+      beginline[beginlen+1] = '\0';         // terminate string
+   }
+   else
+      int_error("Error invalid request format, received garbage line");
+
 
    /* should there be a windows carriage return, we remove it here */
    char *char_pos = NULL;
