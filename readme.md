@@ -31,13 +31,13 @@ not just a frontend to the openssl program, but independently written.
 It only requires standard C libraries,  the OpenSSL libraries and the CGIC
 library from Thomas Boutell. As a result, you don't need to maintain any of
 the web-application enabling technologies like JSP, PHP, Phyton...
-It is using simple CGI technology for easiest installation and maintenance.
+It is using simple CGI technology for the easiest installation and maintenance.
 
 ### External Dependencies:
 
 *	Thomas Boutell's CGIC library, see http://www.boutell.com/cgic/
 
-*	OpenSSL libary and headers, see http://www.openssl.org/
+*	OpenSSL library and headers, see http://www.openssl.org/
 
 Make sure you have:
 	`-I<path-to-cgic-includes>` and `-L<path-to-cgic-lib>`, and
@@ -75,8 +75,8 @@ A more complete installation procedure is provided in INSTALL.
 
 #### Security:
 
-It is highly adviseable to provide access control and SSL encryption
-to the WebCert interface for any use other then experimental.
+It is highly advisable to provide access control and SSL encryption
+to the WebCert interface for any use other than experimental.
 The webserver writeable certificate and export directory should be secured
 (i.e. by a Apache <Directory> directive).
 
