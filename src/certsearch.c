@@ -548,10 +548,10 @@ int cgiMain() {
         int_error("Error retrieving CGI form expiration end time.");
 
         strncat(exp_startstr, exp_startdate, sizeof(exp_startstr)-1);
-        strncat(exp_startstr, " ", 1); /* add a space between date and time */
+        strcat(exp_startstr, " "); /* add a space between date and time */
         strncat(exp_startstr, exp_starttime, sizeof(exp_startstr)-strlen(exp_startstr)-1);
         strncat(exp_endstr, exp_enddate, sizeof(exp_endstr)-1);
-        strncat(exp_endstr, " ", 1); /* add a space between date and time */
+        strcat(exp_endstr, " "); /* add a space between date and time */
         strncat(exp_endstr, exp_endtime, sizeof(exp_endstr)-strlen(exp_endstr)-1);
         snprintf(title, sizeof(title), "Search Certs by Expiration");
         snprintf(subtitle, sizeof(subtitle), "Certificates with expiration between %s and %s", exp_startstr, exp_endstr);
@@ -574,10 +574,10 @@ int cgiMain() {
         int_error("Error retrieving CGI form enable end time.");
 
         strncat(ena_startstr, ena_startdate, sizeof(ena_startstr)-1);
-        strncat(ena_startstr, " ", 1); /* add a space between date and time */
+        strcat(ena_startstr, " "); /* add a space between date and time */
         strncat(ena_startstr, ena_starttime, sizeof(ena_startstr)-strlen(ena_startstr)-1);
         strncat(ena_endstr, ena_enddate, sizeof(ena_endstr)-1);
-        strncat(ena_endstr, " ", 1); /* add a space between date and time */
+        strcat(ena_endstr, " "); /* add a space between date and time */
         strncat(ena_endstr, ena_endtime, sizeof(ena_endstr)-strlen(ena_endstr)-1);
         snprintf(title, sizeof(title), "Search Certs by Start Date");
         snprintf(subtitle, sizeof(subtitle), "Certificates with start date between %s and %s", ena_startstr, ena_endstr);
@@ -600,10 +600,10 @@ int cgiMain() {
         int_error("Error retrieving CGI form enable end time.");
 
         strncat(rev_startstr, rev_startdate, sizeof(rev_startstr)-1);
-        strncat(rev_startstr, " ", 1); /* add a space between date and time */
+        strcat(rev_startstr, " "); /* add a space between date and time */
         strncat(rev_startstr, rev_starttime, sizeof(rev_startstr)-strlen(rev_startstr)-1);
         strncat(rev_endstr, rev_enddate, sizeof(rev_endstr)-1);
-        strncat(rev_endstr, " ", 1); /* add a space between date and time */
+        strcat(rev_endstr, " "); /* add a space between date and time */
         strncat(rev_endstr, rev_endtime, sizeof(rev_endstr)-strlen(rev_endstr)-1);
         snprintf(title, sizeof(title), "Search Revoked Certificates");
         snprintf(subtitle, sizeof(subtitle), "Certificates revoked between %s and %s", rev_startstr, rev_endstr);

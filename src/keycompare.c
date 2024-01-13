@@ -18,11 +18,16 @@
 #include <openssl/rand.h>
 #include "webcert.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/evp.h>
+#include <openssl/core_names.h>
+#endif
+
 int key_enc_check(EVP_PKEY *, EVP_PKEY *);
 
-int rsa_cmp_mod(RSA *, RSA *);
-int rsa_enc_check(RSA *, RSA *);
-int dsa_enc_check(DSA *, DSA *);
+int rsa_cmp_mod(EVP_PKEY *, EVP_PKEY *);
+int rsa_enc_check(EVP_PKEY *, EVP_PKEY *);
+int dsa_enc_check(EVP_PKEY *, EVP_PKEY *);
 int ec_enc_check(EC_KEY *, EC_KEY *);
 
 int cgiMain() {
@@ -30,9 +35,15 @@ int cgiMain() {
  * These function calls are essential to make many PEM + other*
  * OpenSSL functions work.                                    *
  * ---------------------------------------------------------- */
-   OpenSSL_add_all_algorithms();
-   ERR_load_crypto_strings();
-   ERR_load_BIO_strings();
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  // OpenSSL v3.0 now loads error strings automatically:
+  // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
+  OpenSSL_add_all_algorithms();
+  ERR_load_crypto_strings();
+  ERR_load_BIO_strings();
+#endif
 
   static char title[] = "Key Checker";
 
@@ -196,7 +207,14 @@ int cgiMain() {
      * ---------------------------------------------------------- */
     char cmp_res1_str[40]; // contains the string for match, missmatch, etc
     int cmp_res1;
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    // OpenSSL v3.0 changed EVP_PKEY_cmp() to EVP_PKEY_eq():
+    // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+    cmp_res1 = EVP_PKEY_eq(priv_key, pub_key);
+#else
     cmp_res1 = EVP_PKEY_cmp(priv_key, pub_key);
+#endif
 
     if(cmp_res1 == -2) {
       snprintf(error_str, sizeof(error_str), "Error in EVP_PKEY_cmp(): operation is not supported.");
@@ -263,15 +281,7 @@ int key_data_check(EVP_PKEY *priv, EVP_PKEY *pub) {
   switch (EVP_PKEY_base_id(priv)) {
     case EVP_PKEY_RSA:
       if(EVP_PKEY_base_id(pub) == EVP_PKEY_RSA) {
-        RSA *privrsa, *pubrsa;
-
-        if((privrsa = EVP_PKEY_get1_RSA(priv)) == NULL)
-          int_error("Error getting RSA private key data.");
-
-        if((pubrsa = EVP_PKEY_get1_RSA(pub)) == NULL)
-          int_error("Error getting RSA public key data.");
-
-        ret = rsa_cmp_mod(privrsa, pubrsa);
+        ret = rsa_cmp_mod(priv, pub);
         return ret;
       }
       else return -1;
@@ -305,73 +315,78 @@ int key_data_check(EVP_PKEY *priv, EVP_PKEY *pub) {
  * matches by comparing the RSA modulus. Returns 1 for OK, 0 for *
  * missmatch.                                                    *
  * ------------------------------------------------------------- */
-int rsa_cmp_mod(RSA *priv, RSA *pub) {
+int rsa_cmp_mod(EVP_PKEY *priv, EVP_PKEY *pub) {
   int match;
-  const BIGNUM **priv_mod = NULL;
-  const BIGNUM **pub_mod = NULL;
 
-  RSA_get0_key(priv, priv_mod, NULL, NULL);
-  char *priv_mod_hex = BN_bn2hex(*priv_mod);
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+  /* -------------------------------------------------------- *
+   * Old code for OpenSSL versions before version 3.0         *
+   * ---------------------------------------------------------*/
+  const BIGNUM *priv_mod;
+  const BIGNUM *pub_mod;
+  RSA *privrsa = NULL;
+  if((privrsa = EVP_PKEY_get1_RSA(priv)) == NULL)
+     int_error("Error getting RSA private key data.");
+  RSA_get0_key(privrsa, &priv_mod, NULL, NULL);
 
-  RSA_get0_key(pub, pub_mod, NULL, NULL);
-  char *pub_mod_hex = BN_bn2hex(*pub_mod);
+  RSA *pubrsa = NULL;
+  if((pubrsa = EVP_PKEY_get1_RSA(pub)) == NULL)
+    int_error("Error getting RSA public key data.");
+  RSA_get0_key(pubrsa, &pub_mod, NULL, NULL);
+#else
+  /* -------------------------------------------------------- *
+   * New code for latest OpenSSL version 3.0                  *
+   * ---------------------------------------------------------*/
+  BIGNUM *priv_mod = NULL;
+  BIGNUM *pub_mod = NULL;
+  EVP_PKEY_get_bn_param(priv, OSSL_PKEY_PARAM_RSA_N, &priv_mod);
+  EVP_PKEY_get_bn_param(pub, OSSL_PKEY_PARAM_RSA_N, &pub_mod);
+#endif
+
+  char *priv_mod_hex = BN_bn2hex(priv_mod);
+  char *pub_mod_hex = BN_bn2hex(pub_mod);
 
   //printf("priv: %s\n", priv_mod_hex);
-  //printf("pub: %s\n", pub_mod_hex);
+  //printf(" pub: %s\n", pub_mod_hex);
 
   if(strcmp(priv_mod_hex, pub_mod_hex) == 0)
     match = 1; // the keys modulus is matching
   else
     match = 0; // the keys modulus don't match
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
   OPENSSL_free(priv_mod_hex);
   OPENSSL_free(pub_mod_hex);
+#endif
   return match;
 }
 
 /* ------------------------------------------------------------- *
  * Function key_encr_check() checks if a public and private key  *
  * matches by doing EVP_PKEY_sign/EVP_PKEY_verify. Returns 1 for *
- * OK, 0 for key missmatch, -1 for type missmatch.               *
+ * OK the keys match, 0 for key missmatch, -1 for type missmatch *
  * ------------------------------------------------------------- */
 int key_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
   int ret = -1;
-  switch (EVP_PKEY_base_id(priv)) {
+  switch (EVP_PKEY_id(priv)) {
     case EVP_PKEY_RSA:
-      if(EVP_PKEY_base_id(pub) == EVP_PKEY_RSA) {
-        RSA *privrsa, *pubrsa;
-
-        if((privrsa = EVP_PKEY_get1_RSA(priv)) == NULL)
-          int_error("Error getting RSA private key data.");
-
-        if((pubrsa = EVP_PKEY_get1_RSA(pub)) == NULL)
-          int_error("Error getting RSA public key data.");
-
-        ret = rsa_enc_check(privrsa, pubrsa);
-        RSA_free(privrsa);
-        RSA_free(pubrsa);
-        return ret;
-      }
-      else return -1;
+      /* ------------------------------------------------------- *
+    `  * Type match RSA: If privkey is RSA, is pubkey also RSA?  *
+       * If not return -1, if yes do encrypt/decrypt test next   *
+       * ------------------------------------------------------- */
+      if(EVP_PKEY_id(pub) != EVP_PKEY_RSA) return -1;
+      ret = rsa_enc_check(priv, pub);
+      return ret;
       break;
 
     case EVP_PKEY_DSA:
-     if(EVP_PKEY_base_id(pub) == EVP_PKEY_DSA) {
-        DSA *privdsa, *pubdsa;
-
-        if((privdsa = EVP_PKEY_get1_DSA(priv)) == NULL)
-          int_error("Error getting DSA private key data.");
-
-        if((pubdsa = EVP_PKEY_get1_DSA(pub)) == NULL)
-          int_error("Error getting DSA public key data.");
-
-        ret = dsa_enc_check(privdsa, pubdsa);
-        DSA_free(privdsa);
-        DSA_free(pubdsa);
-        return ret;
-      }
-      else
-        int_error("Error public key type does not match private DSA key");
+      /* ------------------------------------------------------- *
+    `  * Type match DSA: If privkey is DSA, is pubkey also DSA?  *
+       * If not return -1, if yes do encrypt/decrypt test next   *
+       * ------------------------------------------------------- */
+      if(EVP_PKEY_id(pub) != EVP_PKEY_DSA) return -1;
+      ret = dsa_enc_check(priv, pub);
+      return ret;
       break;
 
     case EVP_PKEY_EC:
@@ -389,53 +404,135 @@ int key_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
   return ret;
 }
 
-int rsa_enc_check(RSA *priv, RSA *pub) {
+/* ------------------------------------------------------------ *
+ * rsa_enc_check takes a private and public key to encrypt and  *
+ * decrypt a test string, then compares the decrypted string.   *
+ * ------------------------------------------------------------ */
+int rsa_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
   int match = -1;
   /* ---------------------------------------------------------- *
-   * Create a random 512 byte md string for signing             *
+   * Create a random 24 byte test string to encrypt with priv   *
    * ---------------------------------------------------------- */
-  const char md[] = "This is a secret string";
+  const unsigned char md[] = "This is a secret string";
   size_t md_len = sizeof(md);
 
   /* ---------------------------------------------------------- *
-   * Define the encrypted buffer, assign memory                 *
+   * Define the RSA padding method for both encrypt/decrypt ops *
    * ---------------------------------------------------------- */
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+  const char pad = RSA_PKCS1_PADDING;
+#else
+  OSSL_PARAM params[2];
+  params[0] = OSSL_PARAM_construct_utf8_string(OSSL_ASYM_CIPHER_PARAM_PAD_MODE,
+                                            OSSL_PKEY_RSA_PAD_MODE_PKCSV15, 0);
+  params[1] = OSSL_PARAM_construct_end();
+  EVP_PKEY_CTX *ctx = NULL;
+#endif
+
+  /* ---------------------------------------------------------- *
+   * Define the encrypted buffer, assign and zero out memory    *
+   * buffer size is hardcoded as 1024 bytes (1K) to simplify.   *
+   * watch buffer overrun if we get large key sizes or large    *
+   * md test strings.                                           *
+   * ---------------------------------------------------------- */
+  size_t enc_len;
   unsigned char *enc_str;
-  enc_str = OPENSSL_malloc(RSA_size(priv));
+  enc_str = OPENSSL_zalloc(1024);
   if (!enc_str)
     int_error("Error allocating memory for encryption result.");
 
   /* ---------------------------------------------------------- *
    *  Encrypt string with private RSA key                       *
    * ---------------------------------------------------------- */
-  size_t enc_len;
-  const unsigned char pad = RSA_PKCS1_PADDING;
-
-  enc_len = RSA_public_encrypt(md_len, (unsigned char*) md, enc_str, priv, pad);
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+  RSA *privrsa;
+  if((privrsa = EVP_PKEY_get1_RSA(priv)) == NULL)
+    int_error("Error getting RSA private key data.");
+  enc_len = RSA_public_encrypt(md_len, (unsigned char*) md, enc_str, privrsa, pad);
+  RSA_free(privrsa);
+# else
+  ctx = NULL;
+  ctx = EVP_PKEY_CTX_new_from_pkey(NULL, priv, NULL);
+  EVP_PKEY_encrypt_init_ex(ctx, params);
+  EVP_PKEY_encrypt(ctx, enc_str, (size_t *) &enc_len, md, md_len);
+  EVP_PKEY_CTX_free(ctx);
+#endif
   if(enc_len <= 0)
     int_error("Error encrypting digest with private RSA key.");
 
   /* ---------------------------------------------------------- *
    * Successfully encrypted, now decrypt it with public RSA key *
+   * buffer size is hardcoded as 1024 bytes (1K) to simplify.   *
+   * watch buffer overrun if we set larger md test strings.     *
    * ---------------------------------------------------------- */
-  char *clr_str;
-  clr_str = OPENSSL_malloc(RSA_size(pub));
-  if (!clr_str)
-    int_error("Error allocating memory for decryption result.");
-
   size_t clr_len;
-  clr_len = RSA_private_decrypt(enc_len, enc_str, (unsigned char*) clr_str, pub, pad);
+  unsigned char clr_str[1024] = "";
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+  RSA *pubrsa;
+  if((pubrsa = EVP_PKEY_get1_RSA(pub)) == NULL)
+    int_error("Error getting RSA public key data.");
+  clr_len = RSA_private_decrypt(enc_len, enc_str, (unsigned char*) clr_str, pubrsa, pad);
+  RSA_free(pubrsa);
+#else
+  ctx = NULL;
+  ctx = EVP_PKEY_CTX_new_from_pkey(NULL, pub, NULL);
+  EVP_PKEY_decrypt_init_ex(ctx, params);
+  EVP_PKEY_decrypt(ctx, clr_str, (size_t *) &clr_len, enc_str, enc_len);
+  EVP_PKEY_CTX_free(ctx);
+#endif
   if(clr_len <= 0)
     int_error("Error decrypting digest with public RSA key.");
 
-
-  if(strcmp(md, clr_str) == 0) match = 1; // The keys match
+  /* ---------------------------------------------------------- *
+   * Successfully decrypted, compare decrypt string with orig.  *
+   * ---------------------------------------------------------- */
+  if(strcmp((char *)md, (char *)clr_str) == 0) match = 1; // The keys match
   else match = 0; // The keys don't match
-
   return match;
 }
 
-int dsa_enc_check(DSA *priv, DSA *pub) {
+/* ------------------------------------------------------------ *
+ * dsa_enc_check takes a private and public key to encrypt and  *
+ * decrypt a test string, then compares the decrypted string.   *
+ * THIS FUNCTION IS IN DEV - not implemented yet!!!!!!!!!!!!!   *
+ * ------------------------------------------------------------ */
+int dsa_enc_check(EVP_PKEY *priv, EVP_PKEY *pub) {
+  //int match = -1;
+  /* ---------------------------------------------------------- *
+   * Create a random 24 byte test string to encrypt with priv   *
+   * ---------------------------------------------------------- */
+  //const unsigned char md[] = "This is a secret string";
+  //size_t md_len = sizeof(md);
+
+  /* ---------------------------------------------------------- *
+   * Define the encrypted buffer, assign and zero out memory    *
+   * buffer size is hardcoded as 1024 bytes (1K) to simplify.   *
+   * watch buffer overrun if we get large key sizes or large    *
+   * md test strings.                                           *
+   * ---------------------------------------------------------- */
+  //size_t enc_len;
+  unsigned char *enc_str;
+  enc_str = OPENSSL_zalloc(1024);
+  if (!enc_str)
+    int_error("Error allocating memory for encryption result.");
+
+  /* ---------------------------------------------------------- *
+   *  Encrypt string with private DSA key                       *
+   * ---------------------------------------------------------- */
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+  DSA *privdsa;
+  if((privdsa = EVP_PKEY_get1_DSA(priv)) == NULL)
+    int_error("Error getting DSA private key data.");
+  // encryption function goes here
+  DSA_free(privdsa);
+    
+  DSA *pubdsa;
+  if((pubdsa = EVP_PKEY_get1_DSA(pub)) == NULL)
+    int_error("Error getting DSA public key data.");
+  // decryption function goes here
+  DSA_free(pubdsa);
+#endif
   return 1;
 }
 int ec_enc_check(EC_KEY *priv, EC_KEY *pub) {

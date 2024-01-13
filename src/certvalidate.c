@@ -98,9 +98,16 @@ int cgiMain() {
   /* ---------------------------------------------------------- *
    * These function calls initialize openssl for correct work.  *
    * ---------------------------------------------------------- */
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  // OpenSSL v3.0 now loads error strings automatically:
+  // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
   OpenSSL_add_all_algorithms();
-  ERR_load_BIO_strings();
   ERR_load_crypto_strings();
+  ERR_load_BIO_strings();
+#endif
+
   add_missing_ev_oids();
   time(&now);
 

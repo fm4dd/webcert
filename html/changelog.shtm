@@ -18,6 +18,13 @@
 
 <div id="wrapper">
   <div id="content">
+    <h3>2024-01-13 new version 1.8.5 released</h3>
+    <hr />
+        <h4>Bug fixes:</h4>
+    <ul>
+	    <li>Code update to latest OpenSSL version 3 API calls</li>
+    </ul>
+
     <h3>2021-12-20 new version 1.8.4 released</h3>
     <hr />
         <h4>Bug fixes:</h4>

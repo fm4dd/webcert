@@ -1,6 +1,7 @@
 ## WebCert
 
 ![test](https://github.com/fm4dd/webcert/workflows/test/badge.svg)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
 #### A Web Tool for Generation and Management of digital Certificates
 

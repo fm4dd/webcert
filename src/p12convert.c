@@ -38,9 +38,15 @@ int cgiMain() {
  * These function calls are essential to make many PEM + other*
  * OpenSSL functions work.                                    *
  * ---------------------------------------------------------- */
-   OpenSSL_add_all_algorithms();
-   ERR_load_crypto_strings();
-   ERR_load_BIO_strings();
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  // OpenSSL v3.0 now loads error strings automatically:
+  // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
+  OpenSSL_add_all_algorithms();
+  ERR_load_crypto_strings();
+  ERR_load_BIO_strings();
+#endif
 
   /* ---------------------------------------------------------- *
    * If called w/o arguments, display the data gathering form.  *
@@ -409,9 +415,9 @@ int cgiMain() {
       fprintf(cgiOut, "<th  class=\"cnt75\">");
       fprintf(cgiOut, "PKCS12 URL:</th>");
       fprintf(cgiOut, "<td>");
-      fprintf(cgiOut, "<a href=\"http://%s%s/tmp/%s\">",
+      fprintf(cgiOut, "<a href=\"%s://%s%s/tmp/%s\">", HTTP_TYPE,
                       cgiServerName, CERTEXPORTURL, p12name);
-      fprintf(cgiOut, "http://%s%s/tmp/%s</a>\n",
+      fprintf(cgiOut, "%s://%s%s/tmp/%s</a>\n", HTTP_TYPE,
                    cgiServerName, CERTEXPORTURL, p12name);
       fprintf(cgiOut, "</td>\n");
       fprintf(cgiOut, "</tr>\n");

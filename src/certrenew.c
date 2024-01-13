@@ -23,9 +23,16 @@ int cgiMain() {
   /* ---------------------------------------------------------- *
    * These function calls initialize openssl for correct work.  *
    * ---------------------------------------------------------- */
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  // OpenSSL v3.0 now loads error strings automatically:
+  // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
   OpenSSL_add_all_algorithms();
-  ERR_load_BIO_strings();
   ERR_load_crypto_strings();
+  ERR_load_BIO_strings();
+#endif
+
   add_missing_ev_oids();
 
   outbio = BIO_new(BIO_s_file());
@@ -153,7 +160,14 @@ int cgiMain() {
      * ---------------------------------------------------------- */
     char cmp_res1_str[40]; // contains the string for match, missmatch, etc
     int cmp_res1;
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    // OpenSSL v3.0 changed EVP_PKEY_cmp() to EVP_PKEY_eq():
+    // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+    cmp_res1 = EVP_PKEY_eq(priv_key, pub_key);
+#else
     cmp_res1 = EVP_PKEY_cmp(priv_key, pub_key);
+#endif
 
     if(cmp_res1 == -2) {
       snprintf(error_str, sizeof(error_str), "Error in EVP_PKEY_cmp(): operation is not supported.");

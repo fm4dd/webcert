@@ -5,7 +5,7 @@
 # and publishes a new CRL file. Runs daily from cron.
 ##########################################################
 # set debug: 0=off 1=normal  2=verbose
-DEBUG=2
+DEBUG=0
 
 ##########################################################
 # binaries location
@@ -73,7 +73,7 @@ CHECK_UPDATE() {
 ##########################################################
 NEW_CRL() {
   if [ $update_crl == "1" ]; then
-    $OSSL ca -cert /srv/app/webCA/cacert.pem -gencrl -crldays 90 \
+    $OSSL ca -config /srv/app/webCA/webCA.cnf -gencrl -crldays 90 \
     -out $crlfile --passin file:/srv/app/webCA/private/passin.src 2>/dev/null
 
     [ $DEBUG == "2" ] && echo "update-crl.sh: created new crl file $crlfile"

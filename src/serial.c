@@ -24,7 +24,14 @@ int rand_serial(BIGNUM *b, ASN1_INTEGER *ai) {
 
   if (!btmp) return 0;
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  // OpenSSL v3.0 now uses BN_rand():
+  // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+  if (!BN_rand(btmp, SERIAL_RAND_BITS, 0, 0)) goto err;
+#else
   if (!BN_pseudo_rand(btmp, SERIAL_RAND_BITS, 0, 0)) goto err;
+#endif
+
   if (ai && !BN_to_ASN1_INTEGER(btmp, ai)) goto err;
 
   return 1;

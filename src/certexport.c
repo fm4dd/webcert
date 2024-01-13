@@ -99,9 +99,9 @@ int cgiMain() {
 
       fprintf(cgiOut, "<tr>\n");
       fprintf(cgiOut, "<td class=\"center\">");
-      fprintf(cgiOut, "<a href=\"http://%s%s/%s.%s\">",
+      fprintf(cgiOut, "<a href=\"%s://%s%s/%s.%s\">", HTTP_TYPE,
                        cgiServerName, CERTEXPORTURL, certnamestr, format);
-      fprintf(cgiOut, "http://%s%s/%s.%s</a>",
+      fprintf(cgiOut, "%s://%s%s/%s.%s</a>", HTTP_TYPE,
                        cgiServerName, CERTEXPORTURL, certnamestr, format);
       fprintf(cgiOut, "</td>");
       fprintf(cgiOut, "</tr>\n");
@@ -213,9 +213,15 @@ int cgiMain() {
  * These function calls are essential to make many PEM + other openssl        *
  * functions work.                                                            *
  * -------------------------------------------------------------------------- */
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+   // OpenSSL v3.0 now loads error strings automatically:
+   // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
    OpenSSL_add_all_algorithms();
    ERR_load_crypto_strings();
    ERR_load_BIO_strings();
+#endif
 
 /* -------------------------------------------------------------------------- *
  * read the certstore certificate and define a BIO output stream              *
@@ -337,9 +343,9 @@ int cgiMain() {
 
    fprintf(cgiOut, "<tr>\n");
    fprintf(cgiOut, "<td>");
-   fprintf(cgiOut, "<a href=\"http://%s%s/%s.%s\">\n",
+   fprintf(cgiOut, "<a href=\"%s://%s%s/%s.%s\">\n", HTTP_TYPE,
                     cgiServerName, CERTEXPORTURL, certnamestr, format);
-   fprintf(cgiOut, "http://%s%s/%s.%s</a>\n",
+   fprintf(cgiOut, "%s://%s%s/%s.%s</a>\n", HTTP_TYPE,
                     cgiServerName, CERTEXPORTURL, certnamestr, format);
    fprintf(cgiOut, "</td>\n");
    fprintf(cgiOut, "</tr>\n");

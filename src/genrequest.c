@@ -41,9 +41,6 @@ int cgiMain() {
    X509_REQ 	*webrequest 	 = NULL;
    EVP_PKEY	*pkey		 = NULL;
    X509_NAME 	*reqname	 = NULL;
-   DSA 		*mydsa		 = NULL;
-   RSA 		*myrsa		 = NULL;
-   EC_KEY       *myecc           = NULL;
    EVP_MD        const *digest   = NULL;
 
    BIO 		*outbio		 = NULL;
@@ -117,13 +114,22 @@ int cgiMain() {
    if(strlen(cname) == 0)
      int_error("No CN has been provided. The CN field is mandatory.");
 
+   if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
+      int_error("Error getting the signature algorithm from buildrequest.cgi form");
+
 /* ------------------------------------------------------------------------ *
  * These function calls are essential to make many PEM + other openssl      *
  * functions work.                                                          *
  * ------------------------------------------------------------------------ */
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+   // OpenSSL v3.0 now loads error strings automatically:
+   // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
    OpenSSL_add_all_algorithms();
    ERR_load_crypto_strings();
    ERR_load_BIO_strings();
+#endif
 
 /* ------------------------------------------------------------------------- *
  * Generate the key pair based on the selected keytype                       *
@@ -131,30 +137,64 @@ int cgiMain() {
    if ((pkey=EVP_PKEY_new()) == NULL)
       int_error("Error creating EVP_PKEY structure.");
 
-    BIGNUM *exp = BN_new();
-    BN_set_word(exp, RSA_F4);
-
    if(strcmp(keytype, "rsa") == 0) {
-      myrsa = RSA_new();
+      BIGNUM *exp = BN_new();
+      BN_set_word(exp, RSA_F4); // this sets e=65537 (0x10001L)
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+      EVP_PKEY_CTX *ctx = NULL;
+      ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL);
+      EVP_PKEY_keygen_init(ctx);
+      EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, rsastrength);
+      EVP_PKEY_CTX_set_rsa_keygen_primes(ctx, 2);
+//      EVP_PKEY_CTX_set_rsa_keygen_pubexp(ctx, RSA_F4);
+      EVP_PKEY_generate(ctx, &pkey);
+      EVP_PKEY_CTX_free(ctx);
+#else
+      RSA *myrsa = RSA_new();
       if (! (RSA_generate_key_ex(myrsa, rsastrength, exp, NULL)))
          int_error("Error generating the RSA key.");
 
       if (!EVP_PKEY_assign_RSA(pkey,myrsa))
          int_error("Error assigning RSA key to EVP_PKEY structure.");
+#endif
     }
 
    else if(strcmp(keytype, "dsa") == 0) {
-      mydsa = DSA_new();
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+      EVP_PKEY_CTX *pctx = NULL;
+      EVP_PKEY *paramkey = NULL;
+      pctx = EVP_PKEY_CTX_new_from_name(NULL, "DSA", NULL);
+      if(!EVP_PKEY_paramgen_init(pctx))
+        int_error("Error initializing DSA key parameters.");
+      if(!EVP_PKEY_CTX_set_dsa_paramgen_bits(pctx, dsastrength))
+        int_error("Error setting DSA key strength.");
+      if (!EVP_PKEY_paramgen(pctx, &paramkey))
+        int_error("Error setting DSA parameter list object.");
+      EVP_PKEY_CTX_free(pctx);
+
+      EVP_PKEY_CTX *ctx = NULL;
+      ctx = EVP_PKEY_CTX_new(paramkey, NULL);
+      if(!EVP_PKEY_keygen_init(ctx))
+        int_error("Error initializing DSA key.");
+      if(!EVP_PKEY_keygen(ctx, &pkey))
+        int_error("Error generating the DSA key.");
+      EVP_PKEY_CTX_free(ctx);
+#else
+      DSA *mydsa = DSA_new();
       DSA_generate_parameters_ex(mydsa, dsastrength, NULL, 0, NULL, NULL, NULL);
       if (! (DSA_generate_key(mydsa)))
          int_error("Error generating the DSA key.");
 
       if (!EVP_PKEY_assign_DSA(pkey,mydsa))
          int_error("Error assigning DSA key to EVP_PKEY structure.");
+#endif
    }
 
    else if(strcmp(keytype, "ecc") == 0) {
-      myecc = EC_KEY_new();
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+      pkey = EVP_EC_gen(eccstrength);
+#else
+      EC_KEY *myecc = EC_KEY_new();
       int eccgrp = OBJ_txt2nid(eccstrength);
       myecc = EC_KEY_new_by_curve_name(eccgrp);
       /* Important to set the OPENSSL_EC_NAMED_CURVE flag,    *
@@ -165,12 +205,10 @@ int cgiMain() {
 
       if (!EVP_PKEY_assign_EC_KEY(pkey,myecc))
          int_error("Error assigning ECC key to EVP_PKEY structure.");
+#endif
    }
    else
       int_error("Error: Wrong keytype - choose either RSA, DSA or ECC.");
-
-   if(cgiFormString("sigalg", sigalgstr, sizeof(sigalgstr)) != cgiFormSuccess)
-      int_error("Error getting the signature algorithm from buildrequest.cgi form");
 
 /* ------------------------------------------------------------------------- *
  * Generate the certificate request from scratch                             *

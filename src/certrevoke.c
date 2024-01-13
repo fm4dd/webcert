@@ -47,9 +47,15 @@ int cgiMain() {
  * These function calls are essential to make many PEM +      *
  * other openssl functions work.                              *
  * ---------------------------------------------------------- */
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  // OpenSSL v3.0 now loads error strings automatically:
+  // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+#else
   OpenSSL_add_all_algorithms();
   ERR_load_crypto_strings();
   ERR_load_BIO_strings();
+#endif
 
 /* ---------------------------------------------------------- *
  * process the CGI calling arguments                          *
@@ -194,7 +200,14 @@ int cgiMain() {
    * ---------------------------------------------------------- */
     char cmp_res1_str[40]; // contains the string for match, missmatch, etc
     int cmp_res1;
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    // OpenSSL v3.0 changed EVP_PKEY_cmp() to EVP_PKEY_eq():
+    // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+    cmp_res1 = EVP_PKEY_eq(priv_key, pub_key);
+#else
     cmp_res1 = EVP_PKEY_cmp(priv_key, pub_key);
+#endif
 
     if(cmp_res1 == -2) int_error("Cert key problem in EVP_PKEY_cmp(): operation is not supported");
     if(cmp_res1 == -1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Cert key type missmatch");
@@ -213,7 +226,13 @@ int cgiMain() {
       if (! (revo_key = PEM_read_bio_PUBKEY(revbio, NULL, NULL, NULL)))
         int_error("Error loading revocation key content");
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+      // OpenSSL v3.0 changed EVP_PKEY_cmp() to EVP_PKEY_eq():
+      // https://www.openssl.org/docs/manmaster/man7/migration_guide.html
+      cmp_res1 = EVP_PKEY_eq(priv_key, revo_key);
+#else
       cmp_res1 = EVP_PKEY_cmp(priv_key, revo_key);
+#endif
 
       if(cmp_res1 == -2) int_error("Revocation key problem in EVP_PKEY_cmp(): operation is not supported");
       if(cmp_res1 == -1) snprintf(cmp_res1_str, sizeof(cmp_res1_str), "Revocation key type missmatch");

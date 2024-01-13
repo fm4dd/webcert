@@ -10,6 +10,8 @@
 #include "openssl/bn.h"
 #include <openssl/txt_db.h>
 
+/*********** Set https / http protocol for webcert file download **************/
+#define HTTP_TYPE	"https"
 /*********** the main URL where the webcert application resides ***************/
 #define HOMELINK	"/webcert/"
 /*********** the application entry URL which is seen first ********************/
@@ -61,7 +63,7 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.8.4 (12/20/2021)"
+#define SW_VERSION	"WebCert v1.8.5 (01/13/2024)"
 
 /*********** html code template for populating the sidebar  *******************/
 #define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */

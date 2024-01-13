@@ -32,7 +32,7 @@ void pagefoot() {
   fprintf(cgiOut, "</div>\n");
 
   fprintf(cgiOut, "<div id=\"footer\">\n");
-  fprintf(cgiOut, "<span class=\"left\">&copy; %s by <a href=\"http://fm4dd.com/\">Frank4DD</a>.</span>\n", SW_VERSION);
+  fprintf(cgiOut, "<span class=\"left\">&copy; %s by <a href=\"https://fm4dd.com/\">Frank4DD</a>.</span>\n", SW_VERSION);
   fprintf(cgiOut, "<span class=\"right\">");
   fprintf(cgiOut, "Generated on: %s", hostport);
   fprintf(cgiOut, " for ");
