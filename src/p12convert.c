@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- * file:         p12convert.c                                              *
+ * file:         p12convert.c                                                 *
  * purpose:      Converts any certificate, its private key, and any optional  *
  *               CA certificates into a PKCS12 encoded file bundle, good for  *
  *               easy import into various systems. After the conversion, we   *
@@ -340,7 +340,7 @@ int cgiMain() {
        * ---------------------------------------------------------- */
       char p12pass[P12PASSLEN] = "";
       if (! (cgiFormString("p12pass", p12pass, sizeof(p12pass)) == cgiFormSuccess)) {
-         int_error("Error retrieving mandatory PKCS12 passphrase.");
+         int_error("Error retrieving mandatory PKCS12 passphrase.\n");
       }
 
       /* ---------------------------------------------------------- *
@@ -355,17 +355,16 @@ int cgiMain() {
       if ((p12 = PKCS12_new()) == NULL)
         int_error("Error creating PKCS12 structure.\n");
 
-          snprintf(error_str, sizeof(error_str), "Error building PKCS12 structure with ca list %d", sk_X509_num(ca_chain));
-      if(! (p12 = PKCS12_create( p12pass,     // certbundle access password
-                           cert_name,   // friendly certname
-                           priv_key,    // the certificate private key
-                           cert,        // the main certificate
-                           ca_chain,    // stack of CA cert chain
-                           0,           // int nid_key (default 3DES)
-                           0,           // int nid_cert (40bitRC2)
-                           iter,        // int iter (default 2048)
-                           maciter,     // int maciter (default 1)
-                           0 ))) {      // int keytype (default no flag)
+      if(! (p12 = PKCS12_create( p12pass,// certbundle access password
+                           cert_name,    // friendly certname
+                           priv_key,     // the certificate private key
+                           cert,         // the main certificate
+                           ca_chain,     // stack of CA cert chain
+                           0,            // int nid_key (default 3DES)
+                           0,            // int nid_cert (40bitRC2)
+                           iter,         // int iter (default 2048)
+                           maciter,      // int maciter (default 1)
+                           0 ))) {       // int keytype (default no flag)
           int_error("Error creating PKCS12 structure.\n");
         }
 
@@ -432,6 +431,7 @@ int cgiMain() {
       fprintf(cgiOut, "</table>\n");
       fprintf(cgiOut, "<p></p>\n");
 
+      if(p12 == NULL) int_error("PKCS12 structure corrupted.");
       display_p12(p12, p12pass);
       pagefoot();
       PKCS12_free(p12);
@@ -614,9 +614,9 @@ int cgiMain() {
 void display_p12(PKCS12 *p12, char *pass) {
   int ret = 0;
   char error_str[4096] = "";
-  EVP_PKEY *pkey;
-  X509 *cert;
-  STACK_OF(X509) *ca;
+  EVP_PKEY *pkey = NULL;
+  X509 *cert = NULL;
+  STACK_OF(X509) *ca = sk_X509_new_null();
 
   ret = PKCS12_parse(p12, pass, &pkey, &cert, &ca);
   if (ret == 0) {
