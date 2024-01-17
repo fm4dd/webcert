@@ -1351,6 +1351,7 @@ void keycreate_input() {
    fprintf(cgiOut, "<td class=\"type\" id=\"ecc\">");
    fprintf(cgiOut, "<select name=\"eccstrength\">\n");
    fprintf(cgiOut, "<option value=\"secp224r1\">Key Type: secp224r1 (OK)</option>\n");
+   fprintf(cgiOut, "<option value=\"sm2\">Key Type: SM2 256bit (Good)</option>\n");
    fprintf(cgiOut, "<option value=\"secp256k1\" selected=\"selected\">Key Type: secp256k1 (Good)</option>\n");
    fprintf(cgiOut, "<option value=\"prime256v1\">Key Type: prime256v1 (Good)");
    fprintf(cgiOut, "<option value=\"secp384r1\">Key Type: secp384r1 (Better)</option>\n");

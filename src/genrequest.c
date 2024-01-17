@@ -192,7 +192,10 @@ int cgiMain() {
 
    else if(strcmp(keytype, "ecc") == 0) {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
-      pkey = EVP_EC_gen(eccstrength);
+      if(strcmp(eccstrength, "sm2") == 0) {
+          pkey = EVP_PKEY_Q_keygen(NULL, NULL, "SM2");
+      }
+      else pkey = EVP_EC_gen(eccstrength);
 #else
       EC_KEY *myecc = EC_KEY_new();
       int eccgrp = OBJ_txt2nid(eccstrength);
@@ -201,14 +204,14 @@ int cgiMain() {
        * otherwise the cert will not work with an SSL server. */
       EC_KEY_set_asn1_flag(myecc, OPENSSL_EC_NAMED_CURVE);
       if (! (EC_KEY_generate_key(myecc)))
-         int_error("Error generating the ECC key.");
+         int_error("Error generating the EC key.");
 
       if (!EVP_PKEY_assign_EC_KEY(pkey,myecc))
-         int_error("Error assigning ECC key to EVP_PKEY structure.");
+         int_error("Error assigning EC key to EVP_PKEY structure.");
 #endif
    }
    else
-      int_error("Error: Wrong keytype - choose either RSA, DSA or ECC.");
+      int_error("Error: Wrong keytype - choose either RSA, DSA or EC.");
 
 /* ------------------------------------------------------------------------- *
  * Generate the certificate request from scratch                             *
@@ -328,16 +331,16 @@ int cgiMain() {
 
       /* add the stack to the request */
       X509_REQ_add_extensions(webrequest, ext_list);
-      //if (X509_REQ_add_extensions(webrequest, ext_list) != 0)
-      //   int_error("Error adding extensions to the X509_REQ structure.");
    }
 
-/* -------------------------------------------------------------------------- *
- *  Set the digest algorithm for signing                                      *
- * if (EVP_PKEY_type(ca_privkey->type) == EVP_PKEY_DSA)                       *
- *   digest = EVP_dss1(); we used to sign ecc keys, switched to SHA variants  *
- * ---------------------------------------------------------------------------*/
-   if(strcmp(sigalgstr, "SHA-224") == 0) digest = EVP_sha224();
+/* ------------------------------------------------------------------------ *
+ *  Set the digest algorithm for signing                                    *
+ *  For SM2 keys, we hardcode the digest to sm3. For all other key types we *
+ *  use the form value submitted as sigalgstr.                              *
+ * -------------------------------------------------------------------------*/
+   if((strcmp(keytype, "ecc") == 0) && (strcmp(eccstrength, "sm2") == 0))
+      digest = EVP_sm3();
+   else if(strcmp(sigalgstr, "SHA-224") == 0) digest = EVP_sha224();
    else if(strcmp(sigalgstr, "SHA-256") == 0) digest = EVP_sha256();
    else if(strcmp(sigalgstr, "SHA-384") == 0) digest = EVP_sha384();
    else if(strcmp(sigalgstr, "SHA-512") == 0) digest = EVP_sha512();
@@ -348,7 +351,7 @@ int cgiMain() {
  * Sign the certificate request                                              *
  * ------------------------------------------------------------------------- */
    if (!X509_REQ_sign(webrequest, pkey, digest))
-      int_error("Error signing X509_REQ structure with SHA256.");
+      int_error("Error signing X509_REQ structure.");
 
 /* ------------------------------------------------------------------------- *
  *  and sort out the content plus start the html output                      *
