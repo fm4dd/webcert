@@ -286,14 +286,9 @@ void display_csr(X509_REQ *csr) {
   fprintf(cgiOut, "<th class=\"cnt\">Public Key:</th>\n");
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   if (pkey) {
-    switch (EVP_PKEY_base_id(pkey)) {
-      case EVP_PKEY_RSA:
-        fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_DSA:
-        fprintf(cgiOut, "%d bit DSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_EC:
+    fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey),
+                                     EVP_PKEY_get0_type_name(pkey));
+    if(EVP_PKEY_base_id(pkey) == EVP_PKEY_EC) {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
         char curvestr[80];
         EVP_PKEY_get_utf8_string_param(pkey,
@@ -301,20 +296,14 @@ void display_csr(X509_REQ *csr) {
                             curvestr,
                             sizeof(curvestr),
                             NULL);
-        fprintf(cgiOut, "%d bit ECC Key, type %s",
-                            EVP_PKEY_bits(pkey),
-                            curvestr);
+        fprintf(cgiOut, ", type %s", curvestr);
 #else
         EC_KEY *myecc = NULL;
         myecc = EVP_PKEY_get1_EC_KEY(pkey);
         const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
-        fprintf(cgiOut, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
-                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
+        fprintf(cgiOut, ", type %s",
+                OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
 #endif
-        break;
-      default:
-        fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey), OBJ_nid2sn(EVP_PKEY_base_id(pkey)));
-        break;
     }
   }
 
@@ -414,14 +403,9 @@ void display_key(EVP_PKEY *pkey) {
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
   if (pkey) {
-    switch (EVP_PKEY_base_id(pkey)) {
-      case EVP_PKEY_RSA:
-        fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_DSA:
-        fprintf(cgiOut, "%d bit DSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_EC:
+    fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey),
+                                     EVP_PKEY_get0_type_name(pkey));
+    if(EVP_PKEY_base_id(pkey) == EVP_PKEY_EC) {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
         char curvestr[80];
         EVP_PKEY_get_utf8_string_param(pkey,
@@ -429,23 +413,16 @@ void display_key(EVP_PKEY *pkey) {
                             curvestr,
                             sizeof(curvestr),
                             NULL);
-        fprintf(cgiOut, "%d bit ECC Key, type %s",
-                            EVP_PKEY_bits(pkey),
-                            curvestr);
+        fprintf(cgiOut, ", type %s", curvestr);
 #else
         EC_KEY *myecc = NULL;
         myecc = EVP_PKEY_get1_EC_KEY(pkey);
         const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
-        fprintf(cgiOut, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
-                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
+        fprintf(cgiOut, ", type %s",
+                OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
 #endif
-        break;
-      default:
-        fprintf(cgiOut, "%d bit non-RSA/DSA Key", EVP_PKEY_bits(pkey));
-        break;
     }
   }
-
   fprintf(cgiOut, " <a href=\"javascript:elementHideShow('key_%d');\">\n", id+1);
   fprintf(cgiOut, "Expand or Hide Private Key Data</a>\n");
   /* display the public key data in PEM format here */
@@ -465,14 +442,9 @@ void display_key(EVP_PKEY *pkey) {
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
   if (pkey) {
-    switch (EVP_PKEY_base_id(pkey)) {
-      case EVP_PKEY_RSA:
-        fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_DSA:
-        fprintf(cgiOut, "%d bit DSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_EC:
+    fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey),
+                                     EVP_PKEY_get0_type_name(pkey));
+    if(EVP_PKEY_base_id(pkey) == EVP_PKEY_EC) {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
         char curvestr[80];
         EVP_PKEY_get_utf8_string_param(pkey,
@@ -480,20 +452,14 @@ void display_key(EVP_PKEY *pkey) {
                             curvestr,
                             sizeof(curvestr),
                             NULL);
-        fprintf(cgiOut, "%d bit ECC Key, type %s",
-                            EVP_PKEY_bits(pkey),
-                            curvestr);
+        fprintf(cgiOut, ", type %s", curvestr);
 #else
         EC_KEY *myecc = NULL;
         myecc = EVP_PKEY_get1_EC_KEY(pkey);
         const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
-        fprintf(cgiOut, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
-                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
+        fprintf(cgiOut, ", type %s",
+                OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
 #endif
-        break;
-      default:
-        fprintf(cgiOut, "%d bit non-RSA/DSA Key", EVP_PKEY_bits(pkey));
-        break;
     }
   }
 
@@ -703,14 +669,9 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
   fprintf(cgiOut, "<td bgcolor=\"#cfcfcf\">");
   /* display the key type and size here */
   if (pkey) {
-    switch (EVP_PKEY_base_id(pkey)) {
-      case EVP_PKEY_RSA:
-        fprintf(cgiOut, "%d bit RSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_DSA:
-        fprintf(cgiOut, "%d bit DSA Key", EVP_PKEY_bits(pkey));
-        break;
-      case EVP_PKEY_EC:
+    fprintf(cgiOut, "%d bit %s Key", EVP_PKEY_bits(pkey),
+                                     EVP_PKEY_get0_type_name(pkey));
+    if(EVP_PKEY_base_id(pkey) == EVP_PKEY_EC) {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
         char curvestr[80];
         EVP_PKEY_get_utf8_string_param(pkey,
@@ -718,20 +679,14 @@ void display_cert(X509 *ct, char ct_type[], char chain_type[], int level) {
                             curvestr,
                             sizeof(curvestr),
                             NULL);
-        fprintf(cgiOut, "%d bit ECC Key, type %s",
-                            EVP_PKEY_bits(pkey),
-                            curvestr);
+        fprintf(cgiOut, ", type %s", curvestr);
 #else
         EC_KEY *myecc = NULL;
         myecc = EVP_PKEY_get1_EC_KEY(pkey);
         const EC_GROUP *ecgrp = EC_KEY_get0_group(myecc);
-        fprintf(cgiOut, "%d bit ECC Key, type %s", EVP_PKEY_bits(pkey),
-                            OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
+        fprintf(cgiOut, ", type %s",
+                OBJ_nid2sn(EC_GROUP_get_curve_name(ecgrp)));
 #endif
-        break;
-      default:
-        fprintf(cgiOut, "%d bit non-RSA/DSA Key", EVP_PKEY_bits(pkey));
-        break;
     }
   }
 
