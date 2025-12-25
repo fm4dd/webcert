@@ -212,6 +212,8 @@ int cgiMain() {
       fprintf(cgiOut, "<p></p>\n");
       fprintf(cgiOut, "<h3>Retired WebCert Root CA certificates:</h3>\n");
       fprintf(cgiOut, "<hr />\n");
+      fprintf(cgiOut, "<p><strong>2016-02-01</strong> 4096 bit RSA WebCert Root CA certificate with SHA-512 signature: ");
+      fprintf(cgiOut, "<a href=\"../export/webcert-20160201_0700.pem\">webcert-20160201_0700.pem</a></p>\n");
       fprintf(cgiOut, "<p><strong>2007-12-07</strong> 1024 bit RSA WebCert Root CA certificate with SHA-1 signature: ");
       fprintf(cgiOut, "<a href=\"../export/webcert-20071207_1021.pem\">webcert-20071207_1021.pem</a></p>\n");
       fprintf(cgiOut, "<p><strong>2004-12-18</strong> 1024 bit RSA WebCert Root CA certificate with MD5 signature: ");
