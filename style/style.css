@@ -28,7 +28,8 @@ body a:visited {
     position: absolute;
     left: 50%;
     margin-left: -461px; /* half of 917px */
-border: 1px solid #000000;
+    border: 1px solid #000000;
+    border-top: none;
 }
 
 /***** Banner *****/
@@ -71,23 +72,18 @@ border: 1px solid #000000;
     height: 30px;
     margin: 0;
     padding: 0;
-    background: #000000 url(/images/bgplastic.gif) top left repeat-x;
+    background: linear-gradient(to top, #000000 0%, #1d1d1d 40%, #363636 60%, #555555 70%, #777777 85%, #999999 100%);
 }
 #vmenu ul {
     list-style: none;
     margin: 0;
     padding: 0;
-    min-width: 880px;
     position: absolute;
     left: 50%;
-    margin-left: -461px;
+    margin-left: -280px;
 }
 #vmenu ul li {
     float: left;
-    margin: 0;
-    padding: 0;
-    background: transparent url(/images/bgplastic-button.gif) top left no-repeat;
-    height: 27px;
 }
 
 #vmenu ul li a {
@@ -95,8 +91,8 @@ border: 1px solid #000000;
     float: left;
     height: 20px;
     padding-top: 7px;
-    padding-left: 11px;
-    padding-right: 11px;
+    padding-left: 16px;
+    padding-right: 16px;
     text-transform: uppercase;
     font-family: "Helvetica Neue",helvetica,"microsoft sans serif",arial,sans-serif;
     font-size: 85%;
@@ -110,7 +106,7 @@ border: 1px solid #000000;
 }
 
 #vmenu ul li a:hover {
-    background: transparent url(/images/bgplastic-red.gif) top left no-repeat;
+    background: linear-gradient(to top, #000000 0%, #241010 30%, #2a1212 40%, #271111 50%, #421d1d 60%, #b85959 100%);
 }
 
 /***** Content *****/
@@ -121,7 +117,7 @@ border: 1px solid #000000;
     display: inline;
     background: #FFFFFF;
     padding: 10px 15px 10px 15px;
-    margin: 0;
+    margin: 0; 
     width: 710px;
     color: #000000;
     min-height: 450px;
@@ -260,11 +256,11 @@ border: 1px solid #000000;
 }
 
 #content td.center {
-    text-align: center;
+    text-align: center; 
 }
 
 #content td.success {
-    background: #66CDAA;
+    background: #66CDAA; 
 }
 
 #content td.failure {
@@ -366,7 +362,7 @@ border: 1px solid #000000;
     padding: 5px 5px 5px 5px;
     background: #FFFFFF;
     text-align: left;
-    margin: auto;
+    margin: auto; 
     width: 560px;
     overflow: auto; /*--If the Code exceeds the width, provide scrolling--*/
 }
@@ -446,13 +442,13 @@ border: 1px solid #000000;
     text-decoration: none;
     font-size: 1em;
     display: block;
-    padding: 8px 15px;
+    padding: 8px 35px;
     background: inherit;
 }
 
 #sidecontent li a:hover {
     color: #FFFFFF;
-    background: transparent url(/images/bgplastic-red.gif) top left no-repeat;
+    background: linear-gradient(to top, #000000 0%, #241010 30%, #2a1212 40%, #271111 50%, #421d1d 60%, #b85959 100%);
 }
 
 #sidecontent li ul li {

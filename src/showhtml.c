@@ -37,6 +37,13 @@ int cgiMain() {
       int_error("Error can't open policy file");
   }
 
+  else if (strcmp(templ, "changelog") == 0) {
+    snprintf(title, sizeof(title), "%s", "Update History");
+
+    if (! (fp = fopen(CHANGE_TEMPL, "r")))
+      int_error("Error can't changelog file");
+  }
+
   else  {
     int_error("Error unknown template file");
   }

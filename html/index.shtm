@@ -15,7 +15,14 @@
     <h1>WebCert</h1>
     <h2>Web-based Digital Certificate Management</h2>
   </div>
-  <!--#include virtual="/site-navigation.htm" -->
+  <div id="vmenu">
+    <ul>
+      <li><a href="/cgi-bin/showhtml.cgi?templ=index"><span>Webcert Index</span></a></li>
+      <li><a href="https://fm4dd.com" class="selected"><span>FM4DD Home</span></a></li>
+      <li><a href="https://github.com/fm4dd/webcert"><span>Github Source</span></a></li>
+      <li><a href="/cgi-bin/showhtml.cgi?templ=changelog"><span>Change Log</span></a></li>
+    </ul>
+  </div>
 
 <div id="wrapper">
   <div id="content">
@@ -28,15 +35,26 @@ Forward to the application
 </p>
   </div>
   <div id="sidecontent">
- <br />
-    <h4>Topics</h4>
-    <ul>
-      <li><a href="cgi-bin/showhtml.cgi?templ=index">Start WebCert</a></li>
-      <li><a href="cgi-bin/showhtml.cgi?templ=policy">About WebCert</a></li>
-      <li><a href="install.shtm">Installation</a></li>
-      <li><a href="changelog.shtm">Changelog</a></li>
-      <li><a href="cgi-bin/showhtml.cgi?templ=help">WebCert help</a></li>
-    </ul>
+  <h4>Certificate Creation</h4>
+  <ul>
+    <li><a href="/cgi-bin/buildrequest.cgi">Create CSR</a></li>
+    <li><a href="/cgi-bin/certrequest.cgi">Verify CSR</a></li>
+  </ul>
+  <h4>Certificate Management</h4>
+  <ul>
+    <li><a href="/cgi-bin/certstore.cgi">List Certificates</a></li>
+    <li><a href="/cgi-bin/certsearch.cgi">Search Certificates</a></li>
+    <li><a href="/cgi-bin/certvalidate.cgi">Validate Certificates</a></li>
+    <li><a href="/cgi-bin/p12convert.cgi">Install Certificates</a></li>
+    <li><a href="/cgi-bin/crlstore.cgi">Revoked Certificates</a></li>
+    <li><a href="/cgi-bin/getcert.cgi?cfilename=cacert.pem">CA Information</a></li>
+    <li><a href="/cgi-bin/keycompare.cgi">Validate Keys</a></li>
+  </ul>
+  <h4>Documentation</h4>
+  <ul>
+    <li><a href="/cgi-bin/showhtml.cgi?templ=policy">CA Statement</a></li>
+    <li><a href="/cgi-bin/showhtml.cgi?templ=help">Help</a></li>
+  </ul>
   </div>
   <!--#include virtual="/site-footerdata.htm" -->
 </div>

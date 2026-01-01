@@ -63,16 +63,20 @@
 /***************** *********************************** ************************/
 
 #define CONTACT_EMAIL	"support@fm4dd.com"
-#define SW_VERSION	"WebCert v1.8.5 (01/13/2024)"
+#define SW_VERSION	"WebCert v1.8.6 (01/01/2026)"
 
 /*********** html code template for populating the sidebar  *******************/
-#define SIDEBAR_TEMPL	"../sidebar-template.htm" /* optional */
+#define SIDEBAR_TEMPL	"../sidebar-template.htm" /* mandatory */
 /*********** html code template for populating the index  *********************/
 #define INDEX_TEMPL	"../index-template.htm" /* mandatory */
 /*********** html code template for populating the help data  *****************/
 #define HELP_TEMPL	"../help-template.htm" /* mandatory */
 /*********** html code template for populating the policy text  ***************/
 #define POLICY_TEMPL	"../policy-template.htm" /* mandatory */
+/****** html code template for creating the top navigation header links *******/
+#define HEADER_VMENU    "../site-navigation.htm" /* mandatory */
+/****** html code template for populating the change log information **********/
+#define CHANGE_TEMPL	"../change-template.htm" /* mandatory */
 /****** html code template for adding code or scripts into the footer *********/
 #define FOOTER_TEMPL	"../footer-template.htm" /* optional */
 

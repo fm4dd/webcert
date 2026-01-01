@@ -42,14 +42,6 @@ void pagefoot() {
   fprintf(cgiOut, "</span>\n");
   fprintf(cgiOut, "</div>\n");
 
-  if ((fp = fopen(FOOTER_TEMPL, "r"))) {
-    for(;;) {
-       ret = getc(fp);
-       if(ret == EOF) break;
-       fprintf(cgiOut, "%c", ret);
-     }
-  }
-
   fprintf(cgiOut, "</div>\n");
   fprintf(cgiOut, "</body>\n");
   fprintf(cgiOut, "</html>\n");
