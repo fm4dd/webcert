@@ -1,0 +1,20 @@
+# This shows how the scripts are activated through cron.
+# ------------------------------------------------------
+CA_HOME="/srv/app/webCA"
+WEBCERT_HOME="/srv/www/webcert"
+
+cat <<'EOF'
+sudo vi /etc/crontab"
+
+##############################################################################
+# download major vendor certificate bundles once a month
+#11 1 1 * *      root    $CA_HOME/scripts/verisign-bundle-update.sh 2> /dev/null
+12 1 1 * *      root    $CA_HOME/scripts/mozilla-bundle-update.sh 2> /dev/null
+13 1 1 * *      root    $CA_HOME/scripts/ubuntu-bundle-update.sh 2> /dev/null
+# delete expired webcert pkcs12 conversions older then 1 day
+22 8 * * *      root    /usr/bin/find $WEBCERT_HOME/export/tmp/* -mtime +1 -exec rm -f {} \; 2> /dev/null
+# regenerate the certificate revocation list every 90 days
+0 5 */90 * *    root    /usr/bin/openssl ca -cert $CA_HOME/cacert.pem -gencrl -crldays 90 -out $WEBCERT_HOME/webcert.crl --passin file:$CA_HOME/private/passin.src
+# daily check if there is a new revocation, and we need to update the CRL
+0 5 * * *    root      $CA_HOME/scripts/update-crl.sh 
+EOF

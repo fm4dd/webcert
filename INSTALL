@@ -1,0 +1,239 @@
+WebCert Installation Instructions
+=================================
+
+2005-06-28 frank4dd
+
+Assumptions:
+You just downloaded the software package and looked into the README.
+You want to install webcert into "/var/www/html" instead of my
+"/home/htdocs/frank4dd.com" path and you would like to change the
+the CA directory structure to /var/myCA. Here is what you should
+do in order to make it all work.
+
+1.) First, before we start unpacking the  software package, we create
+the CA directory structure with OpenSSL. We need to locate the script
+CA.pl, which is normally located in <openssl-home>/misc. We need to
+edit this script and change the line to match our new CA directory:
+[line numbers are in brackets]
+
+[47]	$CATOP="/var/myCA";
+
+Then we run as root:
+
+   susie:/home/openssl/misc # ./CA.pl -newca
+   CA certificate filename (or enter to create)
+   
+   Making CA certificate ...
+   Generating a 1024 bit RSA private key
+   ......++++++
+   ...................++++++
+   writing new private key to '/var/myCA/private/cakey.pem'
+   Enter PEM pass phrase:		<-REMEMBER !!!!!
+   Verifying - Enter PEM pass phrase:
+   -----
+   You are about to be asked to enter information that will be incorporated
+   into your certificate request.
+   What you are about to enter is what is called a Distinguished Name or a DN.
+   There are quite a few fields but you can leave some blank
+   For some fields there will be a default value,
+   If you enter '.', the field will be left blank.
+   -----
+   Country Name (2 letter code) [US]:
+   State or Province Name (full name) [CA]:
+   Locality Name (eg, city) [Rocklin]:
+   Organization Name (eg, company) [Frank4DD]:
+   Organizational Unit Name (eg, section) []:
+   Common Name (eg, YOUR name) []:WebCert CA
+   Email Address []:
+   susie:/home/openssl/misc #
+
+Now lets check the created structures:
+
+   susie:/home/openssl/misc # ls -lR /var/myCA
+   /var/myCA:
+   total 4
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 .
+   drwxr-xr-x   16 root     root          408 2005-06-28 13:10 ..
+   -rw-r--r--    1 root     root         1034 2005-06-28 13:10 cacert.pem
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 certs
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 crl
+   -rw-r--r--    1 root     root            0 2005-06-28 13:10 index.txt
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:10 private
+   
+   /var/myCA/certs:
+   total 0
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 .
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 ..
+   
+   /var/myCA/crl:
+   total 0
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 .
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 ..
+   
+   /var/myCA/private:
+   total 4
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:10 .
+   drwxr-xr-x    5 root     root          184 2005-06-28 13:10 ..
+   -rw-r--r--    1 root     root          951 2005-06-28 13:10 cakey.pem
+
+If not already created, we need to create the serial number file. We also need
+to make it writeable to the webserver, and the same goes for the certs
+directory.
+
+   susie:/var/myCA # echo 01 > serial
+   susie:/var/myCA # chown wwwrun:www serial
+   susie:/var/myCA # chmod 664 serial
+   susie:/var/myCA # chown wwwrun:www certs
+   susie:/var/myCA # chmod 775 certs
+   susie:/var/myCA # ls -l
+   total 8
+   drwxr-xr-x    5 root     root          208 2005-06-28 13:25 .
+   drwxr-xr-x   16 root     root          408 2005-06-28 13:10 ..
+   -rw-r--r--    1 root     root         1034 2005-06-28 13:10 cacert.pem
+   drwxrwxr-x    2 wwwrun   www            48 2005-06-28 13:10 certs
+   drwxr-xr-x    2 root     root           48 2005-06-28 13:10 crl
+   -rw-r--r--    1 root     root            0 2005-06-28 13:10 index.txt
+   drwxr-xr-x    2 root     root           80 2005-06-28 13:10 private
+   -rw-rw-r--    1 wwwrun   www             3 2005-06-28 13:25 serial
+
+
+2.)  Now we can un-tar the software package and change the software
+source package config files to match your setup [line numbers are in brackets]:
+
+Edit one line in webcert-<version>/Makefile:
+
+[3]     BASEDIR=/var/www/html
+
+Edit one line in webcer-<version>/src/Makefile:
+
+[6]    CGIDIR=/var/www/html/webcert/cgi-bin
+
+Edit the following lines in webcert-<version>/src/webcert.h:
+
+[11]	#define HOMELINK      /webcert/
+[13]	#define REQLINK       /webcert/cgi-bin/certrequest.cgi
+[15]	#define CACERT        /var/myCA/cacert.pem
+[17]	#define CAKEY         /var/myCA/private/cakey.pem
+[19]	#define PASS          <password from CA.pl>
+[21]	#define CACERTSTORE   /var/myCA/certs
+[23]	#define CERTEXPORTDIR /var/www/html/webcert/export
+[25]	#define CERTEXPORTURL /webcert/export
+[27]	#define SERIALFILE    /var/myCA/serial
+[29]	#define DAYS_VALID    1095 (set the default expiration, = 3 years) 
+
+[34]	#define FORCE_SOURCE_IP_INCLUSION       TRUE
+Comment it out to remove the automatic inclusion of the client IP address
+in the certificate subject. This function is meant as a security measure
+on the public demo I am running to prevent abuse.
+
+3.) Then, as root create "/var/www/html/webcert" and the sub-directories
+"images", "cgi-bin", "etc", "results" and "style". 
+
+   susie:/home # mkdir -p /var/www/html/webcert
+   susie:/home # mkdir /var/www/html/webcert/images
+   susie:/home # mkdir /var/www/html/webcert/cgi-bin
+   susie:/home # mkdir /var/www/html/webcert/style
+   susie:/home # mkdir /var/www/html/webcert/export
+
+The export directory must be writeable by the webserver. It will be used
+to cache exported certificates in pem, der or pkcs12 format for download.
+
+   susie:/home # chown wwwrun:www /var/www/html/webcert/export
+
+3.) Now, compile and install the software as root with "make" and
+"make install". After that, the installation looks like this
+(please compare carefully):
+   
+   usie:~ # ls -lR /var/www/html/webcert
+   /var/www/html/webcert:
+   total 112
+   -rwxr-xr-x 1 root   root  7457 Feb 28 10:21 about.htm
+   drwxr-xr-x 2 root   root  4096 Feb 28 10:49 cgi-bin
+   -rwxr-xr-x 1 root   root 13239 Feb 28 10:48 changelog.htm
+   drwxr-xr-x 2 wwwrun www   4096 Feb 28 10:45 export
+   -rwxr-xr-x 1 root   root   683 Feb 28 10:48 footer-template.htm
+   -rwxr-xr-x 1 root   root 11634 Feb 28 10:45 help-template.htm
+   drwxr-xr-x 2 root   root  4096 Feb 28 10:15 images
+   -rwxr-xr-x 1 root   root  1611 Feb 28 10:33 index.htm
+   -rwxr-xr-x 1 root   root 15417 Feb 28 10:14 install.htm
+   -rwxr-xr-x 1 root   root  4920 Feb 28 10:50 policy-template.htm
+   -rwxr-xr-x 1 root   root  3273 Feb 28 10:46 roadmap.htm
+   -rwxr-xr-x 1 root   root  1015 Feb 28 10:53 sidebar-template.htm
+   drwxr-xr-x 2 root   root  4096 Feb 28 10:19 style
+   -rw-r--r-- 1 root   root   831 Feb 28 10:34 webcert.js
+   
+   /var/www/html/webcert/cgi-bin:
+   total 600
+   -rwxr-xr-x 1 root root 42752 Feb 28 10:34 buildrequest.cgi
+   -rwxr-xr-x 1 root root 34572 Feb 28 10:34 capolicy.cgi
+   -rwxr-xr-x 1 root root 46944 Feb 28 10:34 certexport.cgi
+   -rwxr-xr-x 1 root root 34560 Feb 28 10:34 certrequest.cgi
+   -rwxr-xr-x 1 root root 63388 Feb 28 10:34 certsearch.cgi
+   -rwxr-xr-x 1 root root 55316 Feb 28 10:34 certsign.cgi
+   -rwxr-xr-x 1 root root 46976 Feb 28 10:34 certstore.cgi
+   -rwxr-xr-x 1 root root 71808 Feb 28 10:34 certvalidate.cgi
+   -rwxr-xr-x 1 root root 46960 Feb 28 10:34 certverify.cgi
+   -rwxr-xr-x 1 root root 51160 Feb 28 10:34 genrequest.cgi
+   -rwxr-xr-x 1 root root 42784 Feb 28 10:34 getcert.cgi
+   -rwxr-xr-x 1 root root 34608 Feb 28 10:34 help.cgi
+
+   /var/www/html/webcert/images:
+   total 472
+   -rw-r--r-- 1 root root  1081 Feb 28 10:58 bgplastic-button.gif
+   -rw-r--r-- 1 root root   351 Feb 28 10:58 bgplastic.gif
+   -rw-r--r-- 1 root root  1112 Feb 28 10:58 bgplastic-red.gif
+   -rw-r--r-- 1 root root 46493 Feb 28 10:58 cert.gif
+   -rw-r--r-- 1 root root  4924 Feb 28 10:58 frank4dd-logo.gif
+   -rw-r--r-- 1 root root 10958 Feb 28 10:58 new-certificate-data-entry-icon.png
+   -rw-r--r-- 1 root root 50737 Feb 28 10:58 new-certificate-data-entry.png
+   -rw-r--r-- 1 root root  9414 Feb 28 10:58 new-certificate-generated-icon.png
+   -rw-r--r-- 1 root root 28718 Feb 28 10:58 new-certificate-generated.png
+   -rw-r--r-- 1 root root  8178 Feb 28 10:58 new-certificate-key-and_extensions-icon.png
+   -rw-r--r-- 1 root root 50005 Feb 28 10:58 new-certificate-key-and_extensions.png
+   -rw-r--r-- 1 root root  3069 Feb 28 10:58 openssl_button.gif
+   -rw-r--r-- 1 root root 16028 Feb 28 10:58 webcert-certificate-search-icon.png
+   -rw-r--r-- 1 root root 36021 Feb 28 10:58 webcert-certificate-search.png
+   -rw-r--r-- 1 root root 12734 Feb 28 10:58 webcert-certificate-store-icon.png
+   -rw-r--r-- 1 root root 42062 Feb 28 10:58 webcert-certificate-store.png
+   -rw-r--r-- 1 root root 12034 Feb 28 10:58 webcert-certificate-validation-icon.png
+   -rw-r--r-- 1 root root 42863 Feb 28 10:58 webcert-certificate-validation.png
+   -rw-r--r-- 1 root root  2880 Feb 28 10:58 webcert-icon.gif
+   -rw-r--r-- 1 root root  4737 Feb 28 10:58 webcert-logo.gif
+   -rw-r--r-- 1 root root 10251 Feb 28 10:58 webcert-request-paste-icon.png
+   -rw-r--r-- 1 root root 29994 Feb 28 10:58 webcert-request-paste.png
+
+   /var/www/html/webcert/style:
+   total 8
+   -rwxr-xr-x 1 root root 7324 Feb 28 10:22 style.css
+
+   /var/www/html/webcert/export:
+   drwxr-xr-x    2 wwwrun   www            80 2005-06-28 13:45 .
+   drwxr-xr-x    5 root     root          152 2005-06-28 13:45 ..
+   
+
+4.) After the installation, check the webserver configuration and declare
+the alias for /webcert/cgi-bin/ to match /var/www/html/webcert/cgi-bin/.
+Restart the webserver and check if the buildrequest.cgi page comes up properly.
+Assuming the webservers document root is in /var/www/html, we point the
+browser to http://<ip-or-name>/webcert/ and we'll be forwarded to the
+buildrequest.cgi screen. If so, we can move forward to test the
+certificate generation.
+
+5.) Fill out the template to generate your first certificate. If all goes
+well, your request will be signed and a new certificate is placed in the
+CA store. "List Certificates" should display your first cert.
+
+Enjoy WebCert!
+
+Please let me know if these istructions are OK to follow and on which stage
+you run into a problem or if something isn't made clear. It will help me
+improve the documentation.
+
+Thank You!
+Frank
+
+Please send your comments and complaints to: support[at]frank4dd.com
+and if you want to do something really nice and encouraging besides
+saying "Thanks", send me a photo picture of the area you are living in,
+either your town, your work, local sights or of your neighborhood. I enjoy
+collecting pictures from all over the world, maybe I'll start a gallery.
